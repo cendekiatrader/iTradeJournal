@@ -1,0 +1,336 @@
+import React from 'react';
+import { useJournal } from '../../context/JournalContext';
+import { StatCard } from '../common/StatCard';
+import { EquityChart } from '../common/EquityChart';
+import { PropFirmGauge } from './PropFirmGauge';
+import { formatCurrency, formatPercent, formatDate, formatDateTimeDDMMYYYY } from '../../utils/formatters';
+import { 
+  DollarSign, 
+  Percent, 
+  Scale, 
+  TrendingUp, 
+  TrendingDown, 
+  ShieldCheck, 
+  Activity, 
+  Flame, 
+  Award,
+  ArrowUpRight,
+  ArrowDownRight,
+  Clock,
+  Sparkles
+} from 'lucide-react';
+import { Trade } from '../../types';
+
+interface DashboardViewProps {
+  onOpenTradeModal: () => void;
+  onViewTradeDetail: (trade: Trade) => void;
+  onNavigateToJournal: () => void;
+}
+
+export const DashboardView: React.FC<DashboardViewProps> = ({
+  onOpenTradeModal,
+  onViewTradeDetail,
+  onNavigateToJournal
+}) => {
+  const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap } = useJournal();
+  const currentCurrency = activeAccount?.currency || 'USD';
+
+  const recentTrades = [...filteredTrades]
+    .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
+    .slice(0, 6);
+
+  return (
+    <div>
+      {/* Top Welcome & Summary Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+            Performance Dashboard
+          </h1>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            {activeAccount ? `Account overview for ${activeAccount.name} (${activeAccount.broker})` : 'All Trading Accounts combined metrics & growth'}
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={onOpenTradeModal} className="btn btn-primary">
+            + Log New Trade
+          </button>
+        </div>
+      </div>
+
+      {/* Prop Firm Rule Tracker if applicable */}
+      {activeAccount && <PropFirmGauge account={activeAccount} metrics={metrics} />}
+
+      {/* Key Metric Stats Grid */}
+      <div className="grid-stats">
+        <StatCard
+          title="Net Cumulative PnL"
+          value={formatCurrency(metrics.totalPnL, currentCurrency)}
+          subValue={formatPercent(metrics.totalPnlPercent)}
+          subValueType={metrics.totalPnL >= 0 ? 'positive' : 'negative'}
+          icon={metrics.totalPnL >= 0 ? TrendingUp : TrendingDown}
+          iconColor={metrics.totalPnL >= 0 ? 'var(--profit-green)' : 'var(--loss-red)'}
+          iconBg={metrics.totalPnL >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}
+        />
+
+        <StatCard
+          title="Win Rate"
+          value={`${metrics.winRate.toFixed(1)}%`}
+          subValue={`${metrics.winningTrades} Wins / ${metrics.losingTrades} Losses`}
+          subValueType={metrics.winRate >= 50 ? 'positive' : 'negative'}
+          icon={Percent}
+          iconColor="#3b82f6"
+          iconBg="rgba(59, 130, 246, 0.12)"
+          progress={metrics.winRate}
+          progressColor={metrics.winRate >= 50 ? 'var(--profit-green)' : 'var(--loss-red)'}
+        />
+
+        <StatCard
+          title="Profit Factor"
+          value={metrics.profitFactor > 99 ? '99.0+' : metrics.profitFactor.toFixed(2)}
+          subValue={`Gross Profit: ${formatCurrency(metrics.grossProfit, currentCurrency, true)}`}
+          subValueType={metrics.profitFactor >= 1.5 ? 'positive' : 'neutral'}
+          icon={Scale}
+          iconColor="#f59e0b"
+          iconBg="rgba(245, 158, 11, 0.12)"
+        />
+
+        <StatCard
+          title="Average Realized R:R"
+          value={`1 : ${metrics.avgRR > 0 ? metrics.avgRR.toFixed(2) : '0.00'}`}
+          subValue={`Expectancy: ${formatCurrency(metrics.expectancy, currentCurrency)} / trade`}
+          subValueType="accent"
+          icon={Activity}
+          iconColor="#8b5cf6"
+          iconBg="rgba(139, 92, 246, 0.12)"
+        />
+
+        <StatCard
+          title="Max Drawdown"
+          value={`${metrics.maxDrawdownPercent.toFixed(1)}%`}
+          subValue={formatCurrency(metrics.maxDrawdown, currentCurrency)}
+          subValueType={metrics.maxDrawdownPercent < 5 ? 'positive' : 'negative'}
+          icon={ShieldCheck}
+          iconColor={metrics.maxDrawdownPercent < 5 ? 'var(--profit-green)' : 'var(--loss-red)'}
+          iconBg="rgba(239, 68, 68, 0.1)"
+        />
+
+        <StatCard
+          title="Avg Holding Period"
+          value={metrics.avgHoldingFormatted}
+          subValue={`Based on ${metrics.totalTrades} closed trades`}
+          subValueType="accent"
+          icon={Clock}
+          iconColor="#06b6d4"
+          iconBg="rgba(6, 182, 212, 0.12)"
+        />
+
+        <StatCard
+          title="Current Streak"
+          value={metrics.currentStreak.count > 0 ? `${metrics.currentStreak.count} ${metrics.currentStreak.type}` : 'None'}
+          subValue={`Best Trade: +${formatCurrency(metrics.bestTrade, currentCurrency, true)}`}
+          subValueType={metrics.currentStreak.type === 'WIN' ? 'positive' : 'negative'}
+          icon={Flame}
+          iconColor="#ec4899"
+          iconBg="rgba(236, 72, 153, 0.12)"
+        />
+      </div>
+
+      {/* Main Charts & Breakdown Section */}
+      <div className="grid-2col">
+        {/* Equity Curve Chart */}
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">
+                <TrendingUp size={18} color="var(--profit-green)" />
+                <span>Cumulative Equity Growth</span>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                Account balance growth timeline across all closed trades
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <span className="badge" style={{ backgroundColor: '#131e33', color: '#60a5fa' }}>
+                {equityCurve.length - 1} Closed Points
+              </span>
+            </div>
+          </div>
+
+          <EquityChart data={equityCurve} currency={currentCurrency} height={300} />
+        </div>
+
+        {/* Win/Loss & Edge Summary Card */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div className="card-header">
+              <div className="card-title">
+                <Sparkles size={18} color="#f59e0b" />
+                <span>Trade Performance Edge</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '10px' }}>
+              {/* Avg Holding Period row in edge summary */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Avg Holding Period</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>
+                    {metrics.avgHoldingFormatted}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Expectancy</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--profit-green)' }}>
+                    +{formatCurrency(metrics.expectancy, currentCurrency)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Avg Win vs Avg Loss */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Average Win</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--profit-green)' }}>
+                    +{formatCurrency(metrics.avgWin, currentCurrency)}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Average Loss</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--loss-red)' }}>
+                    -{formatCurrency(metrics.avgLoss, currentCurrency)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Win/Loss Ratio */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Win / Loss Payout Ratio</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+                  {metrics.winLossRatio.toFixed(2)}x
+                </span>
+              </div>
+
+              {/* Consecutive Streaks */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Max Win Streak</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--profit-green)' }}>
+                  {metrics.consecutiveWins} Trades
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Risk Per Trade Target: <strong>1.0% - 2.0%</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Trades Table */}
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title">
+            <Clock size={18} color="#60a5fa" />
+            <span>Recent Executions</span>
+          </div>
+          <button onClick={onNavigateToJournal} className="btn btn-ghost btn-sm" style={{ color: '#60a5fa' }}>
+            View Full Journal ({filteredTrades.length} trades) →
+          </button>
+        </div>
+
+        {recentTrades.length === 0 ? (
+          <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            No trades recorded yet. Click "+ Log New Trade" above to get started!
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #1e293b', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                  <th style={{ padding: '10px 12px' }}>Opened At (DD/MM/YYYY, hh:mm)</th>
+                  <th style={{ padding: '10px 12px' }}>Account</th>
+                  <th style={{ padding: '10px 12px' }}>Symbol</th>
+                  <th style={{ padding: '10px 12px' }}>Side</th>
+                  <th style={{ padding: '10px 12px' }}>Setup / Strategy</th>
+                  <th style={{ padding: '10px 12px' }}>Session</th>
+                  <th style={{ padding: '10px 12px' }}>R:R</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'right' }}>Net PnL</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentTrades.map((trade) => {
+                  const account = accountsMap[trade.accountId];
+                  const isWin = trade.status === 'WIN';
+                  const isLoss = trade.status === 'LOSS';
+
+                  return (
+                    <tr
+                      key={trade.id}
+                      onClick={() => onViewTradeDetail(trade)}
+                      style={{
+                        borderBottom: '1px solid #141d2d',
+                        cursor: 'pointer',
+                        transition: 'background 0.15s'
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#101726')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    >
+                      <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>
+                        {formatDateTimeDDMMYYYY(trade.entryDate)}
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        <span style={{ fontSize: '0.78rem', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: account?.colorTag || '#3b82f6' }} />
+                          {account?.name || 'Account'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+                        {trade.symbol}
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        <span className={`badge ${trade.direction === 'LONG' ? 'badge-long' : 'badge-short'}`}>
+                          {trade.direction === 'LONG' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                          {trade.direction}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                        {trade.setup}
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        <span className="badge badge-session" style={{ fontSize: '0.7rem' }}>
+                          {trade.session}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', color: '#cbd5e1' }}>
+                        {trade.rrAchieved ? `1:${trade.rrAchieved.toFixed(1)}` : '-'}
+                      </td>
+                      <td style={{
+                        padding: '12px',
+                        textAlign: 'right',
+                        fontWeight: 700,
+                        fontFamily: 'var(--font-mono)',
+                        color: isWin ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : '#94a3b8'
+                      }}>
+                        {trade.pnl > 0 ? '+' : ''}{formatCurrency(trade.pnl, account?.currency || 'USD')}
+                      </td>
+                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <span className={`badge ${isWin ? 'badge-win' : isLoss ? 'badge-loss' : 'badge-be'}`}>
+                          {trade.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
