@@ -564,20 +564,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Keyboard size={16} />
         </button>
 
-        {/* Theme Quick Switcher Icon Button */}
-        <button
-          onClick={() => setThemeModalOpen(true)}
-          className="btn btn-secondary btn-icon btn-sm"
-          title={`Ganti Tema: ${activeThemeOption.name}`}
-          style={{
-            backgroundColor: '#0c1222',
-            borderColor: 'var(--border-color)',
-            color: activeThemeOption.primaryColor
-          }}
-        >
-          <Palette size={16} />
-        </button>
-
         {/* Add Trade Button */}
         <button
           onClick={onOpenTradeModal}
