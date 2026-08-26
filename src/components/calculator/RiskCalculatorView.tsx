@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { CompoundingPlanner } from './CompoundingPlanner';
 import { KellyRiskSimulator } from './KellyRiskSimulator';
+import { VisualRiskRewardOverlay } from './VisualRiskRewardOverlay';
 
 export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any) => void }> = ({
   onLogTradeWithValues
@@ -160,6 +161,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
           currency={activeAccount?.currency || 'USD'} 
         />
       ) : (
+        <>
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
         {/* Input Parameters Card */}
         <div className="card">
@@ -384,6 +386,20 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
           </div>
         </div>
       </div>
+
+      {/* Interactive Visual Risk-to-Reward Scale */}
+      <VisualRiskRewardOverlay
+        entryPrice={entryPrice}
+        stopLossPrice={stopLossPrice}
+        takeProfitPrice={takeProfitPrice}
+        riskAmount={riskAmount}
+        potentialReward={potentialReward}
+        rrRatio={rrRatio}
+        riskPercent={riskPercent}
+        currency={activeAccount?.currency || 'USD'}
+        instrument={instrument}
+      />
+      </>
       )}
     </div>
   );
