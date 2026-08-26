@@ -14,6 +14,7 @@ import {
   Award
 } from 'lucide-react';
 import { MonteCarloView } from './MonteCarloView';
+import { HoldingDurationMatrix } from './HoldingDurationMatrix';
 import { Trade } from '../../types';
 
 export const AnalyticsView: React.FC = () => {
@@ -390,6 +391,9 @@ export const AnalyticsView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Trade Holding Duration & Time Edge Matrix */}
+      <HoldingDurationMatrix trades={filteredTrades} currency={currentCurrency} />
 
       {/* Monte Carlo Risk & Equity Forecaster Engine */}
       <MonteCarloView />

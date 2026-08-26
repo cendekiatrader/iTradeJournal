@@ -2,6 +2,7 @@ import React from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { StatCard } from '../common/StatCard';
 import { EquityChart } from '../common/EquityChart';
+import { MarketSessionClock } from '../common/MarketSessionClock';
 import { PropFirmGauge } from './PropFirmGauge';
 import { formatCurrency, formatPercent, formatDate, formatDateTimeDDMMYYYY } from '../../utils/formatters';
 import { 
@@ -96,6 +97,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </button>
         )}
       </div>
+
+      {/* Real-time Multi-Market Session & Killzone Radar */}
+      <MarketSessionClock />
 
       {/* Prop Firm Rule Tracker if applicable */}
       {activeAccount && <PropFirmGauge account={activeAccount} metrics={metrics} />}

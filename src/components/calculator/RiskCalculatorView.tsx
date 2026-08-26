@@ -10,14 +10,18 @@ import {
   Copy, 
   Check, 
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  TrendingDown,
+  Layers
 } from 'lucide-react';
+import { CompoundingPlanner } from './CompoundingPlanner';
 
 export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any) => void }> = ({
   onLogTradeWithValues
 }) => {
   const { accounts, activeAccount, showToast } = useJournal();
 
+  const [activeSubTab, setActiveSubTab] = useState<'lot' | 'compounding'>('lot');
   const [selectedAccountId, setSelectedAccountId] = useState(activeAccount?.id || accounts[0]?.id || '');
   const [instrument, setInstrument] = useState<'Gold' | 'Forex' | 'Crypto' | 'Indices'>('Gold');
   const [balance, setBalance] = useState<number>(activeAccount?.currentBalance || 100000);
@@ -81,17 +85,58 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
   return (
     <div>
       {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Calculator size={24} color="#3b82f6" />
-          <span>Position Size & Risk Calculator</span>
-        </h1>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-          Crypto units, Forex/Gold lot sizing & precise risk-to-reward planner
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Calculator size={24} color="#3b82f6" />
+            <span>Position Size & Growth Calculator</span>
+          </h1>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            Hitung lot/unit manajemen risiko dan buat proyeksi roadmap saldo compounding
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div style={{ display: 'flex', gap: '6px', backgroundColor: '#070b16', padding: '4px', borderRadius: '10px', border: '1px solid #1e293b' }}>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('lot')}
+            className="btn btn-sm"
+            style={{
+              padding: '6px 14px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              borderRadius: '8px',
+              backgroundColor: activeSubTab === 'lot' ? '#1e3a8a' : 'transparent',
+              borderColor: activeSubTab === 'lot' ? '#3b82f6' : 'transparent',
+              color: activeSubTab === 'lot' ? '#93c5fd' : '#94a3b8'
+            }}
+          >
+            🎯 Position Size & Lot
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('compounding')}
+            className="btn btn-sm"
+            style={{
+              padding: '6px 14px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              borderRadius: '8px',
+              backgroundColor: activeSubTab === 'compounding' ? '#1e3a8a' : 'transparent',
+              borderColor: activeSubTab === 'compounding' ? '#3b82f6' : 'transparent',
+              color: activeSubTab === 'compounding' ? '#93c5fd' : '#94a3b8'
+            }}
+          >
+            📈 Compounding Planner
+          </button>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
+      {activeSubTab === 'compounding' ? (
+        <CompoundingPlanner initialBalance={balance} currency={activeAccount?.currency || 'USD'} />
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
         {/* Input Parameters Card */}
         <div className="card">
           <div className="card-header">
@@ -315,6 +360,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
