@@ -762,4 +762,38 @@ table {
   }
 }
 
+/* ==========================================================
+   Executive PDF Print Styles
+   ========================================================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .executive-print-area, .executive-print-area * {
+    visibility: visible;
+  }
+
+  .executive-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-page-break {
+    page-break-before: always;
+  }
+}
+
 

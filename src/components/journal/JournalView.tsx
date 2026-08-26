@@ -10,6 +10,7 @@ import {
   Trash2, 
   Plus, 
   FileSpreadsheet, 
+  FileText,
   Eye, 
   Edit3, 
   ArrowUpRight, 
@@ -20,6 +21,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { exportTradesToCSV } from '../../utils/storage';
+import { ExecutiveReportModal } from '../reports/ExecutiveReportModal';
 
 interface JournalViewProps {
   onOpenTradeModal: () => void;
@@ -46,6 +48,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
 
   const [selectedTradeIds, setSelectedTradeIds] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   const currentCurrency = activeAccount?.currency || 'USD';
 
@@ -93,7 +96,14 @@ export const JournalView: React.FC<JournalViewProps> = ({
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => setReportModalOpen(true)} 
+            className="btn btn-secondary btn-sm"
+          >
+            <FileText size={15} color="#38bdf8" /> Export PDF Report
+          </button>
+
           <button 
             onClick={() => exportTradesToCSV(filteredTrades, accountsMap)} 
             className="btn btn-secondary btn-sm"
@@ -450,6 +460,12 @@ export const JournalView: React.FC<JournalViewProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Executive PDF Audit Report Modal */}
+      <ExecutiveReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+      />
     </div>
   );
 };

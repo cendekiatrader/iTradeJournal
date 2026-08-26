@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { formatCurrency, formatPercent, formatDuration } from '../../utils/formatters';
 import { 
@@ -11,14 +11,18 @@ import {
   Zap, 
   ShieldCheck,
   Flame,
-  Award
+  Award,
+  FileText,
+  Printer
 } from 'lucide-react';
 import { MonteCarloView } from './MonteCarloView';
 import { HoldingDurationMatrix } from './HoldingDurationMatrix';
+import { ExecutiveReportModal } from '../reports/ExecutiveReportModal';
 import { Trade } from '../../types';
 
 export const AnalyticsView: React.FC = () => {
   const { filteredTrades, activeAccount, metrics } = useJournal();
+  const [reportModalOpen, setReportModalOpen] = useState(false);
   const currentCurrency = activeAccount?.currency || 'USD';
 
   // Strategy performance breakdown
@@ -151,14 +155,25 @@ export const AnalyticsView: React.FC = () => {
   return (
     <div>
       {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <BarChart3 size={24} color="#3b82f6" />
-          <span>Strategy & Edge Analytics</span>
-        </h1>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-          Data-driven edge analysis across trading models, market sessions, and psychological states
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+        <div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <BarChart3 size={24} color="#3b82f6" />
+            <span>Strategy & Edge Analytics</span>
+          </h1>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            Data-driven edge analysis across trading models, market sessions, and psychological states
+          </p>
+        </div>
+
+        <button
+          onClick={() => setReportModalOpen(true)}
+          className="btn btn-primary"
+          style={{ padding: '8px 18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <FileText size={16} />
+          <span>📄 Executive PDF Audit Report</span>
+        </button>
       </div>
 
       {/* Long vs Short Direction Comparison Cards */}
@@ -397,6 +412,12 @@ export const AnalyticsView: React.FC = () => {
 
       {/* Monte Carlo Risk & Equity Forecaster Engine */}
       <MonteCarloView />
+
+      {/* Executive PDF Audit Report Modal */}
+      <ExecutiveReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+      />
     </div>
   );
 };
