@@ -40,103 +40,118 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 2. **⚡ Auto-Import CSV / Statement dari MetaTrader (MT4 / MT5) & TradingView**
    - *Konsep*: Fitur *drag-and-drop* file statement riwayat trading dari MT4/MT5 atau TradingView dalam 1 detik.
 
-3. **📰 Auto-Detect High-Impact News on Entry (Detektor Berita Otomatis)**
+3. **📡 1-Click Discord & Telegram Signal Broadcaster (Kirim Sinyal / Setup ke Grup)**
+   - *Konsep*: Tombol 1-klik untuk membagikan setup trade lengkap (chart Before/After, Direction, Entry, SL, TP, RRR) dalam format Rich Embed ke channel Discord / Telegram.
+
+4. **📰 Auto-Detect High-Impact News on Entry (Detektor Berita Otomatis)**
    - *Konsep*: Sistem mencocokkan waktu entry trade dengan jadwal rilis kalender ekonomi secara otomatis.
 
-4. **🤖 Discord Webhook Notification Bot (Auto-Alert ke Komunitas)**
+5. **🤖 Discord Webhook Notification Bot (Auto-Alert ke Komunitas)**
    - *Konsep*: Mengirim embed pesan trade berwarna hijau/merah ke channel Discord trader atau grup VIP komunitasnya.
 
-5. **📱 Telegram Instant Trade Logger Bot**
+6. **📱 Telegram Instant Trade Logger Bot**
    - *Konsep*: Cukup ketik pesan singkat di Telegram (misal: `BUY XAUUSD 2500 SL 2490 TP 2520 +$350 Win`), bot langsung memasukkan data ke journal.
 
-6. **⚡ Batch Multi-Trade Editor & Bulk Tagger (Edit Massal & Pemberian Tag Cepat)**
+7. **⚡ Batch Multi-Trade Editor & Bulk Tagger (Edit Massal & Pemberian Tag Cepat)**
    - *Konsep*: Centang puluhan trade di tabel jurnal untuk mengganti Setup, memindahkan Akun, atau memberi tag massal dalam 1-klik.
 
-7. **📈 Live TradingView Interactive Chart Widget**
+8. **📈 Live TradingView Interactive Chart Widget**
    - *Konsep*: Menyematkan widget chart TradingView interaktif langsung di tab atau modal trade.
 
 ---
 
-### B. Analisis Lanjutan, Pemulihan & Psikologi
-8. **🛡️ Distance-to-Peak & Drawdown Recovery Calculator (Kalkulator Pemulihan Drawdown)**
-   - *Konsep*: Menghitung exact % profit yang dibutuhkan untuk kembali ke modal semula / ATH dan estimasi jumlah trade pemulihan (*Recovery Velocity*).
+### B. Analisis Lanjutan, Psikologi & Pemulihan
+9. **🧘 60-Second Cooldown & Box Breathing Relaxer (Pereda Emosi Pasca Loss)**
+   - *Konsep*: Modal animasi visual *Box Breathing (4-4-4-4)* pasca trade loss untuk menurunkan detak jantung dan hormon kortisol stres sebelum menyentuh chart berikutnya.
 
-9. **⚖️ Head-to-Head Account & Period Comparison (Perbandingan 2 Akun Berdampingan)**
-   - *Konsep*: Membandingkan Akun Live vs Prop Firm, atau Bulan Ini vs Bulan Lalu secara berdampingan dalam satu layar.
+10. **🕸️ Multi-Setup Spider Web / Radar Chart (Grafik Jaring Laba-Laba SOP)**
+    - *Konsep*: Radar visual 5 dimensi (*Winrate, RRR, Profit Factor, Frekuensi, Stabilitas*) membandingkan seluruh strategi SOP secara holistik.
 
-10. **🧘 Physical & Mental State Correlation Tracker (Korelasi Kualitas Tidur, Fokus & Profit)**
+11. **⏳ Holding Duration Decay & Peak Profit Curve (Kurva Puncak Keuntungan Trade)**
+    - *Konsep*: Menghitung kurva laba terhadap waktu tahan posisi untuk mengetahui menit optimal melakukan *Take Profit* sebelum harga berbalik arah.
+
+12. **🛡️ Distance-to-Peak & Drawdown Recovery Calculator (Kalkulator Pemulihan Drawdown)**
+    - *Konsep*: Menghitung exact % profit yang dibutuhkan untuk kembali ke modal semula / ATH dan estimasi jumlah trade pemulihan (*Recovery Velocity*).
+
+13. **⚖️ Head-to-Head Account & Period Comparison (Perbandingan 2 Akun Berdampingan)**
+    - *Konsep*: Membandingkan Akun Live vs Prop Firm, atau Bulan Ini vs Bulan Lalu secara berdampingan dalam satu layar.
+
+14. **🧘 Physical & Mental State Correlation Tracker (Korelasi Kualitas Tidur, Fokus & Profit)**
     - *Konsep*: Mencatat kualitas tidur, energi, dan level stres untuk menemukan korelasi fisik terhadap performa profit.
 
-11. **🛡️ Break-Even & Trailing Stop Efficiency Tracker (Analisis Efektivitas Geser SL ke BE)**
+15. **🛡️ Break-Even & Trailing Stop Efficiency Tracker (Analisis Efektivitas Geser SL ke BE)**
     - *Konsep*: Menghitung statistik berapa modal yang terselamatkan oleh BE vs berapa trade yang tersentuh BE lalu terbang ke TP.
 
-12. **🎲 Streak Probability & Expectancy Simulator (Simulasi Rentetan Loss Beruntun)**
+16. **🎲 Streak Probability & Expectancy Simulator (Simulasi Rentetan Loss Beruntun)**
     - *Konsep*: Teori probabilitas matematika menghitung peluang mengalami rentetan loss beruntun dalam 50–100 trade ke depan.
 
-13. **📅 Annual Seasonality & Month-by-Month Matrix (Matriks Musiman Pasar)**
+17. **📅 Annual Seasonality & Month-by-Month Matrix (Matriks Musiman Pasar)**
     - *Konsep*: Memetakan performa dari Januari hingga Desember untuk mengetahui kuartal/bulan yang paling profitabel (*Seasonal Edge*).
 
-14. **💸 Multi-Broker Commission & Overnight Swap Fee Analyzer**
+18. **💸 Multi-Broker Commission & Overnight Swap Fee Analyzer**
     - *Konsep*: Menganalisis berapa persen keuntungan kotor yang terpotong untuk komisi dan biaya inap (*Swap*) broker.
 
-15. **📉 Slippage & Broker Hidden Cost Tracker (Pelacak Biaya Tersembunyi Broker)**
+19. **📉 Slippage & Broker Hidden Cost Tracker (Pelacak Biaya Tersembunyi Broker)**
     - *Konsep*: Membandingkan *Planned Entry Price* vs *Actual Filled Price* untuk menghitung nominal uang yang hilang akibat slippage/spread broker.
 
-16. **🧠 Psychological Emotion Cost & Leak Breakdown (Hitung Kerugian Emosi)**
+20. **🧠 Psychological Emotion Cost & Leak Breakdown (Hitung Kerugian Emosi)**
     - *Konsep*: Analisis mendalam menghitung total nominal uang yang hilang (*Cost of Emotion*) akibat emosi *FOMO* atau *Revenge Trading*.
 
-17. **🧠 AI Trade Performance Analyzer & Leak Detector**
+21. **🧠 AI Trade Performance Analyzer & Leak Detector**
     - *Konsep*: AI Assistant yang mendeteksi kebocoran psikologi dan memberikan rekomendasi konkret untuk memperbaiki *edge*.
 
-18. **⚖️ Currency & Asset Correlation Matrix (Matriks Korelasi Pasangan Aset)**
+22. **⚖️ Currency & Asset Correlation Matrix (Matriks Korelasi Pasangan Aset)**
     - *Konsep*: Analisis korelasi real-time antar aset (misal: EURUSD vs GBPUSD $+0.88$, DXY vs XAUUSD $-0.92$) untuk mencegah *Over-Exposure*.
 
-19. **🎯 Strategy Edge Scatter Plot Matrix (Peta Efisiensi Strategi)**
+23. **🎯 Strategy Edge Scatter Plot Matrix (Peta Efisiensi Strategi)**
     - *Konsep*: Grafik kuadran 2D (Sumbu X: Winrate %, Sumbu Y: Average R:R) untuk memetakan setup *Cash Cow* vs *Money Drain*.
 
-20. **📅 Day-of-Week & Hourly Profit Heatmap Matrix (Matriks Jam & Hari Terbaik)**
+24. **📅 Day-of-Week & Hourly Profit Heatmap Matrix (Matriks Jam & Hari Terbaik)**
     - *Konsep*: Heatmap 2D (Hari vs Jam) untuk menemukan jam dan hari eksekusi paling profitabel.
 
-21. **📅 Weekly & Monthly Retrospective Reviewer (Laporan Evaluasi Rutin)**
+25. **📅 Weekly & Monthly Retrospective Reviewer (Laporan Evaluasi Rutin)**
     - *Konsep*: Ringkasan otomatis setiap akhir pekan (*Weekly Trading Debrief*) lengkap dengan kolom refleksi mingguan.
 
-22. **💱 Multi-Currency Realtime Portfolio Aggregator (Konversi Otomatis ke Rupiah / USD)**
+26. **💱 Multi-Currency Realtime Portfolio Aggregator (Konversi Otomatis ke Rupiah / USD)**
     - *Konsep*: Tombol konversi satu sentuhan untuk melihat total portofolio multi-akun dalam mata uang USD, IDR, atau EUR.
 
 ---
 
-### C. Pengaman Risiko, Mobile & Gamifikasi
-23. **📋 Dynamic SOP Setup Checklist & Confluence Score (Validator Syarat SOP Dinamis)**
+### C. Laporan Keuangan, Pengaman Risiko & Gamifikasi
+27. **📑 Formal Monthly Income & Tax Statement (Laporan Penghasilan Bersih Bulanan)**
+    - *Konsep*: Dokumen formal rincian *Gross Profit, Biaya Broker, Net Withdrawn Profit* untuk arsip pembukuan keuangan pribadi atau laporan pajak.
+
+28. **📋 Dynamic SOP Setup Checklist & Confluence Score (Validator Syarat SOP Dinamis)**
     - *Konsep*: Checklist syarat wajib otomatis saat memilih setup strategi untuk menghitung Skor Konfluensi SOP (0%–100%).
 
-24. **🖼️ Trade Chart Magnifier & High-Res Zoom Inspector (Kaca Pembesar Chart)**
+29. **🖼️ Trade Chart Magnifier & High-Res Zoom Inspector (Kaca Pembesar Chart)**
     - *Konsep*: Lensa pembesar dan zoom detail tinggi untuk memeriksa candlestick dan area FVG tanpa pecah.
 
-25. **🔒 Emergency Tilt Lock & Daily Loss Kill-Switch (Kunci Anti-Revenge Trading)**
+30. **🔒 Emergency Tilt Lock & Daily Loss Kill-Switch (Kunci Anti-Revenge Trading)**
     - *Konsep*: Sistem pengaman psikologi darurat yang mengunci form input trade selama 4 jam jika trader mengalami batas rugi harian.
 
-26. **📱 Mobile Swipe Review Mode (Mode Review Geser di HP)**
+31. **📱 Mobile Swipe Review Mode (Mode Review Geser di HP)**
     - *Konsep*: Mode review cepat ala kartu di smartphone: Geser Kanan (Trade A+), Geser Kiri (Pelanggaran Disiplin).
 
-27. **🔔 Institutional Audio FX & Real-Time Sound Feedback**
+32. **🔔 Institutional Audio FX & Real-Time Sound Feedback**
     - *Konsep*: Suara audio elegan (*Cash Chime*, *Subtle Loss Muffle*, *Risk Ping*) dengan toggle Mute.
 
-28. **🧮 Partial Take-Profit & Multi-Target Sizing Calculator**
+33. **🧮 Partial Take-Profit & Multi-Target Sizing Calculator**
     - *Konsep*: Kalkulator pembagian TP1, TP2, dan Runner Trailing Stop secara presisi.
 
-29. **🎯 Pre-Trade Discipline Checklist & Daily Routine Score**
+34. **🎯 Pre-Trade Discipline Checklist & Daily Routine Score**
     - *Konsep*: Checklist konfirmasi sebelum menekan tombol entry untuk menghitung skor kepatuhan aturan (*Discipline Score %*) harian.
 
-30. **🛡️ Prop Firm Challenge Tracker & Drawdown Safeguard**
+35. **🛡️ Prop Firm Challenge Tracker & Drawdown Safeguard**
     - *Konsep*: Mode khusus evaluasi Prop Firm (Target Profit vs Daily Loss vs Max Drawdown dengan alarm merah).
 
-31. **🏆 Trading Milestones & Gamification Achievement Badges**
+36. **🏆 Trading Milestones & Gamification Achievement Badges**
     - *Konsep*: Sistem reward lencana (*Risk Guardian*, *Sniper Entry*, *Zen Mindset*) berdasarkan kedisiplinan eksekusi.
 
-32. **🖼️ Aesthetic Shareable Trade PnL Card Generator**
+37. **🖼️ Aesthetic Shareable Trade PnL Card Generator**
     - *Konsep*: Tombol 1-klik untuk meng-generate kartu grafis PNG dark-neon berisi hasil trade untuk dibagikan ke media sosial.
 
-33. **📚 Trading Playbook & Best Setups Catalog (Katalog Setup A+)**
+38. **📚 Trading Playbook & Best Setups Catalog (Katalog Setup A+)**
     - *Konsep*: Folder khusus arsip trade terbaik (*Best Trades of the Month*) dengan rating bintang (⭐⭐⭐⭐⭐) sebagai panduan *cheat sheet*.
 
 ---
