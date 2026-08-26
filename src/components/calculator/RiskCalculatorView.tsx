@@ -68,10 +68,13 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
   const rrRatio = stopDistance > 0 ? Number((rewardDistance / stopDistance).toFixed(2)) : 0;
   const potentialReward = riskAmount * rrRatio;
 
+  const unitLabel = instrument === 'Crypto' ? 'Units' : instrument === 'Indices' ? 'Contracts' : 'Lots';
+  const formattedSize = lotSize > 0 ? (instrument === 'Crypto' ? (lotSize >= 10 ? lotSize.toFixed(2) : lotSize.toFixed(4)) : lotSize.toFixed(2)) : '0.00';
+
   const copyLotSize = () => {
-    navigator.clipboard.writeText(lotSize.toFixed(2));
+    navigator.clipboard.writeText(formattedSize);
     setCopied(true);
-    showToast(`Copied ${lotSize.toFixed(2)} lots to clipboard!`, 'success');
+    showToast(`Copied ${formattedSize} ${unitLabel.toLowerCase()} to clipboard!`, 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -84,7 +87,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
           <span>Position Size & Risk Calculator</span>
         </h1>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-          Institutional lot sizing & precise risk-to-reward planner
+          Crypto units, Forex/Gold lot sizing & precise risk-to-reward planner
         </p>
       </div>
 
@@ -254,10 +257,10 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               </div>
             </div>
 
-            {/* Big Lot Size Display */}
+            {/* Big Position Size Display */}
             <div style={{ backgroundColor: '#060913', padding: '20px', borderRadius: '12px', border: '1px solid #1a2538', textAlign: 'center', marginBottom: '16px' }}>
               <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Recommended Position Size
+                Recommended Position Size ({unitLabel})
               </span>
               <div style={{
                 fontSize: '2.5rem',
@@ -267,7 +270,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
                 letterSpacing: '-0.02em',
                 margin: '6px 0'
               }}>
-                {lotSize > 0 ? lotSize.toFixed(2) : '0.00'} <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>Lots</span>
+                {formattedSize} <span style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{unitLabel}</span>
               </div>
 
               <button
@@ -276,7 +279,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
                 style={{ margin: '0 auto', fontSize: '0.75rem' }}
               >
                 {copied ? <Check size={14} color="var(--profit-green)" /> : <Copy size={14} />}
-                {copied ? 'Copied to Clipboard!' : 'Copy Lot Size'}
+                {copied ? 'Copied to Clipboard!' : `Copy ${unitLabel}`}
               </button>
             </div>
 

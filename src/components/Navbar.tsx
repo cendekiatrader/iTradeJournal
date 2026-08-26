@@ -15,15 +15,21 @@ import {
   Sparkles,
   Wallet,
   ShieldCheck,
-  Trash2
+  Trash2,
+  Menu
 } from 'lucide-react';
 
 interface NavbarProps {
   onOpenTradeModal: () => void;
   onOpenAccountModal: () => void;
+  onOpenMobileMenu?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenTradeModal, onOpenAccountModal }) => {
+export const Navbar: React.FC<NavbarProps> = ({ 
+  onOpenTradeModal, 
+  onOpenAccountModal,
+  onOpenMobileMenu
+}) => {
   const { 
     accounts, 
     activeAccountId, 
@@ -79,20 +85,40 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTradeModal, onOpenAccountM
   const totalPortfolioBalance = accounts.reduce((acc, a) => acc + a.currentBalance, 0);
 
   return (
-    <header style={{
+    <header className="app-navbar" style={{
       height: '70px',
       backgroundColor: '#080c1b',
       borderBottom: '1px solid var(--border-color)',
-      padding: '0 28px',
+      padding: '0 24px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       position: 'sticky',
       top: 0,
-      zIndex: 100
+      zIndex: 100,
+      gap: '12px'
     }}>
-      {/* Brand & Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      {/* Brand & Logo + Mobile Menu Button */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            onClick={onOpenMobileMenu}
+            className="mobile-only-btn btn btn-ghost btn-icon btn-sm"
+            title="Open Menu Navigation"
+            style={{
+              padding: '8px',
+              borderRadius: '8px',
+              backgroundColor: '#0d1527',
+              border: '1px solid #1e2c44',
+              color: '#94a3b8',
+              cursor: 'pointer'
+            }}
+          >
+            <Menu size={20} />
+          </button>
+        )}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '38px',
@@ -102,19 +128,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTradeModal, onOpenAccountM
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 16px rgba(16, 185, 129, 0.35)'
+            boxShadow: '0 0 16px rgba(16, 185, 129, 0.35)',
+            flexShrink: 0
           }}>
             <TrendingUp size={22} color="#ffffff" strokeWidth={2.5} />
           </div>
-          <div>
-            <span style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '-0.02em', color: '#f8fafc' }}>
+          <div className="navbar-logo-text">
+            <span style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '-0.02em', color: '#f8fafc', whiteSpace: 'nowrap' }}>
               iTrade<span style={{ color: 'var(--profit-green)' }}>Journal</span>
             </span>
           </div>
         </div>
 
         {/* Multi-Account Selector Switcher */}
-        <div ref={accountRef} style={{ position: 'relative', marginLeft: '12px' }}>
+        <div ref={accountRef} className="navbar-account-switcher" style={{ position: 'relative' }}>
           <button
             onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
             style={{

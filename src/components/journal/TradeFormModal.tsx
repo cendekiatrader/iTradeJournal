@@ -502,7 +502,9 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </div>
 
             <div className="input-group" style={{ margin: 0 }}>
-              <label className="input-label">Lots / Quantity</label>
+              <label className="input-label">
+                {assetClass === 'Crypto' ? 'Units / Quantity *' : assetClass === 'Indices' ? 'Contracts / Quantity *' : 'Lots / Quantity *'}
+              </label>
               <input
                 type="number"
                 step="any"

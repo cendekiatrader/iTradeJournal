@@ -167,9 +167,11 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
             </div>
 
             <div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Quantity / Lots</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                {trade.assetClass === 'Crypto' ? 'Quantity (Units)' : trade.assetClass === 'Indices' ? 'Contracts' : 'Position Size (Lots)'}
+              </div>
               <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
-                {trade.quantity}
+                {trade.quantity} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{trade.assetClass === 'Crypto' ? 'Units' : trade.assetClass === 'Indices' ? 'Ctr' : 'Lots'}</span>
               </div>
             </div>
 

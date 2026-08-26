@@ -59,6 +59,8 @@ const MainApp: React.FC = () => {
     setAccountFormOpen(true);
   };
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="app-container">
       {/* Sidebar Navigation */}
@@ -67,6 +69,8 @@ const MainApp: React.FC = () => {
         onSelectTab={setActiveTab}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
       />
 
       {/* Main Content Area */}
@@ -74,6 +78,7 @@ const MainApp: React.FC = () => {
         <Navbar
           onOpenTradeModal={handleOpenNewTrade}
           onOpenAccountModal={handleOpenNewAccount}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
         />
 
         <main className="page-body">
