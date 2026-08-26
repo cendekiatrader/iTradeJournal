@@ -21,6 +21,7 @@ import {
   LogOut,
   Globe,
   Palette,
+  Keyboard,
   User as UserIcon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +29,7 @@ import { useTheme } from '../context/ThemeContext';
 import { AuthModal, AuthMode } from './auth/AuthModal';
 import { ProfileSettingsModal } from './profile/ProfileSettingsModal';
 import { ThemeSelectorModal } from './common/ThemeSelectorModal';
+import { KeyboardShortcutsModal } from './common/KeyboardShortcutsModal';
 
 interface NavbarProps {
   onOpenTradeModal: () => void;
@@ -65,6 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [themeModalOpen, setThemeModalOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
@@ -547,6 +550,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         )}
 
+        {/* Keyboard Shortcuts Trigger Button */}
+        <button
+          onClick={() => setShortcutsModalOpen(true)}
+          className="btn btn-secondary btn-icon btn-sm"
+          title="Panduan Keyboard Shortcuts (?)"
+          style={{
+            backgroundColor: '#0c1222',
+            borderColor: 'var(--border-color)',
+            color: '#94a3b8'
+          }}
+        >
+          <Keyboard size={16} />
+        </button>
+
         {/* Theme Quick Switcher Icon Button */}
         <button
           onClick={() => setThemeModalOpen(true)}
@@ -571,6 +588,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span>Log Trade</span>
         </button>
       </div>
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={shortcutsModalOpen}
+        onClose={() => setShortcutsModalOpen(false)}
+      />
 
       {/* Theme Selector Modal */}
       <ThemeSelectorModal

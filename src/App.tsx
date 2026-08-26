@@ -18,6 +18,7 @@ import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
 import { EconomicCalendarView } from './components/news/EconomicCalendarView';
+import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
@@ -35,6 +36,7 @@ const MainApp: React.FC = () => {
   const [editingAccount, setEditingAccount] = useState<TradingAccount | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   
   // Public Portfolio Route (#/u/username or ?u=username)
   const [publicUsername, setPublicUsername] = useState<string | null>(() => {
@@ -57,6 +59,67 @@ const MainApp: React.FC = () => {
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Global Keyboard Shortcuts Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement;
+      const isInput = activeEl && (
+        activeEl.tagName === 'INPUT' || 
+        activeEl.tagName === 'TEXTAREA' || 
+        activeEl.tagName === 'SELECT' || 
+        (activeEl as HTMLElement).isContentEditable
+      );
+
+      // Ctrl + Enter or Cmd + Enter to submit active form
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        const submitBtn = document.querySelector('.modal-container button[type="submit"]') as HTMLButtonElement;
+        if (submitBtn) {
+          submitBtn.click();
+        }
+        return;
+      }
+
+      // If user is currently typing in input field, don't trigger navigation shortcuts
+      if (isInput) return;
+
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        setShortcutsModalOpen(prev => !prev);
+      } else if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        setEditingTrade(null);
+        setTradeFormOpen(true);
+      } else if (e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+        setActiveTab('dashboard');
+      } else if (e.key === 'j' || e.key === 'J') {
+        e.preventDefault();
+        setActiveTab('journal');
+      } else if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        setActiveTab('analytics');
+      } else if (e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+        setActiveTab('news');
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        setActiveTab('calculator');
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        setActiveTab('accounts');
+      } else if (e.key === 'Escape') {
+        setTradeFormOpen(false);
+        setDetailTrade(null);
+        setAccountFormOpen(false);
+        setAuthModalOpen(false);
+        setShortcutsModalOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const { deleteTrade, accountsMap } = useJournal();
@@ -227,6 +290,12 @@ const MainApp: React.FC = () => {
 
       {/* PWA Install Banner */}
       <PWAInstallPrompt />
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={shortcutsModalOpen}
+        onClose={() => setShortcutsModalOpen(false)}
+      />
 
       {/* Global Toast */}
       <Toast />

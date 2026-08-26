@@ -15,13 +15,14 @@ import {
   Layers
 } from 'lucide-react';
 import { CompoundingPlanner } from './CompoundingPlanner';
+import { KellyRiskSimulator } from './KellyRiskSimulator';
 
 export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any) => void }> = ({
   onLogTradeWithValues
 }) => {
-  const { accounts, activeAccount, showToast } = useJournal();
+  const { accounts, activeAccount, metrics, showToast } = useJournal();
 
-  const [activeSubTab, setActiveSubTab] = useState<'lot' | 'compounding'>('lot');
+  const [activeSubTab, setActiveSubTab] = useState<'lot' | 'compounding' | 'kelly'>('lot');
   const [selectedAccountId, setSelectedAccountId] = useState(activeAccount?.id || accounts[0]?.id || '');
   const [instrument, setInstrument] = useState<'Gold' | 'Forex' | 'Crypto' | 'Indices'>('Gold');
   const [balance, setBalance] = useState<number>(activeAccount?.currentBalance || 100000);
@@ -130,11 +131,34 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
           >
             📈 Compounding Planner
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('kelly')}
+            className="btn btn-sm"
+            style={{
+              padding: '6px 14px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              borderRadius: '8px',
+              backgroundColor: activeSubTab === 'kelly' ? '#1e3a8a' : 'transparent',
+              borderColor: activeSubTab === 'kelly' ? '#3b82f6' : 'transparent',
+              color: activeSubTab === 'kelly' ? '#93c5fd' : '#94a3b8'
+            }}
+          >
+            🧮 Kelly Criterion Sizing
+          </button>
         </div>
       </div>
 
       {activeSubTab === 'compounding' ? (
         <CompoundingPlanner initialBalance={balance} currency={activeAccount?.currency || 'USD'} />
+      ) : activeSubTab === 'kelly' ? (
+        <KellyRiskSimulator 
+          initialBalance={balance} 
+          initialWinRate={metrics.winRate} 
+          initialRR={metrics.avgRR} 
+          currency={activeAccount?.currency || 'USD'} 
+        />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
         {/* Input Parameters Card */}
