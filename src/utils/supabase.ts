@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
-import { TradingAccount, Trade, WithdrawalRecord } from '../types';
+import { TradingAccount, Trade, WithdrawalRecord, UserProfile } from '../types';
 
 const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
@@ -303,6 +303,167 @@ export const uploadImageToStorage = async (file: File | Blob, filename: string):
     return publicData.publicUrl;
   } catch (err) {
     console.error('Error uploading image to Supabase Storage:', err);
+    return null;
+  }
+};
+
+// ==========================================
+// User Profile & Public Portfolio
+// ==========================================
+export const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  if (!supabase || !userId) return null;
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      username: data.username || '',
+      displayName: data.display_name || '',
+      bio: data.bio || '',
+      avatarUrl: data.avatar_url || '',
+      twitterHandle: data.twitter_handle || '',
+      discordHandle: data.discord_handle || '',
+      isPublic: Boolean(data.is_public),
+      hideDollarAmounts: data.hide_dollar_amounts !== false,
+      showEquityCurve: data.show_equity_curve !== false,
+      showTradesHistory: data.show_trades_history !== false,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+  } catch (err) {
+    console.error('Error fetching user profile from Supabase:', err);
+    return null;
+  }
+};
+
+export const saveUserProfile = async (profile: UserProfile): Promise<boolean> => {
+  if (!supabase || !profile.id) return false;
+  try {
+    const payload = {
+      id: profile.id,
+      username: profile.username.toLowerCase().trim(),
+      display_name: profile.displayName,
+      bio: profile.bio || null,
+      avatar_url: profile.avatarUrl || null,
+      twitter_handle: profile.twitterHandle || null,
+      discord_handle: profile.discordHandle || null,
+      is_public: profile.isPublic,
+      hide_dollar_amounts: profile.hideDollarAmounts,
+      show_equity_curve: profile.showEquityCurve,
+      show_trades_history: profile.showTradesHistory,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase.from('profiles').upsert(payload);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Error saving user profile to Supabase:', err);
+    return false;
+  }
+};
+
+export const fetchPublicTraderData = async (username: string): Promise<{
+  profile: UserProfile;
+  accounts: TradingAccount[];
+  trades: Trade[];
+} | null> => {
+  if (!supabase || !username) return null;
+  try {
+    // 1. Fetch Profile by username
+    const { data: profileData, error: profileErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', username.toLowerCase().trim())
+      .eq('is_public', true)
+      .single();
+
+    if (profileErr || !profileData) return null;
+
+    const profile: UserProfile = {
+      id: profileData.id,
+      username: profileData.username,
+      displayName: profileData.display_name || profileData.username,
+      bio: profileData.bio || '',
+      avatarUrl: profileData.avatar_url || '',
+      twitterHandle: profileData.twitter_handle || '',
+      discordHandle: profileData.discord_handle || '',
+      isPublic: true,
+      hideDollarAmounts: profileData.hide_dollar_amounts !== false,
+      showEquityCurve: profileData.show_equity_curve !== false,
+      showTradesHistory: profileData.show_trades_history !== false,
+      createdAt: profileData.created_at
+    };
+
+    // 2. Fetch Accounts
+    const { data: accountsData } = await supabase
+      .from('accounts')
+      .select('*')
+      .eq('user_id', profile.id);
+
+    const accounts: TradingAccount[] = (accountsData || []).map(item => ({
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      broker: item.broker,
+      currency: item.currency,
+      initialBalance: Number(item.initial_balance),
+      currentBalance: Number(item.current_balance),
+      status: item.status,
+      colorTag: item.color_tag,
+      totalWithdrawn: Number(item.total_withdrawn || 0),
+      createdAt: item.created_at
+    }));
+
+    // 3. Fetch Trades
+    const { data: tradesData } = await supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', profile.id)
+      .order('entry_date', { ascending: false });
+
+    const trades: Trade[] = (tradesData || []).map(item => ({
+      id: item.id,
+      accountId: item.account_id,
+      symbol: item.symbol,
+      assetClass: item.asset_class,
+      direction: item.direction,
+      entryDate: item.entry_date,
+      exitDate: item.exit_date || undefined,
+      timeframe: item.timeframe,
+      entryPrice: Number(item.entry_price),
+      exitPrice: item.exit_price ? Number(item.exit_price) : undefined,
+      stopLoss: item.stop_loss ? Number(item.stop_loss) : undefined,
+      takeProfit: item.take_profit ? Number(item.take_profit) : undefined,
+      quantity: Number(item.quantity),
+      pnl: Number(item.pnl),
+      pnlPercent: Number(item.pnl_percent),
+      pips: item.pips ? Number(item.pips) : undefined,
+      rrPlanned: item.rr_planned ? Number(item.rr_planned) : undefined,
+      rrAchieved: item.rr_achieved ? Number(item.rr_achieved) : undefined,
+      session: item.session,
+      setup: item.setup,
+      emotion: item.emotion,
+      rulesFollowed: item.rules_followed,
+      confluences: Array.isArray(item.confluences) ? item.confluences : [],
+      notes: item.notes || '',
+      lessons: item.lessons || '',
+      screenshots: Array.isArray(item.screenshots) ? item.screenshots : [],
+      status: item.status,
+      createdAt: item.created_at || new Date().toISOString(),
+      updatedAt: item.created_at || new Date().toISOString()
+    }));
+
+    return { profile, accounts, trades };
+  } catch (err) {
+    console.error('Error fetching public trader data:', err);
     return null;
   }
 };

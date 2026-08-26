@@ -19,10 +19,12 @@ import {
   Menu,
   LogIn,
   LogOut,
+  Globe,
   User as UserIcon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AuthModal, AuthMode } from './auth/AuthModal';
+import { ProfileSettingsModal } from './profile/ProfileSettingsModal';
 
 interface NavbarProps {
   onOpenTradeModal: () => void;
@@ -57,6 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
@@ -477,6 +480,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </div>
 
+                {/* Public Portfolio Link Button */}
+                <button
+                  onClick={() => {
+                    setUserDropdownOpen(false);
+                    setProfileModalOpen(true);
+                  }}
+                  className="btn btn-ghost btn-sm"
+                  style={{ width: '100%', justifyContent: 'flex-start', color: '#60a5fa', fontWeight: 600, marginBottom: '4px' }}
+                >
+                  <Globe size={15} color="#3b82f6" /> Public Portfolio Link
+                </button>
+
+                <div style={{ height: '1px', backgroundColor: '#1e293b', margin: '4px 0' }} />
+
                 <button
                   onClick={() => {
                     signOut();
@@ -523,6 +540,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span>Log Trade</span>
         </button>
       </div>
+
+      {/* Profile Settings Modal */}
+      <ProfileSettingsModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      />
 
       {/* Auth Modal */}
       <AuthModal

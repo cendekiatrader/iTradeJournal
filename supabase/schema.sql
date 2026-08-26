@@ -1,11 +1,44 @@
 -- ==========================================================
--- iTradeJournal Bulletproof Multi-User Migration for Supabase
+-- iTradeJournal Multi-User Migration & Public Profiles Schema
 -- ==========================================================
 
 -- 1. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Create or Update Accounts Table
+-- 2. Create or Update Profiles Table (for Verified Public Bio Links)
+CREATE TABLE IF NOT EXISTS profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    username TEXT UNIQUE,
+    display_name TEXT,
+    bio TEXT,
+    avatar_url TEXT,
+    twitter_handle TEXT,
+    discord_handle TEXT,
+    is_public BOOLEAN DEFAULT false,
+    hide_dollar_amounts BOOLEAN DEFAULT true,
+    show_equity_curve BOOLEAN DEFAULT true,
+    show_trades_history BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Ensure profiles table has RLS enabled
+ALTER TABLE IF EXISTS profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+
+CREATE POLICY "Public profiles are viewable by everyone" ON profiles
+    FOR SELECT USING (is_public = true OR auth.uid() = id OR id IS NULL);
+
+CREATE POLICY "Users can insert their own profile" ON profiles
+    FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON profiles
+    FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+
+-- 3. Create or Update Accounts Table
 CREATE TABLE IF NOT EXISTS accounts (
     id TEXT PRIMARY KEY,
     user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -26,10 +59,9 @@ CREATE TABLE IF NOT EXISTS accounts (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Ensure user_id column exists if table was created previously
 ALTER TABLE accounts ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE;
 
--- 3. Create or Update Trades Table
+-- 4. Create or Update Trades Table
 CREATE TABLE IF NOT EXISTS trades (
     id TEXT PRIMARY KEY,
     user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -62,10 +94,9 @@ CREATE TABLE IF NOT EXISTS trades (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Ensure user_id column exists if table was created previously
 ALTER TABLE trades ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE;
 
--- 4. Create or Update Withdrawals Table
+-- 5. Create or Update Withdrawals Table
 CREATE TABLE IF NOT EXISTS withdrawals (
     id TEXT PRIMARY KEY,
     user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -77,34 +108,36 @@ CREATE TABLE IF NOT EXISTS withdrawals (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Ensure user_id column exists if table was created previously
 ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE;
 
--- 5. Enable Row Level Security (RLS)
+-- 6. Enable Row Level Security (RLS)
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trades ENABLE ROW LEVEL SECURITY;
 ALTER TABLE withdrawals ENABLE ROW LEVEL SECURITY;
 
--- Drop previous policies to avoid duplicates
 DROP POLICY IF EXISTS "Users can access own accounts" ON accounts;
 DROP POLICY IF EXISTS "Users can access own trades" ON trades;
 DROP POLICY IF EXISTS "Users can access own withdrawals" ON withdrawals;
-DROP POLICY IF EXISTS "Allow public full access to accounts" ON accounts;
-DROP POLICY IF EXISTS "Allow public full access to trades" ON trades;
-DROP POLICY IF EXISTS "Allow public full access to withdrawals" ON withdrawals;
-DROP POLICY IF EXISTS "Public accounts" ON accounts;
-DROP POLICY IF EXISTS "Public trades" ON trades;
-DROP POLICY IF EXISTS "Public withdrawals" ON withdrawals;
+DROP POLICY IF EXISTS "Public can view trades of public profiles" ON trades;
+DROP POLICY IF EXISTS "Public can view accounts of public profiles" ON accounts;
 
--- RLS Policies: Authenticated users can only see & modify their own rows
+-- RLS Policies: Authenticated users can access their own data + Public can view public profiles
 CREATE POLICY "Users can access own accounts" ON accounts
     FOR ALL
-    USING (auth.uid() = user_id OR user_id IS NULL)
+    USING (
+        auth.uid() = user_id 
+        OR user_id IS NULL 
+        OR EXISTS (SELECT 1 FROM profiles WHERE profiles.id = accounts.user_id AND profiles.is_public = true)
+    )
     WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
 
 CREATE POLICY "Users can access own trades" ON trades
     FOR ALL
-    USING (auth.uid() = user_id OR user_id IS NULL)
+    USING (
+        auth.uid() = user_id 
+        OR user_id IS NULL 
+        OR EXISTS (SELECT 1 FROM profiles WHERE profiles.id = trades.user_id AND profiles.is_public = true)
+    )
     WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
 
 CREATE POLICY "Users can access own withdrawals" ON withdrawals
@@ -112,7 +145,7 @@ CREATE POLICY "Users can access own withdrawals" ON withdrawals
     USING (auth.uid() = user_id OR user_id IS NULL)
     WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
 
--- 6. Storage Bucket for Trade Screenshots
+-- 7. Storage Bucket for Trade Screenshots
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('trade-screenshots', 'trade-screenshots', true)
 ON CONFLICT (id) DO NOTHING;

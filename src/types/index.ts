@@ -148,3 +148,19 @@ export interface EquityPoint {
   tradeSymbol?: string;
   drawdown: number;
 }
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  bio?: string;
+  avatarUrl?: string;
+  twitterHandle?: string;
+  discordHandle?: string;
+  isPublic: boolean;
+  hideDollarAmounts: boolean;
+  showEquityCurve: boolean;
+  showTradesHistory: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}

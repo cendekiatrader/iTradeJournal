@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { JournalProvider, useJournal } from './context/JournalContext';
 import { Navbar } from './components/Navbar';
@@ -15,6 +15,7 @@ import { AccountFormModal } from './components/accounts/AccountFormModal';
 import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
+import { PublicProfileView } from './components/profile/PublicProfileView';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
@@ -32,6 +33,29 @@ const MainApp: React.FC = () => {
   const [editingAccount, setEditingAccount] = useState<TradingAccount | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
+  
+  // Public Portfolio Route (#/u/username or ?u=username)
+  const [publicUsername, setPublicUsername] = useState<string | null>(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#/u/')) {
+      return hash.replace('#/u/', '').split('?')[0];
+    }
+    const params = new URLSearchParams(window.location.search);
+    return params.get('u') || null;
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#/u/')) {
+        setPublicUsername(hash.replace('#/u/', '').split('?')[0]);
+      } else {
+        setPublicUsername(null);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const { deleteTrade, accountsMap } = useJournal();
 
@@ -68,6 +92,18 @@ const MainApp: React.FC = () => {
   };
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  if (publicUsername) {
+    return (
+      <PublicProfileView
+        username={publicUsername}
+        onBackToApp={() => {
+          window.location.hash = '';
+          setPublicUsername(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="app-container">
