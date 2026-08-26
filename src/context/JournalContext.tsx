@@ -119,12 +119,6 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             saveWithdrawals(cloudWithdrawals);
           }
           setIsCloudSync(true);
-          setToast({
-            message: 'Connected to Supabase Cloud Database! ☁️',
-            type: 'success',
-            visible: true
-          });
-          setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
         })
         .catch(err => {
           console.error('Failed to sync with Supabase:', err);
