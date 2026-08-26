@@ -13,6 +13,7 @@ import {
   Flame,
   Award
 } from 'lucide-react';
+import { MonteCarloView } from './MonteCarloView';
 import { Trade } from '../../types';
 
 export const AnalyticsView: React.FC = () => {
@@ -389,6 +390,9 @@ export const AnalyticsView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Monte Carlo Risk & Equity Forecaster Engine */}
+      <MonteCarloView />
     </div>
   );
 };

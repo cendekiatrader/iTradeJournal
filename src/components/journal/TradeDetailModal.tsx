@@ -16,6 +16,7 @@ import {
   Sparkles,
   Clock
 } from 'lucide-react';
+import { BeforeAfterSlider } from './BeforeAfterSlider';
 
 interface TradeDetailModalProps {
   trade: Trade | null;
@@ -252,21 +253,28 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
             </div>
           )}
 
-          {/* Screenshot Preview */}
-          {trade.screenshots && trade.screenshots.length > 0 && (
+          {/* Dual Chart Before/After Slider or Single Screenshot Preview */}
+          {trade.screenshots && trade.screenshots.length >= 2 ? (
+            <BeforeAfterSlider
+              beforeImage={trade.screenshots[0]}
+              afterImage={trade.screenshots[1]}
+              beforeLabel="Before (Entry Setup)"
+              afterLabel="After (Execution / Exit)"
+            />
+          ) : trade.screenshots && trade.screenshots.length === 1 ? (
             <div>
               <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
                 Chart Screenshot
               </div>
-              <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid #23324d', maxHeight: '280px' }}>
+              <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid #23324d', maxHeight: '300px', backgroundColor: '#070b14' }}>
                 <img
                   src={trade.screenshots[0]}
                   alt="Trade Chart Screenshot"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
                 />
               </div>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Footer Actions */}

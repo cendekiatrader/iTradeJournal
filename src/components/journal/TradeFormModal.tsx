@@ -107,7 +107,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   const [customConfluence, setCustomConfluence] = useState('');
   const [notes, setNotes] = useState('');
   const [lessons, setLessons] = useState('');
-  const [screenshotUrl, setScreenshotUrl] = useState('');
+  const [screenshotBefore, setScreenshotBefore] = useState('');
+  const [screenshotAfter, setScreenshotAfter] = useState('');
 
   useEffect(() => {
     if (initialTrade) {
@@ -133,9 +134,12 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       setConfluences(initialTrade.confluences || []);
       setNotes(initialTrade.notes || '');
       setLessons(initialTrade.lessons || '');
-      setScreenshotUrl(initialTrade.screenshots?.[0] || '');
+      setScreenshotBefore(initialTrade.screenshots?.[0] || '');
+      setScreenshotAfter(initialTrade.screenshots?.[1] || '');
     } else {
       setAccountId(activeAccountId === 'all' ? (accounts[0]?.id || '') : activeAccountId);
+      setScreenshotBefore('');
+      setScreenshotAfter('');
     }
   }, [initialTrade, activeAccountId, accounts, isOpen]);
 
@@ -216,7 +220,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       confluences,
       notes,
       lessons,
-      screenshots: screenshotUrl ? [screenshotUrl] : [],
+      screenshots: [screenshotBefore, screenshotAfter].filter(Boolean),
       status
     };
 
@@ -646,18 +650,48 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </label>
           </div>
 
-          {/* Screenshot / Image URL */}
-          <div className="input-group" style={{ marginBottom: '16px' }}>
-            <label className="input-label">Screenshot / TradingView Chart URL</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                type="text"
-                value={screenshotUrl}
-                onChange={(e) => setScreenshotUrl(e.target.value)}
-                placeholder="https://www.tradingview.com/x/... or paste external chart link"
-                className="input-control font-mono"
-                style={{ flex: 1 }}
-              />
+          {/* Dual Chart Screenshots (Before vs After) */}
+          <div style={{
+            padding: '14px',
+            backgroundColor: '#070b17',
+            borderRadius: '12px',
+            border: '1px solid #1e293b',
+            marginBottom: '16px'
+          }}>
+            <label className="input-label" style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>Dual Chart Comparison (Before & After Screenshots)</span>
+            </label>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {/* Before Screenshot */}
+              <div>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#93c5fd', display: 'block', marginBottom: '4px' }}>
+                  1. Before (Setup / Plan Chart)
+                </span>
+                <input
+                  type="text"
+                  value={screenshotBefore}
+                  onChange={(e) => setScreenshotBefore(e.target.value)}
+                  placeholder="https://www.tradingview.com/x/... (Before)"
+                  className="input-control font-mono"
+                  style={{ width: '100%', fontSize: '0.78rem' }}
+                />
+              </div>
+
+              {/* After Screenshot */}
+              <div>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#34d399', display: 'block', marginBottom: '4px' }}>
+                  2. After (Execution / Outcome Chart)
+                </span>
+                <input
+                  type="text"
+                  value={screenshotAfter}
+                  onChange={(e) => setScreenshotAfter(e.target.value)}
+                  placeholder="https://www.tradingview.com/x/... (After)"
+                  className="input-control font-mono"
+                  style={{ width: '100%', fontSize: '0.78rem' }}
+                />
+              </div>
             </div>
           </div>
 
