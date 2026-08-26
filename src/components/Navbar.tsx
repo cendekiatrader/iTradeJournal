@@ -20,11 +20,14 @@ import {
   LogIn,
   LogOut,
   Globe,
+  Palette,
   User as UserIcon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { AuthModal, AuthMode } from './auth/AuthModal';
 import { ProfileSettingsModal } from './profile/ProfileSettingsModal';
+import { ThemeSelectorModal } from './common/ThemeSelectorModal';
 
 interface NavbarProps {
   onOpenTradeModal: () => void;
@@ -54,12 +57,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     showToast
   } = useJournal();
 
+  const { activeThemeOption } = useTheme();
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const [dataDropdownOpen, setDataDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [themeModalOpen, setThemeModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
@@ -487,9 +492,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setProfileModalOpen(true);
                   }}
                   className="btn btn-ghost btn-sm"
-                  style={{ width: '100%', justifyContent: 'flex-start', color: '#60a5fa', fontWeight: 600, marginBottom: '4px' }}
+                  style={{ width: '100%', justifyContent: 'flex-start', color: '#60a5fa', fontWeight: 600, marginBottom: '2px' }}
                 >
                   <Globe size={15} color="#3b82f6" /> Public Portfolio Link
+                </button>
+
+                {/* Theme Selector Button */}
+                <button
+                  onClick={() => {
+                    setUserDropdownOpen(false);
+                    setThemeModalOpen(true);
+                  }}
+                  className="btn btn-ghost btn-sm"
+                  style={{ width: '100%', justifyContent: 'flex-start', color: activeThemeOption.primaryColor, fontWeight: 600, marginBottom: '4px' }}
+                >
+                  <Palette size={15} color={activeThemeOption.primaryColor} /> Ganti Tema ({activeThemeOption.name.split(' ')[0]})
                 </button>
 
                 <div style={{ height: '1px', backgroundColor: '#1e293b', margin: '4px 0' }} />
@@ -530,6 +547,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         )}
 
+        {/* Theme Quick Switcher Icon Button */}
+        <button
+          onClick={() => setThemeModalOpen(true)}
+          className="btn btn-secondary btn-icon btn-sm"
+          title={`Ganti Tema: ${activeThemeOption.name}`}
+          style={{
+            backgroundColor: '#0c1222',
+            borderColor: 'var(--border-color)',
+            color: activeThemeOption.primaryColor
+          }}
+        >
+          <Palette size={16} />
+        </button>
+
         {/* Add Trade Button */}
         <button
           onClick={onOpenTradeModal}
@@ -540,6 +571,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span>Log Trade</span>
         </button>
       </div>
+
+      {/* Theme Selector Modal */}
+      <ThemeSelectorModal
+        isOpen={themeModalOpen}
+        onClose={() => setThemeModalOpen(false)}
+      />
 
       {/* Profile Settings Modal */}
       <ProfileSettingsModal

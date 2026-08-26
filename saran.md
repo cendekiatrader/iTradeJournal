@@ -18,9 +18,10 @@ Dokumen ini mencatat seluruh daftar saran fitur, inovasi, dan roadmap pengembang
 | 8 | **Monte Carlo Risk & Equity Forecaster** | 🟢 **SELESAI** | Algoritma matematika 1.000 simulasi masa depan untuk memprediksi probabilitas profit, risiko drawdown, dan target evaluasi prop firm. |
 | 9 | **Account Growth Compounding & Roadmap Planner** | 🟢 **SELESAI** | Kalkulator proyeksi pertumbuhan saldo berbunga (*Compounding Plan*) bulan per bulan lengkap dengan simulasi persentase penarikan profit (*Withdrawal Milestone*). |
 | 10 | **Trade Holding Duration & Time Edge Matrix** | 🟢 **SELESAI** | Matriks analisis efektivitas trading berdasarkan durasi tahan posisi: Scalp (<15m), Intraday (15m–4h), Day Trade (4h–24h), dan Swing (>1 hari). |
-| 11 | **Multi-Account & Multi-Asset Support** | 🟢 **SELESAI** | Dukungan multi-akun (Live, Prop Firm, Challenge), sistem withdrawal terpisah, serta satuan Lot (Forex/Gold), Unit (Crypto), dan Kontrak (Indeks). |
-| 12 | **Interactive Calendar Heatmap** | 🟢 **SELESAI** | Tampilan kalender harian dengan kalkulasi RRR dan PnL harian serta detail trade popup. |
-| 13 | **CSV Exporter** | 🟢 **SELESAI** | Kemampuan ekspor seluruh data trade dan metrik ke format CSV dalam 1-klik. |
+| 11 | **Custom Institutional Accent Themes (5 Luxury Themes)** | 🟢 **SELESAI** | Sistem ganti tema warna visual mewah 1-klik: *Emerald Institutional*, *Sapphire Electric*, *Obsidian Amethyst*, *Golden Bullion*, dan *Crimson Titan*. |
+| 12 | **Multi-Account & Multi-Asset Support** | 🟢 **SELESAI** | Dukungan multi-akun (Live, Prop Firm, Challenge), sistem withdrawal terpisah, serta satuan Lot (Forex/Gold), Unit (Crypto), dan Kontrak (Indeks). |
+| 13 | **Interactive Calendar Heatmap** | 🟢 **SELESAI** | Tampilan kalender harian dengan kalkulasi RRR dan PnL harian serta detail trade popup. |
+| 14 | **CSV Exporter** | 🟢 **SELESAI** | Kemampuan ekspor seluruh data trade dan metrik ke format CSV dalam 1-klik. |
 
 ---
 
@@ -47,44 +48,47 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 
 ---
 
-### B. Analisis Cerdas & AI
+### B. Analisis Lanjutan & AI
 5. **🧠 AI Trade Performance Analyzer & Leak Detector**
    - *Konsep*: AI Assistant yang menganalisis seluruh database histori trading pengguna.
    - *Manfaat*: Mendeteksi kebocoran psikologi & SOP secara otomatis (misal: *"Winrate Anda 85% di sesi London pada XAUUSD, namun Anda kehilangan 60% profit di sesi New York pada hari Jumat akibat emosi FOMO"*), lalu memberikan rekomendasi perbaikan.
 
-6. **🎙️ Voice Note / Audio Memo Journaling (Rekam Catatan Suara)**
-   - *Konsep*: Tombol rekam suara 30–60 detik langsung di form trade.
-   - *Manfaat*: Solusi cepat bagi trader yang malas mengetik saat emosi sedang meluap atau setelah sesi trading panjang; rekaman tersimpan di cloud dan dapat didengarkan kembali saat evaluasi mingguan.
+6. **⚖️ Currency & Asset Correlation Matrix (Matriks Korelasi Pasangan Aset)**
+   - *Konsep*: Analisis korelasi real-time antar aset (misal: EURUSD vs GBPUSD $+0.88$, DXY vs XAUUSD $-0.92$).
+   - *Manfaat*: Memperingatkan trader jika membuka 2 posisi bersamaan pada pair berkorelasi 90%+ (*Over-Exposure Risk Warning*).
+
+7. **🎯 Strategy Edge Scatter Plot Matrix (Peta Efisiensi Strategi)**
+   - *Konsep*: Grafik kuadran 2D (Sumbu X: Winrate %, Sumbu Y: Average R:R) untuk memetakan setup mana yang merupakan *Cash Cow* (paling profit) vs *Money Drain* (membuang modal).
+
+8. **🎙️ Voice Note / Audio Memo Journaling (Rekam Catatan Suara)**
+   - *Konsep*: Tombol rekam suara 30–60 detik langsung di form trade untuk trader yang malas mengetik saat emosi sedang meluap.
+
+9. **📅 Weekly & Monthly Retrospective Reviewer (Laporan Evaluasi Rutin)**
+   - *Konsep*: Ringkasan otomatis setiap akhir pekan (*Weekly Trading Debrief*) lengkap dengan kolom refleksi mingguan layaknya trader di hedge fund profesional.
+
+10. **💱 Live Multi-Currency Converter & FX Rate Calculator**
+    - *Konsep*: Konverter mata uang instan terintegrasi dengan kurs live dunia (USD, IDR, EUR, GBP, JPY, AUD) untuk menghitung nominal rupiah hasil penarikan atau margin akun.
 
 ---
 
 ### C. Psikologi, Pengaman Risiko & Gamifikasi
-7. **🔒 Emergency Tilt Lock & Daily Loss Kill-Switch (Kunci Anti-Revenge Trading)**
-   - *Konsep*: Sistem pengaman psikologi darurat yang mengunci tombol *Log Trade* selama 4 jam jika trader mengalami batas rugi harian (misal: $-3\%$ dalam sehari atau 3x loss beruntun).
-   - *Manfaat*: Melindungi saldo akun dari bahaya *Tilt* dan *Overtrading* secara disiplin.
+11. **🔒 Emergency Tilt Lock & Daily Loss Kill-Switch (Kunci Anti-Revenge Trading)**
+    - *Konsep*: Sistem pengaman psikologi darurat yang mengunci form input trade selama 4 jam jika trader mengalami batas rugi harian (misal: $-3\%$ dalam sehari atau 3x loss beruntun).
 
-8. **🎯 Pre-Trade Discipline Checklist & Daily Routine Score**
-   - *Konsep*: Checklist konfirmasi sebelum menekan tombol entry (misal: *Risk $\le 1\%$? HTF Trend searah? Tidak ada High-Impact News?*).
-   - *Manfaat*: Menghitung skor kepatuhan aturan (*Discipline Score %*) harian untuk mencegah *impulse trading*.
+12. **🎯 Pre-Trade Discipline Checklist & Daily Routine Score**
+    - *Konsep*: Checklist konfirmasi sebelum menekan tombol entry untuk menghitung skor kepatuhan aturan (*Discipline Score %*) harian.
 
-9. **🛡️ Prop Firm Challenge Tracker & Drawdown Safeguard**
-   - *Konsep*: Mode khusus bagi trader yang sedang mengikuti evaluasi Prop Firm (FTMO, FundedNext, Topstep, MFF).
-   - *Manfaat*: Visual meter Target Profit (8%/10%) vs Daily Loss Limit (5%) vs Max Drawdown (10%) real-time dengan sistem alarm peringatan merah jika mendekati batas pelanggaran (*breached limit*).
+13. **🛡️ Prop Firm Challenge Tracker & Drawdown Safeguard**
+    - *Konsep*: Mode khusus evaluasi Prop Firm (Target Profit 8%/10% vs Daily Loss 5% vs Max Drawdown 10% dengan alarm merah).
 
-10. **🏆 Trading Milestones & Gamification Achievement Badges (Sistem Lencana Disiplin)**
-    - *Konsep*: Sistem reward lencana (badges) dan level trader berdasarkan kedisiplinan eksekusi.
-    - *Contoh Lencana*:
-      - 🛡️ *Risk Guardian* (20 trade berturut-turut menjaga risiko $\le 1\%$).
-      - 🎯 *Sniper Entry* (Mengeksekusi trade dengan $RRR \ge 1:4$).
-      - 🧘 *Zen Mindset* (10 trade berturut-turut tanpa emosi *FOMO / Revenge*).
+14. **🏆 Trading Milestones & Gamification Achievement Badges (Sistem Lencana Disiplin)**
+    - *Konsep*: Sistem reward lencana (*Risk Guardian*, *Sniper Entry*, *Zen Mindset*) berdasarkan kedisiplinan eksekusi.
 
-11. **🖼️ Aesthetic Shareable Trade PnL Card Generator (Social Share Flyer)**
-    - *Konsep*: Tombol 1-klik untuk meng-generate gambar kartu grafis estetik dark-neon (format PNG) berisi Symbol, Direction (BUY/SELL), PnL %, R-Multiple (`+3.5R`), dan Setup.
-    - *Manfaat*: Siap di-download dan dibagikan ke Instagram Story, Twitter/X, Telegram, atau Discord.
+15. **🖼️ Aesthetic Shareable Trade PnL Card Generator (Social Share Flyer)**
+    - *Konsep*: Tombol 1-klik untuk meng-generate kartu grafis PNG dark-neon berisi hasil trade untuk dibagikan ke media sosial.
 
-12. **📚 Trading Playbook & Best Setups Catalog (Katalog Setup A+)**
-    - *Konsep*: Folder khusus untuk mengarsipkan trade-trade terbaik (*Best Trades of the Month*).
-    - *Manfaat*: Berfungsi sebagai buku panduan (*Cheat Sheet*) pribadi dengan rating bintang (⭐⭐⭐⭐⭐) yang bisa dibuka kembali sebelum memulai sesi trading.
+16. **📚 Trading Playbook & Best Setups Catalog (Katalog Setup A+)**
+    - *Konsep*: Folder khusus arsip trade terbaik (*Best Trades of the Month*) dengan rating bintang (⭐⭐⭐⭐⭐) sebagai panduan *cheat sheet*.
 
 ---
 

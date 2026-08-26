@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { JournalProvider, useJournal } from './context/JournalContext';
 import { Navbar } from './components/Navbar';
@@ -235,11 +236,13 @@ const MainApp: React.FC = () => {
 
 export function App() {
   return (
-    <AuthProvider>
-      <JournalProvider>
-        <MainApp />
-      </JournalProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <JournalProvider>
+          <MainApp />
+        </JournalProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
