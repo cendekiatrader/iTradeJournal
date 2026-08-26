@@ -15,6 +15,7 @@ import { AccountFormModal } from './components/accounts/AccountFormModal';
 import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
+import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
 
@@ -180,6 +181,9 @@ const MainApp: React.FC = () => {
         onClose={() => setAuthModalOpen(false)}
         initialMode={authMode}
       />
+
+      {/* PWA Install Banner */}
+      <PWAInstallPrompt />
 
       {/* Global Toast */}
       <Toast />

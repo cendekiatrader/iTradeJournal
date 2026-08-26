@@ -1,0 +1,43 @@
+{
+  "name": "iTradeJournal - Institutional Trading Journal",
+  "short_name": "iTradeJournal",
+  "description": "Multi-Account Institutional Trading Journal & Analytics Platform for Crypto, Forex, Gold & Indices.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#070b14",
+  "theme_color": "#0b1120",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["finance", "productivity", "business"],
+  "shortcuts": [
+    {
+      "name": "Log Trade",
+      "short_name": "New Trade",
+      "description": "Quickly record a new trade entry",
+      "url": "./#new-trade",
+      "icons": [{ "src": "./icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Risk Calculator",
+      "short_name": "Calculator",
+      "description": "Calculate exact lot & position sizing",
+      "url": "./#calculator",
+      "icons": [{ "src": "./icon.svg", "sizes": "192x192" }]
+    }
+  ]
+}
