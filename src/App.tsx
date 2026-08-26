@@ -16,6 +16,7 @@ import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
+import { EconomicCalendarView } from './components/news/EconomicCalendarView';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
@@ -131,6 +132,7 @@ const MainApp: React.FC = () => {
               onOpenTradeModal={handleOpenNewTrade}
               onViewTradeDetail={handleViewTradeDetail}
               onNavigateToJournal={() => setActiveTab('journal')}
+              onNavigateToNews={() => setActiveTab('news')}
             />
           )}
 
@@ -150,6 +152,10 @@ const MainApp: React.FC = () => {
 
           {activeTab === 'analytics' && (
             <AnalyticsView />
+          )}
+
+          {activeTab === 'news' && (
+            <EconomicCalendarView />
           )}
 
           {activeTab === 'accounts' && (

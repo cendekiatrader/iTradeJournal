@@ -10,11 +10,12 @@ import {
   PanelLeftOpen,
   Check,
   X,
-  TrendingUp
+  TrendingUp,
+  Flame
 } from 'lucide-react';
 import { useJournal } from '../context/JournalContext';
 
-export type NavTab = 'dashboard' | 'calendar' | 'journal' | 'analytics' | 'accounts' | 'calculator';
+export type NavTab = 'dashboard' | 'calendar' | 'journal' | 'analytics' | 'news' | 'accounts' | 'calculator';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -40,6 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'calendar', label: 'Calendar View', icon: CalendarDays, badge: null },
     { id: 'journal', label: 'Trade Log', icon: BookOpen, badge: trades.length },
     { id: 'analytics', label: 'Analytics & Setups', icon: BarChart3, badge: null },
+    { id: 'news', label: 'Economic Calendar', icon: Flame, badge: 'LIVE 🔴' },
     { id: 'accounts', label: 'Account Manager', icon: WalletCards, badge: null },
     { id: 'calculator', label: 'Position Size Calc', icon: Calculator, badge: 'PRO' }
   ];

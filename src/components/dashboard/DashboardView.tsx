@@ -25,12 +25,14 @@ interface DashboardViewProps {
   onOpenTradeModal: () => void;
   onViewTradeDetail: (trade: Trade) => void;
   onNavigateToJournal: () => void;
+  onNavigateToNews?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenTradeModal,
   onViewTradeDetail,
-  onNavigateToJournal
+  onNavigateToJournal,
+  onNavigateToNews
 }) => {
   const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap } = useJournal();
   const currentCurrency = activeAccount?.currency || 'USD';
@@ -42,7 +44,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   return (
     <div>
       {/* Top Welcome & Summary Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
             Performance Dashboard
@@ -57,6 +59,42 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             + Log New Trade
           </button>
         </div>
+      </div>
+
+      {/* High-Impact News Live Indicator Banner */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 18px',
+        borderRadius: '14px',
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+        border: '1px solid rgba(239, 68, 68, 0.25)',
+        marginBottom: '20px',
+        flexWrap: 'wrap',
+        gap: '10px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '1.2rem' }}>🔴</span>
+          <div>
+            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#f87171' }}>
+              High-Impact Economic Radar: Waspada Rilis Berita Red Folder Hari Ini
+            </div>
+            <div style={{ fontSize: '0.74rem', color: '#cbd5e1' }}>
+              US CPI, NFP, & Keputusan Suku Bunga The Fed/FOMC memicu lonjakan volatilitas & pelebaran spread.
+            </div>
+          </div>
+        </div>
+
+        {onNavigateToNews && (
+          <button 
+            onClick={onNavigateToNews}
+            className="btn btn-secondary btn-sm"
+            style={{ padding: '6px 12px', fontSize: '0.76rem', borderColor: 'rgba(239,68,68,0.4)', color: '#fca5a5', whiteSpace: 'nowrap' }}
+          >
+            Lihat Kalender Berita Live →
+          </button>
+        )}
       </div>
 
       {/* Prop Firm Rule Tracker if applicable */}
