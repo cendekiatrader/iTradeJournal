@@ -10,6 +10,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
   signUpWithEmail: (email: string, password: string, fullName?: string) => Promise<{ error: any; user: User | null }>;
   signInWithGoogle: () => Promise<{ error: any }>;
+  signInWithDiscord: () => Promise<{ error: any }>;
   resetPasswordEmail: (email: string) => Promise<{ error: any }>;
   updateUserPassword: (password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -107,6 +108,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithDiscord = async () => {
+    if (!supabase) return { error: { message: 'Supabase is not configured' } };
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'discord',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      return { error };
+    } catch (err: any) {
+      return { error: err };
+    }
+  };
+
   const resetPasswordEmail = async (email: string) => {
     if (!supabase) return { error: { message: 'Supabase is not configured' } };
     try {
@@ -152,6 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signInWithEmail,
         signUpWithEmail,
         signInWithGoogle,
+        signInWithDiscord,
         resetPasswordEmail,
         updateUserPassword,
         signOut,
