@@ -1,11 +1,11 @@
 -- ==========================================================
--- iTradeJournal Multi-User Institutional Database & Auth Schema
+-- iTradeJournal Bulletproof Multi-User Migration for Supabase
 -- ==========================================================
 
 -- 1. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Create Accounts Table with user_id
+-- 2. Create or Update Accounts Table
 CREATE TABLE IF NOT EXISTS accounts (
     id TEXT PRIMARY KEY,
     user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -26,7 +26,10 @@ CREATE TABLE IF NOT EXISTS accounts (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 3. Create Trades Table with user_id
+-- Ensure user_id column exists if table was created previously
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE;
+
+-- 3. Create or Update Trades Table
 CREATE TABLE IF NOT EXISTS trades (
     id TEXT PRIMARY KEY,
     user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -59,7 +62,10 @@ CREATE TABLE IF NOT EXISTS trades (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. Create Withdrawals Table with user_id
+-- Ensure user_id column exists if table was created previously
+ALTER TABLE trades ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE;
+
+-- 4. Create or Update Withdrawals Table
 CREATE TABLE IF NOT EXISTS withdrawals (
     id TEXT PRIMARY KEY,
     user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -71,34 +77,40 @@ CREATE TABLE IF NOT EXISTS withdrawals (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. Enable Row Level Security (RLS) - Each User Can ONLY Access Their Own Data
+-- Ensure user_id column exists if table was created previously
+ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE;
+
+-- 5. Enable Row Level Security (RLS)
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trades ENABLE ROW LEVEL SECURITY;
 ALTER TABLE withdrawals ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if any
+-- Drop previous policies to avoid duplicates
 DROP POLICY IF EXISTS "Users can access own accounts" ON accounts;
 DROP POLICY IF EXISTS "Users can access own trades" ON trades;
 DROP POLICY IF EXISTS "Users can access own withdrawals" ON withdrawals;
 DROP POLICY IF EXISTS "Allow public full access to accounts" ON accounts;
 DROP POLICY IF EXISTS "Allow public full access to trades" ON trades;
 DROP POLICY IF EXISTS "Allow public full access to withdrawals" ON withdrawals;
+DROP POLICY IF EXISTS "Public accounts" ON accounts;
+DROP POLICY IF EXISTS "Public trades" ON trades;
+DROP POLICY IF EXISTS "Public withdrawals" ON withdrawals;
 
 -- RLS Policies: Authenticated users can only see & modify their own rows
 CREATE POLICY "Users can access own accounts" ON accounts
     FOR ALL
-    USING (auth.uid() = user_id OR auth.uid() IS NULL)
-    WITH CHECK (auth.uid() = user_id OR auth.uid() IS NULL);
+    USING (auth.uid() = user_id OR user_id IS NULL)
+    WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
 
 CREATE POLICY "Users can access own trades" ON trades
     FOR ALL
-    USING (auth.uid() = user_id OR auth.uid() IS NULL)
-    WITH CHECK (auth.uid() = user_id OR auth.uid() IS NULL);
+    USING (auth.uid() = user_id OR user_id IS NULL)
+    WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
 
 CREATE POLICY "Users can access own withdrawals" ON withdrawals
     FOR ALL
-    USING (auth.uid() = user_id OR auth.uid() IS NULL)
-    WITH CHECK (auth.uid() = user_id OR auth.uid() IS NULL);
+    USING (auth.uid() = user_id OR user_id IS NULL)
+    WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
 
 -- 6. Storage Bucket for Trade Screenshots
 INSERT INTO storage.buckets (id, name, public) 
