@@ -16,7 +16,9 @@ import {
   Wallet,
   ShieldCheck,
   Trash2,
-  Menu
+  Menu,
+  Cloud,
+  Database
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -41,6 +43,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     metrics,
     importData,
     resetAllData,
+    isCloudSync,
+    isLoadingCloud,
     showToast
   } = useJournal();
 
@@ -321,7 +325,28 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Right Controls: Data Backup, Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Cloud / Local DB Status Badge */}
+        <div
+          title={isCloudSync ? "Supabase Cloud Database Connected & Synced ☁️" : "Using Browser LocalStorage 💾 (Tambahkan VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY di Vercel/.env untuk Cloud DB)"}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '5px 10px',
+            borderRadius: '20px',
+            backgroundColor: isCloudSync ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.1)',
+            border: isCloudSync ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(59, 130, 246, 0.25)',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            color: isCloudSync ? '#34d399' : '#93c5fd',
+            userSelect: 'none'
+          }}
+        >
+          {isCloudSync ? <Cloud size={13} color="var(--profit-green)" /> : <Database size={13} color="#3b82f6" />}
+          <span className="hide-on-mobile">{isCloudSync ? 'Cloud Synced' : 'Local Storage'}</span>
+        </div>
+
         {/* Data Tools Menu */}
         <div ref={dataRef} style={{ position: 'relative' }}>
           <button

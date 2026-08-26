@@ -1,0 +1,21 @@
+name: Keep Supabase Alive (Auto Pinger)
+
+on:
+  schedule:
+    # Runs every 3 days at 00:00 UTC
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "Pinging Supabase at ${{ secrets.VITE_SUPABASE_URL }}..."
+            curl -s -f -H "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}" "${{ secrets.VITE_SUPABASE_URL }}/rest/v1/accounts?limit=1" || true
+            echo "Keep-alive ping sent successfully!"
+          else
+            echo "Supabase secrets not configured in GitHub repository. Skipping ping."
+          fi

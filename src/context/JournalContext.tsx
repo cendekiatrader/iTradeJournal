@@ -4,19 +4,32 @@ import {
   Trade, 
   TradeFilter, 
   AccountMetrics, 
-  EquityPoint,
-  WithdrawalRecord
+  EquityPoint, 
+  WithdrawalRecord 
 } from '../types';
 import { 
   loadAccounts, 
   saveAccounts, 
   loadTrades, 
   saveTrades, 
-  loadWithdrawals,
-  saveWithdrawals,
+  loadWithdrawals, 
+  saveWithdrawals, 
   loadActiveAccountId, 
   saveActiveAccountId 
 } from '../utils/storage';
+import { 
+  isSupabaseConfigured, 
+  fetchCloudAccounts, 
+  fetchCloudTrades, 
+  fetchCloudWithdrawals, 
+  syncAccountToCloud, 
+  deleteAccountFromCloud, 
+  syncTradeToCloud, 
+  deleteTradeFromCloud, 
+  bulkDeleteTradesFromCloud, 
+  syncWithdrawalToCloud, 
+  deleteWithdrawalFromCloud 
+} from '../utils/supabase';
 import { calculateAccountMetrics, generateEquityCurve } from '../utils/calculations';
 import { INITIAL_ACCOUNTS, INITIAL_TRADES, INITIAL_WITHDRAWALS } from '../data/seedData';
 import confetti from 'canvas-confetti';
@@ -53,6 +66,8 @@ interface JournalContextType {
   importData: (jsonData: any) => boolean;
   resetAllData: () => void;
   resetToDemoData?: () => void;
+  isCloudSync: boolean;
+  isLoadingCloud: boolean;
   toast: ToastState;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   hideToast: () => void;
@@ -82,8 +97,45 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [activeAccountId, setActiveAccountIdState] = useState<string>(() => loadActiveAccountId());
   const [filters, setFiltersState] = useState<TradeFilter>(defaultFilter);
   const [toast, setToast] = useState<ToastState>({ message: '', type: 'info', visible: false });
+  const [isCloudSync, setIsCloudSync] = useState<boolean>(false);
+  const [isLoadingCloud, setIsLoadingCloud] = useState<boolean>(false);
 
-  // Save changes to localStorage
+  // Sync with Supabase on mount if configured
+  useEffect(() => {
+    if (isSupabaseConfigured()) {
+      setIsLoadingCloud(true);
+      Promise.all([fetchCloudAccounts(), fetchCloudTrades(), fetchCloudWithdrawals()])
+        .then(([cloudAccounts, cloudTrades, cloudWithdrawals]) => {
+          if (cloudAccounts && cloudAccounts.length > 0) {
+            setAccounts(cloudAccounts);
+            saveAccounts(cloudAccounts);
+          }
+          if (cloudTrades) {
+            setTrades(cloudTrades);
+            saveTrades(cloudTrades);
+          }
+          if (cloudWithdrawals) {
+            setWithdrawals(cloudWithdrawals);
+            saveWithdrawals(cloudWithdrawals);
+          }
+          setIsCloudSync(true);
+          setToast({
+            message: 'Connected to Supabase Cloud Database! ☁️',
+            type: 'success',
+            visible: true
+          });
+          setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
+        })
+        .catch(err => {
+          console.error('Failed to sync with Supabase:', err);
+        })
+        .finally(() => {
+          setIsLoadingCloud(false);
+        });
+    }
+  }, []);
+
+  // Save changes to localStorage as fallback & cache
   useEffect(() => {
     saveAccounts(accounts);
   }, [accounts]);
@@ -153,7 +205,6 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Filtered trades by account & criteria
   const filteredTrades = useMemo(() => {
     let list = trades.filter(t => {
-      // Account filter: either global activeAccount or filter-level account
       if (activeAccountId !== 'all' && t.accountId !== activeAccountId) {
         return false;
       }
@@ -209,33 +260,23 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return list;
   }, [trades, activeAccountId, filters]);
 
-  // Calculate Metrics
+  // Overall or filtered metrics
   const metrics = useMemo(() => {
-    // Trades for active account
-    const targetTrades = activeAccountId === 'all' 
-      ? trades 
-      : trades.filter(t => t.accountId === activeAccountId);
+    const startingBalance = activeAccount 
+      ? activeAccount.initialBalance 
+      : accounts.reduce((acc, a) => acc + a.initialBalance, 0);
+    return calculateAccountMetrics(filteredTrades, startingBalance);
+  }, [filteredTrades, activeAccount, accounts]);
 
-    const initialBal = activeAccountId === 'all'
-      ? accounts.reduce((sum, a) => sum + a.initialBalance, 0)
-      : (activeAccount?.initialBalance || 0);
-
-    return calculateAccountMetrics(targetTrades, initialBal);
-  }, [trades, accounts, activeAccountId, activeAccount]);
-
-  // Equity Curve
+  // Equity Curve Data
   const equityCurve = useMemo(() => {
-    const targetTrades = activeAccountId === 'all' 
-      ? trades 
-      : trades.filter(t => t.accountId === activeAccountId);
+    const startingBalance = activeAccount 
+      ? activeAccount.initialBalance 
+      : accounts.reduce((acc, a) => acc + a.initialBalance, 0);
+    return generateEquityCurve(filteredTrades, startingBalance);
+  }, [filteredTrades, activeAccount, accounts]);
 
-    const initialBal = activeAccountId === 'all'
-      ? accounts.reduce((sum, a) => sum + a.initialBalance, 0)
-      : (activeAccount?.initialBalance || 0);
-
-    return generateEquityCurve(targetTrades, initialBal);
-  }, [trades, accounts, activeAccountId, activeAccount]);
-
+  // Filter setters
   const setFilters = (newFilters: Partial<TradeFilter>) => {
     setFiltersState(prev => ({ ...prev, ...newFilters }));
   };
@@ -253,13 +294,21 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       createdAt: new Date().toISOString()
     };
     setAccounts(prev => [...prev, newAccount]);
+    if (isSupabaseConfigured()) {
+      syncAccountToCloud(newAccount);
+    }
     showToast(`Account "${newAccount.name}" created successfully!`, 'success');
   };
 
   const updateAccount = (id: string, updates: Partial<TradingAccount>) => {
     setAccounts(prev => {
       const updated = prev.map(a => a.id === id ? { ...a, ...updates } : a);
-      return recalculateAccountBalances(updated, trades, withdrawals);
+      const recalculated = recalculateAccountBalances(updated, trades, withdrawals);
+      const targetAcc = recalculated.find(a => a.id === id);
+      if (targetAcc && isSupabaseConfigured()) {
+        syncAccountToCloud(targetAcc);
+      }
+      return recalculated;
     });
     showToast('Account updated successfully!', 'success');
   };
@@ -272,6 +321,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setAccounts(prev => prev.filter(a => a.id !== id));
     setTrades(prev => prev.filter(t => t.accountId !== id));
     setWithdrawals(prev => prev.filter(w => w.accountId !== id));
+    if (isSupabaseConfigured()) {
+      deleteAccountFromCloud(id);
+    }
     if (activeAccountId === id) {
       setActiveAccountId('all');
     }
@@ -290,9 +342,20 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     setTrades(prev => {
       const updatedTrades = [newTrade, ...prev];
-      setAccounts(accs => recalculateAccountBalances(accs, updatedTrades, withdrawals));
+      setAccounts(accs => {
+        const recalculated = recalculateAccountBalances(accs, updatedTrades, withdrawals);
+        const targetAcc = recalculated.find(a => a.id === newTrade.accountId);
+        if (targetAcc && isSupabaseConfigured()) {
+          syncAccountToCloud(targetAcc);
+        }
+        return recalculated;
+      });
       return updatedTrades;
     });
+
+    if (isSupabaseConfigured()) {
+      syncTradeToCloud(newTrade);
+    }
 
     if (newTrade.pnl > 0) {
       triggerCelebration();
@@ -306,18 +369,44 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const now = new Date().toISOString();
     setTrades(prev => {
       const updatedTrades = prev.map(t => t.id === id ? { ...t, ...updates, updatedAt: now } : t);
-      setAccounts(accs => recalculateAccountBalances(accs, updatedTrades, withdrawals));
+      const targetTrade = updatedTrades.find(t => t.id === id);
+      if (targetTrade && isSupabaseConfigured()) {
+        syncTradeToCloud(targetTrade);
+      }
+      setAccounts(accs => {
+        const recalculated = recalculateAccountBalances(accs, updatedTrades, withdrawals);
+        if (targetTrade) {
+          const targetAcc = recalculated.find(a => a.id === targetTrade.accountId);
+          if (targetAcc && isSupabaseConfigured()) {
+            syncAccountToCloud(targetAcc);
+          }
+        }
+        return recalculated;
+      });
       return updatedTrades;
     });
     showToast('Trade entry updated.', 'success');
   };
 
   const deleteTrade = (id: string) => {
+    const targetTrade = trades.find(t => t.id === id);
     setTrades(prev => {
       const updatedTrades = prev.filter(t => t.id !== id);
-      setAccounts(accs => recalculateAccountBalances(accs, updatedTrades, withdrawals));
+      setAccounts(accs => {
+        const recalculated = recalculateAccountBalances(accs, updatedTrades, withdrawals);
+        if (targetTrade) {
+          const targetAcc = recalculated.find(a => a.id === targetTrade.accountId);
+          if (targetAcc && isSupabaseConfigured()) {
+            syncAccountToCloud(targetAcc);
+          }
+        }
+        return recalculated;
+      });
       return updatedTrades;
     });
+    if (isSupabaseConfigured()) {
+      deleteTradeFromCloud(id);
+    }
     showToast('Trade deleted from journal.', 'info');
   };
 
@@ -327,6 +416,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setAccounts(accs => recalculateAccountBalances(accs, updatedTrades, withdrawals));
       return updatedTrades;
     });
+    if (isSupabaseConfigured()) {
+      bulkDeleteTradesFromCloud(ids);
+    }
     showToast(`${ids.length} trades deleted.`, 'info');
   };
 
@@ -341,32 +433,68 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     setWithdrawals(prev => {
       const updatedWds = [newWd, ...prev];
-      setAccounts(accs => recalculateAccountBalances(accs, trades, updatedWds));
+      setAccounts(accs => {
+        const recalculated = recalculateAccountBalances(accs, trades, updatedWds);
+        const targetAcc = recalculated.find(a => a.id === newWd.accountId);
+        if (targetAcc && isSupabaseConfigured()) {
+          syncAccountToCloud(targetAcc);
+        }
+        return recalculated;
+      });
       return updatedWds;
     });
+
+    if (isSupabaseConfigured()) {
+      syncWithdrawalToCloud(newWd);
+    }
 
     triggerCelebration();
     showToast(`Withdrawal of ${wdData.amount} recorded! Payout celebration! 🎉`, 'success');
   };
 
   const deleteWithdrawal = (id: string) => {
+    const targetWd = withdrawals.find(w => w.id === id);
     setWithdrawals(prev => {
       const updatedWds = prev.filter(w => w.id !== id);
-      setAccounts(accs => recalculateAccountBalances(accs, trades, updatedWds));
+      setAccounts(accs => {
+        const recalculated = recalculateAccountBalances(accs, trades, updatedWds);
+        if (targetWd) {
+          const targetAcc = recalculated.find(a => a.id === targetWd.accountId);
+          if (targetAcc && isSupabaseConfigured()) {
+            syncAccountToCloud(targetAcc);
+          }
+        }
+        return recalculated;
+      });
       return updatedWds;
     });
+
+    if (isSupabaseConfigured()) {
+      deleteWithdrawalFromCloud(id);
+    }
+
     showToast('Withdrawal record removed.', 'info');
   };
 
-  const importData = (jsonData: any): boolean => {
+  // Backup & Import
+  const importData = (jsonData: any) => {
     try {
       if (jsonData && Array.isArray(jsonData.accounts) && Array.isArray(jsonData.trades)) {
-        const importedAccounts = jsonData.accounts;
-        const importedTrades = jsonData.trades;
-        const importedWds = Array.isArray(jsonData.withdrawals) ? jsonData.withdrawals : [];
-        setAccounts(importedAccounts);
+        const importedAccounts: TradingAccount[] = jsonData.accounts;
+        const importedTrades: Trade[] = jsonData.trades;
+        const importedWithdrawals: WithdrawalRecord[] = Array.isArray(jsonData.withdrawals) ? jsonData.withdrawals : [];
+
+        setAccounts(recalculateAccountBalances(importedAccounts, importedTrades, importedWithdrawals));
         setTrades(importedTrades);
-        setWithdrawals(importedWds);
+        setWithdrawals(importedWithdrawals);
+        setActiveAccountId('all');
+
+        if (isSupabaseConfigured()) {
+          importedAccounts.forEach(a => syncAccountToCloud(a));
+          importedTrades.forEach(t => syncTradeToCloud(t));
+          importedWithdrawals.forEach(w => syncWithdrawalToCloud(w));
+        }
+
         showToast(`Successfully restored ${importedAccounts.length} accounts & ${importedTrades.length} trades!`, 'success');
         return true;
       } else {
@@ -398,6 +526,11 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setTrades([]);
     setWithdrawals([]);
     setActiveAccountId('all');
+
+    if (isSupabaseConfigured()) {
+      syncAccountToCloud(cleanStarterAccount);
+    }
+
     showToast('Semua data trade & akun berhasil dihapus bersih!', 'info');
   };
 
@@ -437,6 +570,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         importData,
         resetAllData,
         resetToDemoData,
+        isCloudSync,
+        isLoadingCloud,
         toast,
         showToast,
         hideToast,
