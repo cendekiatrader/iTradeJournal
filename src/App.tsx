@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { JournalProvider, useJournal } from './context/JournalContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar, NavTab } from './components/Sidebar';
@@ -13,10 +13,13 @@ import { TradeFormModal } from './components/journal/TradeFormModal';
 import { TradeDetailModal } from './components/journal/TradeDetailModal';
 import { AccountFormModal } from './components/accounts/AccountFormModal';
 import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
+import { AuthLockScreen } from './components/auth/AuthLockScreen';
+import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
 
 const MainApp: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     return localStorage.getItem('itrade_sidebar_collapsed') === 'true';
@@ -26,6 +29,8 @@ const MainApp: React.FC = () => {
   const [detailTrade, setDetailTrade] = useState<Trade | null>(null);
   const [accountFormOpen, setAccountFormOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<TradingAccount | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<AuthMode>('signin');
 
   const { deleteTrade, accountsMap } = useJournal();
 
@@ -158,6 +163,23 @@ const MainApp: React.FC = () => {
 
       {/* Reset Password Modal (Triggered by Email Link) */}
       <ResetPasswordModal />
+
+      {/* Blurred Auth Lockscreen (Active when not logged in) */}
+      {!user && (
+        <AuthLockScreen 
+          onOpenAuth={(mode) => {
+            setAuthMode(mode);
+            setAuthModalOpen(true);
+          }} 
+        />
+      )}
+
+      {/* Global Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode={authMode}
+      />
 
       {/* Global Toast */}
       <Toast />
