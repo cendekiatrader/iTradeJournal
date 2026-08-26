@@ -533,7 +533,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setTrades(INITIAL_TRADES);
     setWithdrawals(INITIAL_WITHDRAWALS);
     setActiveAccountId('all');
-    showToast('Reset to demo institutional accounts & trades!', 'info');
+    showToast('Reset to demo accounts & trades!', 'info');
   };
 
   return (

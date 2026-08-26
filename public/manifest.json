@@ -1,7 +1,7 @@
 {
-  "name": "iTradeJournal - Institutional Trading Journal",
+  "name": "iTradeJournal - Trading Journal",
   "short_name": "iTradeJournal",
-  "description": "Multi-Account Institutional Trading Journal & Analytics Platform for Crypto, Forex, Gold & Indices.",
+  "description": "Multi-Account Trading Journal & Analytics Platform for Crypto, Forex, Gold & Indices.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

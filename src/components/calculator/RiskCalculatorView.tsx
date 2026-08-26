@@ -310,7 +310,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
 
           <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              Institutional Guideline: Never risk &gt; 2.0% per trade on any single idea.
+              Risk Management Guideline: Never risk &gt; 2.0% per trade on any single idea.
             </span>
           </div>
         </div>

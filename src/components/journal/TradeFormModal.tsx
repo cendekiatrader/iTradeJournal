@@ -239,7 +239,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               {initialTrade ? 'Edit Trade Entry' : 'Log New Trade Execution'}
             </h2>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              Institutional trade checklist & psychology record
+              Trade checklist & psychology record
             </span>
           </div>
           <button onClick={onClose} className="btn btn-ghost btn-icon">
@@ -579,10 +579,10 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </div>
           </div>
 
-          {/* Institutional Confluences Checklist */}
+          {/* Strategy Confluences Checklist */}
           <div style={{ marginBottom: '16px' }}>
             <label className="input-label" style={{ marginBottom: '8px', display: 'block' }}>
-              Institutional Confluences Checklist
+              Strategy Confluences Checklist
             </label>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
               {CONFLUENCE_SUGGESTIONS.map(conf => {

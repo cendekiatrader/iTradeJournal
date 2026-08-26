@@ -175,7 +175,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </h2>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
                 {mode === 'signin' && 'Sign in to access your cloud journal'}
-                {mode === 'signup' && 'Create your free institutional trading journal'}
+                {mode === 'signup' && 'Create your free trading journal'}
                 {mode === 'forgot' && 'Reset your account password'}
               </p>
             </div>
@@ -485,7 +485,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           fontSize: '0.72rem'
         }}>
           <ShieldCheck size={14} color="#10b981" />
-          <span>Institutional 256-Bit Encrypted Database</span>
+          <span>256-Bit Encrypted Database</span>
         </div>
       </div>
     </div>

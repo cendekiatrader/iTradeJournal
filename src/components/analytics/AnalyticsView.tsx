@@ -152,7 +152,7 @@ export const AnalyticsView: React.FC = () => {
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <BarChart3 size={24} color="#3b82f6" />
-          <span>Institutional Strategy & Edge Analytics</span>
+          <span>Strategy & Edge Analytics</span>
         </h1>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
           Data-driven edge analysis across trading models, market sessions, and psychological states

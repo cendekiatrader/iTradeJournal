@@ -89,7 +89,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
             <span>Trading Journal Log</span>
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Comprehensive trade records, institutional setups, and psychological audit
+            Comprehensive trade records, setups, and psychological audit
           </p>
         </div>
 
