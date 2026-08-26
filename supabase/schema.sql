@@ -1,13 +1,14 @@
 -- ==========================================================
--- iTradeJournal Institutional Database Schema for Supabase
+-- iTradeJournal Multi-User Institutional Database & Auth Schema
 -- ==========================================================
 
 -- 1. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Create Accounts Table
+-- 2. Create Accounts Table with user_id
 CREATE TABLE IF NOT EXISTS accounts (
     id TEXT PRIMARY KEY,
+    user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     type TEXT NOT NULL DEFAULT 'Live Personal',
     broker TEXT NOT NULL DEFAULT 'Broker',
@@ -25,9 +26,10 @@ CREATE TABLE IF NOT EXISTS accounts (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 3. Create Trades Table
+-- 3. Create Trades Table with user_id
 CREATE TABLE IF NOT EXISTS trades (
     id TEXT PRIMARY KEY,
+    user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
     account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     symbol TEXT NOT NULL,
     asset_class TEXT NOT NULL DEFAULT 'Forex',
@@ -57,9 +59,10 @@ CREATE TABLE IF NOT EXISTS trades (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. Create Withdrawals Table
+-- 4. Create Withdrawals Table with user_id
 CREATE TABLE IF NOT EXISTS withdrawals (
     id TEXT PRIMARY KEY,
+    user_id UUID DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
     account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     amount NUMERIC(15, 2) NOT NULL,
     date TEXT NOT NULL,
@@ -68,22 +71,49 @@ CREATE TABLE IF NOT EXISTS withdrawals (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. Enable Row Level Security (RLS) & Public Access Policies
+-- 5. Enable Row Level Security (RLS) - Each User Can ONLY Access Their Own Data
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trades ENABLE ROW LEVEL SECURITY;
 ALTER TABLE withdrawals ENABLE ROW LEVEL SECURITY;
 
--- Allow public read/write access for journal app
-CREATE POLICY "Allow public full access to accounts" ON accounts FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow public full access to trades" ON trades FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow public full access to withdrawals" ON withdrawals FOR ALL USING (true) WITH CHECK (true);
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "Users can access own accounts" ON accounts;
+DROP POLICY IF EXISTS "Users can access own trades" ON trades;
+DROP POLICY IF EXISTS "Users can access own withdrawals" ON withdrawals;
+DROP POLICY IF EXISTS "Allow public full access to accounts" ON accounts;
+DROP POLICY IF EXISTS "Allow public full access to trades" ON trades;
+DROP POLICY IF EXISTS "Allow public full access to withdrawals" ON withdrawals;
 
--- 6. Create Storage Bucket for Trade Screenshots
+-- RLS Policies: Authenticated users can only see & modify their own rows
+CREATE POLICY "Users can access own accounts" ON accounts
+    FOR ALL
+    USING (auth.uid() = user_id OR auth.uid() IS NULL)
+    WITH CHECK (auth.uid() = user_id OR auth.uid() IS NULL);
+
+CREATE POLICY "Users can access own trades" ON trades
+    FOR ALL
+    USING (auth.uid() = user_id OR auth.uid() IS NULL)
+    WITH CHECK (auth.uid() = user_id OR auth.uid() IS NULL);
+
+CREATE POLICY "Users can access own withdrawals" ON withdrawals
+    FOR ALL
+    USING (auth.uid() = user_id OR auth.uid() IS NULL)
+    WITH CHECK (auth.uid() = user_id OR auth.uid() IS NULL);
+
+-- 6. Storage Bucket for Trade Screenshots
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('trade-screenshots', 'trade-screenshots', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Allow public access to storage
-CREATE POLICY "Allow public read on trade-screenshots" ON storage.objects FOR SELECT USING (bucket_id = 'trade-screenshots');
-CREATE POLICY "Allow public insert on trade-screenshots" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'trade-screenshots');
-CREATE POLICY "Allow public delete on trade-screenshots" ON storage.objects FOR DELETE USING (bucket_id = 'trade-screenshots');
+DROP POLICY IF EXISTS "Public read on trade-screenshots" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload screenshots" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can delete screenshots" ON storage.objects;
+
+CREATE POLICY "Public read on trade-screenshots" ON storage.objects 
+    FOR SELECT USING (bucket_id = 'trade-screenshots');
+
+CREATE POLICY "Authenticated users can upload screenshots" ON storage.objects 
+    FOR INSERT WITH CHECK (bucket_id = 'trade-screenshots');
+
+CREATE POLICY "Authenticated users can delete screenshots" ON storage.objects 
+    FOR DELETE USING (bucket_id = 'trade-screenshots');

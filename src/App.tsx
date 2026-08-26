@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AuthProvider } from './context/AuthContext';
 import { JournalProvider, useJournal } from './context/JournalContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar, NavTab } from './components/Sidebar';
@@ -11,6 +12,7 @@ import { RiskCalculatorView } from './components/calculator/RiskCalculatorView';
 import { TradeFormModal } from './components/journal/TradeFormModal';
 import { TradeDetailModal } from './components/journal/TradeDetailModal';
 import { AccountFormModal } from './components/accounts/AccountFormModal';
+import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
 
@@ -154,6 +156,9 @@ const MainApp: React.FC = () => {
         initialAccount={editingAccount}
       />
 
+      {/* Reset Password Modal (Triggered by Email Link) */}
+      <ResetPasswordModal />
+
       {/* Global Toast */}
       <Toast />
     </div>
@@ -162,9 +167,11 @@ const MainApp: React.FC = () => {
 
 export function App() {
   return (
-    <JournalProvider>
-      <MainApp />
-    </JournalProvider>
+    <AuthProvider>
+      <JournalProvider>
+        <MainApp />
+      </JournalProvider>
+    </AuthProvider>
   );
 }
 

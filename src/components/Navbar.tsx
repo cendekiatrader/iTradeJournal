@@ -18,8 +18,13 @@ import {
   Trash2,
   Menu,
   Cloud,
-  Database
+  Database,
+  LogIn,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { AuthModal, AuthMode } from './auth/AuthModal';
 
 interface NavbarProps {
   onOpenTradeModal: () => void;
@@ -32,6 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAccountModal,
   onOpenMobileMenu
 }) => {
+  const { user, signOut, isConfigured } = useAuth();
   const { 
     accounts, 
     activeAccountId, 
@@ -50,9 +56,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const [dataDropdownOpen, setDataDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<AuthMode>('signin');
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
   const dataRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -62,6 +73,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       }
       if (dataRef.current && !dataRef.current.contains(event.target as Node)) {
         setDataDropdownOpen(false);
+      }
+      if (userRef.current && !userRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -427,6 +441,101 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
+        {/* User Profile / Auth Button */}
+        {user ? (
+          <div ref={userRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+              className="btn btn-secondary btn-sm"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 12px',
+                borderRadius: '10px',
+                backgroundColor: '#0e1628',
+                borderColor: '#243750'
+              }}
+            >
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: '#ffffff'
+              }}>
+                {(user.user_metadata?.full_name || user.email || 'U')[0].toUpperCase()}
+              </div>
+              <span className="hide-on-mobile" style={{ fontSize: '0.78rem', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user.user_metadata?.full_name || user.email?.split('@')[0]}
+              </span>
+              <ChevronDown size={12} color="#94a3b8" />
+            </button>
+
+            {userDropdownOpen && (
+              <div style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                right: 0,
+                width: '240px',
+                backgroundColor: '#0c1222',
+                border: '1px solid #233148',
+                borderRadius: '12px',
+                boxShadow: '0 12px 30px rgba(0,0,0,0.7)',
+                padding: '10px',
+                zIndex: 200,
+                animation: 'fadeIn 0.15s ease'
+              }}>
+                <div style={{ padding: '6px 8px', borderBottom: '1px solid #1e293b', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {user.user_metadata?.full_name || 'Trader'}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {user.email}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    signOut();
+                    setUserDropdownOpen(false);
+                    showToast('Berhasil keluar dari akun.', 'info');
+                  }}
+                  className="btn btn-ghost btn-sm"
+                  style={{ width: '100%', justifyContent: 'flex-start', color: '#ef4444', fontWeight: 600 }}
+                >
+                  <LogOut size={15} /> Log Out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              setAuthMode('signin');
+              setAuthModalOpen(true);
+            }}
+            className="btn btn-secondary btn-sm"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#0e1628',
+              borderColor: '#243750',
+              color: '#60a5fa',
+              fontWeight: 600
+            }}
+          >
+            <LogIn size={14} />
+            <span>Sign In</span>
+          </button>
+        )}
+
         {/* Add Trade Button */}
         <button
           onClick={onOpenTradeModal}
@@ -437,6 +546,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span>Log Trade</span>
         </button>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode={authMode}
+      />
     </header>
   );
 };
