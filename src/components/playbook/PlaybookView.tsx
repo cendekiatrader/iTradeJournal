@@ -93,7 +93,7 @@ export const PlaybookView: React.FC = () => {
               <BookMarked size={20} color="#ffffff" strokeWidth={2.5} />
             </div>
             <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
-              A+ Setup Playbook Gallery
+              Setup Playbook Gallery
             </h1>
           </div>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: 0 }}>

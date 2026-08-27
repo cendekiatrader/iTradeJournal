@@ -20,7 +20,7 @@ const SHORTCUTS: ShortcutItem[] = [
   { key: '?', description: 'Buka panduan Keyboard Shortcuts ini', category: 'General' },
   { key: 'D', description: 'Pindah ke tab Performance Dashboard', category: 'Navigation' },
   { key: 'J', description: 'Pindah ke tab Trade Log (Journal)', category: 'Navigation' },
-  { key: 'P', description: 'Pindah ke tab Playbook (A+ SOP)', category: 'Navigation' },
+  { key: 'P', description: 'Pindah ke tab Playbook', category: 'Navigation' },
   { key: 'A', description: 'Pindah ke tab Analytics & Setups', category: 'Navigation' },
   { key: 'E', description: 'Pindah ke tab Economic Calendar & News', category: 'Navigation' },
   { key: 'C', description: 'Pindah ke tab Position Size & Calculator', category: 'Navigation' },

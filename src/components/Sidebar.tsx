@@ -42,7 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'calendar', label: 'Calendar View', icon: CalendarDays, badge: null },
     { id: 'journal', label: 'Trade Log', icon: BookOpen, badge: trades.length },
     { id: 'analytics', label: 'Analytics & Setups', icon: BarChart3, badge: null },
-    { id: 'playbook', label: 'Playbook (A+ SOP)', icon: BookMarked, badge: playbooks.length },
+    { id: 'playbook', label: 'Playbook', icon: BookMarked, badge: playbooks.length },
     { id: 'news', label: 'Economic Calendar', icon: Flame, badge: null },
     { id: 'accounts', label: 'Account Manager', icon: WalletCards, badge: null },
     { id: 'calculator', label: 'Position Size Calc', icon: Calculator, badge: 'PRO' }
