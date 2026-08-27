@@ -354,6 +354,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 98. **📑 Executive Dark-Mode Investor Presentation Deck Generator (HTML5 / Slide Format)**
     - *Konsep*: Generator slide presentasi portofolio interaktif berbasis web (HTML5) siap tayang untuk pitching ke investor modal atau mitra prop trading.
 
+### M. Saran Fitur Baru & Inovasi Tingkat Lanjut (Batch 99 - 104)
+
+99. **🛡️ Dynamic Stop Loss Cushion & ATR Buffer Sizer**
+    - *Konsep*: Kalkulator rekomendasi jarak buffer Stop Loss berbasis nilai *Average True Range (ATR)* pasar terkini untuk mencegah posisi tersapu oleh *wick spread / false stop hunt*.
+
+100. **📱 WhatsApp & Telegram Instant Daily Performance Voice Note Digest**
+     - *Konsep*: Bot pengirim ringkasan audio singkat berbasis AI ke WhatsApp / Telegram pribadi trader yang merangkum hasil trading hari ini beserta catatan evaluasi psikologi.
+
+101. **📊 Winrate by Day-of-Month Cycle (Siklus Awal vs Akhir Bulan)**
+     - *Konsep*: Analisis tren performa per kuadran tanggal (Hari 1-7, 8-14, 15-21, 22-akhir bulan) untuk melihat apakah ada pola performa yang menurun di akhir bulan (*End-of-Month Bias*).
+
+102. **🏷️ Dynamic Strategy SOP Checklist Validator (Kepatuhan Wajib Sebelum Submit)**
+     - *Konsep*: Pilihan syarat SOP yang wajib dicentang minimal 3 kriteria sebelum tombol submit trade bisa ditekan, memastikan trader tidak mengambil trade setengah matang.
+
+103. **🔄 Live Currency Strength Meter Overlay**
+     - *Konsep*: Indikator kekuatan 8 mata uang utama (USD, EUR, GBP, JPY, AUD, CAD, NZD, CHF) real-time di bagian atas jurnal untuk memvalidasi setup trading searah tren modal institusional.
+
+104. **📑 Automated Trade Tax & Commission Fee Deduction Breakdown**
+     - *Konsep*: Panel rincian biaya trading tahunan yang memisahkan laba bruto (*Gross*), potongan komisi broker, biaya inap *Swap*, dan laba bersih yang dapat ditarik (*Net Realized*).
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
