@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { EquityPoint, Currency } from '../../types';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
+import { TrendingUp, BarChart2 } from 'lucide-react';
 
 interface EquityChartProps {
   data: EquityPoint[];
@@ -8,16 +9,26 @@ interface EquityChartProps {
   height?: number;
 }
 
+type BenchmarkType = 'none' | 'sp500' | 'gold' | 'btc';
+
+const BENCHMARK_CONFIG = {
+  none: { label: 'None', annualReturn: 0, color: '#64748b' },
+  sp500: { label: 'S&P 500 (~12% p.a)', annualReturn: 0.12, color: '#38bdf8' },
+  gold: { label: 'Gold (~15% p.a)', annualReturn: 0.15, color: '#fbbf24' },
+  btc: { label: 'Bitcoin (~45% p.a)', annualReturn: 0.45, color: '#f97316' },
+};
+
 export const EquityChart: React.FC<EquityChartProps> = ({
   data,
   currency = 'USD',
   height = 320
 }) => {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [benchmark, setBenchmark] = useState<BenchmarkType>('none');
 
-  const { minVal, maxVal, points, pathD, areaD, baseLineY } = useMemo(() => {
+  const { minVal, maxVal, points, pathD, areaD, baseLineY, benchmarkPoints, benchmarkPathD } = useMemo(() => {
     if (!data || data.length === 0) {
-      return { minVal: 0, maxVal: 100, points: [], pathD: '', areaD: '', baseLineY: height / 2 };
+      return { minVal: 0, maxVal: 100, points: [], pathD: '', areaD: '', baseLineY: height / 2, benchmarkPoints: [], benchmarkPathD: '' };
     }
 
     const equities = data.map(d => d.equity);
@@ -25,9 +36,24 @@ export const EquityChart: React.FC<EquityChartProps> = ({
     const rawMin = Math.min(...equities, initialBal);
     const rawMax = Math.max(...equities, initialBal);
 
-    const padding = (rawMax - rawMin) * 0.12 || (rawMax * 0.05) || 100;
-    const minVal = Math.floor(rawMin - padding);
-    const maxVal = Math.ceil(rawMax + padding);
+    // Calculate benchmark simulated equity curve based on time progression
+    const totalTrades = Math.max(1, data.length - 1);
+    const annualRate = BENCHMARK_CONFIG[benchmark].annualReturn;
+    // Assuming approx 200 trading days/trades per year standard pace
+    const perTradeRate = annualRate / 200;
+
+    const benchmarkEquities = data.map((_, i) => {
+      if (benchmark === 'none') return initialBal;
+      return initialBal * Math.pow(1 + perTradeRate, i);
+    });
+
+    const allEquities = benchmark !== 'none' ? [...equities, ...benchmarkEquities, initialBal] : [...equities, initialBal];
+    const combinedMin = Math.min(...allEquities);
+    const combinedMax = Math.max(...allEquities);
+
+    const padding = (combinedMax - combinedMin) * 0.14 || (combinedMax * 0.05) || 100;
+    const minVal = Math.floor(combinedMin - padding);
+    const maxVal = Math.ceil(combinedMax + padding);
     const range = maxVal - minVal || 1;
 
     const width = 800;
@@ -37,6 +63,12 @@ export const EquityChart: React.FC<EquityChartProps> = ({
       const x = (i / Math.max(1, data.length - 1)) * width;
       const y = chartHeight - ((d.equity - minVal) / range) * chartHeight;
       return { x, y, data: d };
+    });
+
+    const benchmarkPoints = benchmarkEquities.map((bVal, i) => {
+      const x = (i / Math.max(1, data.length - 1)) * width;
+      const y = chartHeight - ((bVal - minVal) / range) * chartHeight;
+      return { x, y, val: bVal };
     });
 
     const baseLineY = chartHeight - ((initialBal - minVal) / range) * chartHeight;
@@ -50,14 +82,23 @@ export const EquityChart: React.FC<EquityChartProps> = ({
       }
     }
 
+    let benchmarkPathD = '';
+    if (benchmark !== 'none' && benchmarkPoints.length > 0) {
+      benchmarkPathD = `M ${benchmarkPoints[0].x},${benchmarkPoints[0].y}`;
+      for (let i = 1; i < benchmarkPoints.length; i++) {
+        benchmarkPathD += ` L ${benchmarkPoints[i].x},${benchmarkPoints[i].y}`;
+      }
+    }
+
     const areaD = points.length > 0
       ? `${pathD} L ${points[points.length - 1].x},${chartHeight} L ${points[0].x},${chartHeight} Z`
       : '';
 
-    return { minVal, maxVal, points, pathD, areaD, baseLineY };
-  }, [data, height]);
+    return { minVal, maxVal, points, pathD, areaD, baseLineY, benchmarkPoints, benchmarkPathD };
+  }, [data, height, benchmark]);
 
   const activePoint = hoverIndex !== null && points[hoverIndex] ? points[hoverIndex] : null;
+  const activeBenchmarkPoint = hoverIndex !== null && benchmarkPoints[hoverIndex] ? benchmarkPoints[hoverIndex] : null;
 
   if (data.length <= 1) {
     return (
@@ -84,6 +125,33 @@ export const EquityChart: React.FC<EquityChartProps> = ({
 
   return (
     <div style={{ position: 'relative', width: '100%', userSelect: 'none' }}>
+      {/* Benchmark Selector Pills */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+        <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginRight: '4px' }}>
+          <BarChart2 size={12} /> Benchmark:
+        </span>
+        {(['none', 'sp500', 'gold', 'btc'] as BenchmarkType[]).map((b) => (
+          <button
+            type="button"
+            key={b}
+            onClick={() => setBenchmark(b)}
+            style={{
+              padding: '3px 8px',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              borderRadius: '6px',
+              cursor: 'pointer',
+              backgroundColor: benchmark === b ? 'rgba(59, 130, 246, 0.2)' : '#0a0f1d',
+              border: benchmark === b ? '1px solid #3b82f6' : '1px solid #1a2538',
+              color: benchmark === b ? '#60a5fa' : '#64748b',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            {b === 'none' ? 'Off' : b === 'sp500' ? 'S&P 500' : b === 'gold' ? 'Gold' : 'BTC'}
+          </button>
+        ))}
+      </div>
+
       {/* Chart Canvas / SVG Container */}
       <svg
         viewBox={`0 0 800 ${height}`}
@@ -156,6 +224,20 @@ export const EquityChart: React.FC<EquityChartProps> = ({
         {/* Area fill */}
         <path d={areaD} fill="url(#equityGradient)" />
 
+        {/* Benchmark Reference Curve if active */}
+        {benchmark !== 'none' && benchmarkPathD && (
+          <g>
+            <path
+              d={benchmarkPathD}
+              fill="none"
+              stroke={BENCHMARK_CONFIG[benchmark].color}
+              strokeWidth="2"
+              strokeDasharray="5 5"
+              opacity="0.85"
+            />
+          </g>
+        )}
+
         {/* Equity Line */}
         <path
           d={pathD}
@@ -201,49 +283,61 @@ export const EquityChart: React.FC<EquityChartProps> = ({
             y1="0"
             x2={activePoint.x}
             y2={height - 40}
-            stroke="#60a5fa"
+            stroke="#38bdf8"
+            strokeDasharray="2 2"
             strokeWidth="1.5"
-            strokeDasharray="3 3"
           />
         )}
       </svg>
 
-      {/* Floating Hover Tooltip */}
+      {/* Floating Tooltip info bar on hover */}
       {activePoint && (
         <div
           style={{
             position: 'absolute',
-            left: `${(activePoint.x / 800) * 100}%`,
-            top: `${Math.max(10, (activePoint.y / height) * 100 - 35)}%`,
-            transform: 'translate(-50%, -100%)',
-            backgroundColor: '#0c1324',
-            border: '1px solid #283952',
-            borderRadius: '8px',
-            padding: '8px 12px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.8)',
+            top: '36px',
+            left: `${Math.min(75, Math.max(25, (activePoint.x / 800) * 100))}%`,
+            transform: 'translateX(-50%)',
+            backgroundColor: '#0c1527',
+            border: '1px solid #1e3a5f',
+            padding: '8px 14px',
+            borderRadius: '10px',
+            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.6)',
+            display: 'flex',
+            gap: '16px',
+            alignItems: 'center',
             pointerEvents: 'none',
-            zIndex: 50,
+            zIndex: 10,
             whiteSpace: 'nowrap'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            <span>{activePoint.data.displayDate}</span>
-            {activePoint.data.tradeSymbol && (
-              <span style={{ fontWeight: 700, color: '#f8fafc' }}>{activePoint.data.tradeSymbol}</span>
-            )}
+          <div>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{activePoint.data.displayDate}</div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              {formatCurrency(activePoint.data.equity, currency)}
+            </div>
           </div>
-          <div style={{ fontSize: '0.92rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
-            {formatCurrency(activePoint.data.equity, currency)}
-          </div>
-          {activePoint.data.pnl !== 0 && (
+
+          <div style={{ borderLeft: '1px solid #1e293b', paddingLeft: '12px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Trade Outcome</div>
             <div style={{
-              fontSize: '0.75rem',
-              fontWeight: 600,
+              fontSize: '0.85rem',
+              fontWeight: 700,
               fontFamily: 'var(--font-mono)',
-              color: activePoint.data.pnl >= 0 ? 'var(--profit-green)' : 'var(--loss-red)',
-              marginTop: '2px'
+              color: activePoint.data.pnl >= 0 ? 'var(--profit-green)' : 'var(--loss-red)'
             }}>
-              PnL: {activePoint.data.pnl >= 0 ? '+' : ''}{formatCurrency(activePoint.data.pnl, currency)}
+              {activePoint.data.pnl > 0 ? '+' : ''}{formatCurrency(activePoint.data.pnl, currency)}
+            </div>
+          </div>
+
+          {benchmark !== 'none' && activeBenchmarkPoint && (
+            <div style={{ borderLeft: '1px solid #1e293b', paddingLeft: '12px' }}>
+              <div style={{ fontSize: '0.7rem', color: BENCHMARK_CONFIG[benchmark].color }}>
+                {BENCHMARK_CONFIG[benchmark].label}
+              </div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: BENCHMARK_CONFIG[benchmark].color }}>
+                {formatCurrency(activeBenchmarkPoint.val, currency)}
+              </div>
             </div>
           )}
         </div>
