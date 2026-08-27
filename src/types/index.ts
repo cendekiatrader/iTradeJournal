@@ -54,7 +54,8 @@ export type StrategyType =
   | 'Breakout & Retest'
   | 'Mean Reversion'
   | 'Scalping'
-  | 'Other';
+  | 'Other'
+  | (string & {});
 
 export type EmotionState = 
   | 'Disciplined'

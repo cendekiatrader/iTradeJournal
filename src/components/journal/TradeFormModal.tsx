@@ -81,7 +81,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   onClose,
   initialTrade
 }) => {
-  const { accounts, activeAccountId, addTrade, updateTrade, showToast } = useJournal();
+  const { accounts, activeAccountId, playbooks, addTrade, updateTrade, showToast } = useJournal();
 
   const [accountId, setAccountId] = useState(activeAccountId === 'all' ? (accounts[0]?.id || '') : activeAccountId);
   const [symbol, setSymbol] = useState('XAUUSD');
@@ -810,13 +810,51 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
           {/* Strategy, Session & Emotion */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '16px' }}>
             <div className="input-group" style={{ margin: 0 }}>
-              <label className="input-label">Strategy / Setup Model</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <label className="input-label" style={{ margin: 0 }}>Strategy / Setup Model</label>
+                {playbooks.length > 0 && (
+                  <span style={{ fontSize: '0.68rem', color: '#f59e0b', fontWeight: 600 }}>
+                    ⭐ {playbooks.length} Playbooks
+                  </span>
+                )}
+              </div>
               <select
                 value={setup}
-                onChange={(e) => setSetup(e.target.value as StrategyType)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSetup(val as StrategyType);
+                  // Auto-fill confluences & timeframe if matching custom Playbook
+                  const matchedPb = playbooks.find(p => p.title === val || p.category === val);
+                  if (matchedPb) {
+                    if (matchedPb.confluences && matchedPb.confluences.length > 0) {
+                      setConfluences(matchedPb.confluences);
+                    }
+                    if (matchedPb.timeframe && matchedPb.timeframe.includes('m') || matchedPb?.timeframe?.includes('h') || matchedPb?.timeframe?.includes('1D')) {
+                      const cleanTf = matchedPb.timeframe.split('/')[0].trim();
+                      if (['1m', '3m', '5m', '15m', '30m', '1h', '4h', '1D', '1W'].includes(cleanTf)) {
+                        setTimeframe(cleanTf);
+                      }
+                    }
+                    showToast(`SOP Playbook "${matchedPb.title}" dimuat otomatis!`, 'info');
+                  }
+                }}
                 className="input-control"
               >
-                {STRATEGIES.map(s => <option key={s} value={s}>{s}</option>)}
+                {/* Custom User Playbooks Group */}
+                {playbooks.length > 0 && (
+                  <optgroup label="⭐ My Custom Playbooks">
+                    {playbooks.map(pb => (
+                      <option key={pb.id} value={pb.title}>
+                        {pb.title} ({pb.timeframe || pb.category})
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+
+                {/* Default Standard Strategies */}
+                <optgroup label="Standard Models">
+                  {STRATEGIES.map(s => <option key={s} value={s}>{s}</option>)}
+                </optgroup>
               </select>
             </div>
 
