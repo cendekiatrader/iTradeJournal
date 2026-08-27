@@ -536,15 +536,15 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              {/* Presets 0.5%, 1.0%, 2.0% */}
-              {[0.5, 1.0, 2.0].map((pct) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+              {/* Presets 0.5%, 1%, 2%, 3% s.d. 10% */}
+              {[0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((pct) => (
                 <button
                   type="button"
                   key={pct}
                   onClick={() => setRiskPercentPreset(pct)}
                   style={{
-                    padding: '4px 8px',
+                    padding: '4px 7px',
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     borderRadius: '6px',
@@ -557,43 +557,6 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   {pct}%
                 </button>
               ))}
-
-              {/* Custom / Manual Risk % Input */}
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                backgroundColor: '#0c152a',
-                border: ![0.5, 1.0, 2.0].includes(riskPercentPreset) ? '1px solid #3b82f6' : '1px solid #1c273e',
-                borderRadius: '6px',
-                padding: '2px 6px',
-                gap: '2px'
-              }}>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0.01"
-                  max="100"
-                  value={riskPercentPreset || ''}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    setRiskPercentPreset(isNaN(val) ? 0 : Math.max(0, val));
-                  }}
-                  placeholder="Custom"
-                  style={{
-                    width: '46px',
-                    background: 'transparent',
-                    border: 'none',
-                    outline: 'none',
-                    color: ![0.5, 1.0, 2.0].includes(riskPercentPreset) ? '#60a5fa' : '#f8fafc',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    fontFamily: 'var(--font-mono)',
-                    textAlign: 'right',
-                    padding: 0
-                  }}
-                />
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>%</span>
-              </div>
 
               {calculatedLotSize > 0 && (
                 <button
