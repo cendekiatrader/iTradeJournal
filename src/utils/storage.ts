@@ -18,9 +18,8 @@ export const loadAccounts = (): TradingAccount[] => {
   } catch (err) {
     console.error('Error loading accounts from localStorage:', err);
   }
-  // Default seed on first run
-  saveAccounts(INITIAL_ACCOUNTS);
-  return INITIAL_ACCOUNTS;
+  // If first run, return empty array (let user create their account or explore)
+  return [];
 };
 
 export const saveAccounts = (accounts: TradingAccount[]): void => {
@@ -43,9 +42,8 @@ export const loadTrades = (): Trade[] => {
   } catch (err) {
     console.error('Error loading trades from localStorage:', err);
   }
-  // Default seed on first run
-  saveTrades(INITIAL_TRADES);
-  return INITIAL_TRADES;
+  // Default empty on first run
+  return [];
 };
 
 export const saveTrades = (trades: Trade[]): void => {

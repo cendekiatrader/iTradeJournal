@@ -13,6 +13,7 @@ import { RiskCalculatorView } from './components/calculator/RiskCalculatorView';
 import { TradeFormModal } from './components/journal/TradeFormModal';
 import { TradeDetailModal } from './components/journal/TradeDetailModal';
 import { AccountFormModal } from './components/accounts/AccountFormModal';
+import { OnboardingAccountModal } from './components/accounts/OnboardingAccountModal';
 import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
@@ -122,7 +123,17 @@ const MainApp: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const { deleteTrade, accountsMap } = useJournal();
+  const { deleteTrade, accountsMap, accounts, isLoadingCloud } = useJournal();
+  const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(() => {
+    return localStorage.getItem('itrade_onboarding_dismissed') === 'true';
+  });
+
+  const showOnboarding = Boolean(user && !isLoadingCloud && accounts.length === 0 && !onboardingDismissed);
+
+  const handleDismissOnboarding = () => {
+    setOnboardingDismissed(true);
+    localStorage.setItem('itrade_onboarding_dismissed', 'true');
+  };
 
   const handleToggleSidebar = () => {
     setSidebarCollapsed(prev => {
@@ -266,6 +277,12 @@ const MainApp: React.FC = () => {
           setEditingAccount(null);
         }}
         initialAccount={editingAccount}
+      />
+
+      {/* First-Time User Onboarding Modal */}
+      <OnboardingAccountModal
+        isOpen={showOnboarding}
+        onClose={handleDismissOnboarding}
       />
 
       {/* Reset Password Modal (Triggered by Email Link) */}
