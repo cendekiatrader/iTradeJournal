@@ -292,8 +292,8 @@ const MainApp: React.FC = () => {
       {/* Reset Password Modal (Triggered by Email Link) */}
       <ResetPasswordModal />
 
-      {/* Blurred Auth Lockscreen (Active when not logged in) */}
-      {!user && (
+      {/* Blurred Auth Lockscreen (Active when Supabase is configured and not logged in) */}
+      {!user && import.meta.env.VITE_SUPABASE_URL && (
         <AuthLockScreen 
           onOpenAuth={(mode) => {
             setAuthMode(mode);

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../utils/formatters';
 import { 
+  TrendingUp,
   Plus, 
   ChevronDown, 
   Download, 
@@ -18,7 +19,8 @@ import {
   FileJson,
   Palette,
   Globe,
-  Keyboard
+  Keyboard,
+  Menu
 } from 'lucide-react';
 import { AuthModal, AuthMode } from './auth/AuthModal';
 import { ThemeSelectorModal } from './common/ThemeSelectorModal';
@@ -33,7 +35,8 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   onOpenTradeModal, 
-  onOpenAccountModal 
+  onOpenAccountModal,
+  onOpenMobileMenu 
 }) => {
   const { 
     accounts, 
@@ -176,10 +179,65 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="navbar">
-      {/* Left: Account Selector (Single-Line Compact) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div ref={accountRef} style={{ position: 'relative' }}>
+    <header className="app-navbar" style={{
+      height: '64px',
+      backgroundColor: '#080c1b',
+      borderBottom: '1px solid var(--border-color)',
+      padding: '0 24px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
+      gap: '12px'
+    }}>
+      {/* Left: Brand Logo & Mobile Menu & Account Selector */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            onClick={onOpenMobileMenu}
+            className="mobile-only-btn btn btn-ghost btn-icon btn-sm"
+            title="Open Menu Navigation"
+            style={{
+              padding: '8px',
+              borderRadius: '8px',
+              backgroundColor: '#0d1527',
+              border: '1px solid #1e2c44',
+              color: '#94a3b8',
+              cursor: 'pointer'
+            }}
+          >
+            <Menu size={20} />
+          </button>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '9px',
+            background: 'linear-gradient(135deg, #10b981, #3b82f6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 14px rgba(16, 185, 129, 0.3)',
+            flexShrink: 0
+          }}>
+            <TrendingUp size={20} color="#ffffff" strokeWidth={2.5} />
+          </div>
+          <div className="navbar-logo-text">
+            <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '-0.02em', color: '#f8fafc', whiteSpace: 'nowrap' }}>
+              iTrade<span style={{ color: 'var(--profit-green)' }}>Journal</span>
+            </span>
+          </div>
+        </div>
+
+        <div style={{ width: '1px', height: '24px', backgroundColor: '#1e293b' }} />
+
+        {/* Account Selector (Single-Line Compact) */}
+        <div ref={accountRef} className="navbar-account-switcher" style={{ position: 'relative' }}>
           <button
             onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
             style={{

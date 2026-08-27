@@ -126,8 +126,16 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .finally(() => {
           setIsLoadingCloud(false);
         });
+    } else if (!isSupabaseConfigured()) {
+      // Local demo / standalone mode
+      const localAccs = loadAccounts();
+      const localTrades = loadTrades();
+      const localWds = loadWithdrawals();
+      setAccounts(localAccs.length > 0 ? localAccs : INITIAL_ACCOUNTS);
+      setTrades(localTrades.length > 0 ? localTrades : INITIAL_TRADES);
+      setWithdrawals(localWds.length > 0 ? localWds : INITIAL_WITHDRAWALS);
     } else if (!user) {
-      // If logged out or no user, keep clean state
+      // Supabase configured but logged out
       setAccounts([]);
       setTrades([]);
       setWithdrawals([]);
