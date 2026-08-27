@@ -173,6 +173,25 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 44. **🛡️ Automated Account Risk Shield & Hard Lockout Timer**
     - *Konsep*: Timer countdown lockout otomatis ketika menyentuh Max Daily Loss yang ditentukan sendiri untuk menghentikan siklus *revenge trading*.
 
+### E. Fitur Eksklusif Baru (Gelombang Terkini)
+45. **📴 True Offline-First Sync & Background Auto-Queue**
+    - *Konsep*: Dukungan penuh offline via IndexedDB di browser. Trader dapat mencatat trade dan melampirkan screenshot saat koneksi terputus (misal di pesawat), dan otomatis tersinkronisasi ke Supabase begitu internet kembali terhubung.
+
+46. **⚡ Quick Screenshot Clipboard OCR & Auto-Fill**
+    - *Konsep*: Tekan `Ctrl + V` untuk paste screenshot TradingView/MetaTrader, lalu sistem otomatis membaca teks nama Pair, Timeframe, dan Tanggal dari chart untuk mengisi form secara instan tanpa ketik manual.
+
+47. **🎯 R:R Multiple Efficiency Grader & Early Exit Leak Detector**
+    - *Konsep*: Penilaian otomatis efisiensi eksekusi (Grade A, B, C, F) dengan membandingkan *Planned R:R* vs *Achieved R:R* untuk mendeteksi kebiasaan *cut profit* terlalu dini.
+
+48. **🗂️ Multi-Tag Logic Query Builder (Filter Kombinasi Bebas)**
+    - *Konsep*: Mesin pencarian filter lanjutan dengan logika AND/OR antar tag (contoh: *London Session* + *ICT Silver Bullet* + *Rule Followed = TRUE* + *R:R ≥ 2.5*).
+
+49. **📉 Realized Drawdown vs Maximum Favorable Excursion (MAE / MFE Matrix)**
+    - *Konsep*: Analisis seberapa jauh harga sempat floating minus (*Maximum Adverse Excursion*) dan seberapa jauh harga sempat floating profit (*Maximum Favorable Excursion*) sebelum posisi ditutup untuk mengoptimalkan penempatan Stop Loss dan Take Profit.
+
+50. **🛡️ Dynamic Lot Risk Calculator Shortcut Langsung di Form Input**
+    - *Konsep*: Tombol kalkulator risiko instan di dalam TradeFormModal yang langsung mengkalkulasi lot berdasarkan Stop Loss price dan % resiko saldo saat itu juga.
+
 ---
 
 *Terakhir diperbarui: 27 Agustus 2026*
