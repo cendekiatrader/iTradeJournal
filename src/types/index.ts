@@ -137,6 +137,16 @@ export interface AccountMetrics {
   avgHoldingMinutes: number;
   avgHoldingFormatted: string;
   dailyPnlMap: Record<string, { pnl: number; tradesCount: number; wins: number; losses: number }>;
+  disciplineRate: number; // Percentage (0-100)
+  rulesFollowedCount: number;
+  recoveryFactor: number;
+  longWinRate: number;
+  shortWinRate: number;
+  longTradesCount: number;
+  shortTradesCount: number;
+  totalVolume: number;
+  dailyRunRate: number; // Avg profit per active trading day
+  activeTradingDays: number;
 }
 
 export interface EquityPoint {

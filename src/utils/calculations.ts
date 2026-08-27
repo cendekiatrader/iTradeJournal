@@ -139,6 +139,28 @@ export const calculateAccountMetrics = (
     avgHoldingFormatted = `${mins}m`;
   }
 
+  // 1. Discipline Rate
+  const rulesFollowedCount = closedTrades.filter(t => t.rulesFollowed).length;
+  const disciplineRate = totalTradesCount > 0 ? (rulesFollowedCount / totalTradesCount) * 100 : 0;
+
+  // 2. Recovery Factor
+  const recoveryFactor = maxDrawdown > 0 ? totalPnL / maxDrawdown : totalPnL > 0 ? totalPnL : 0;
+
+  // 3. Long vs Short Edge Bias
+  const longTrades = closedTrades.filter(t => t.direction === 'LONG');
+  const shortTrades = closedTrades.filter(t => t.direction === 'SHORT');
+  const longWins = longTrades.filter(t => t.status === 'WIN').length;
+  const shortWins = shortTrades.filter(t => t.status === 'WIN').length;
+  const longWinRate = longTrades.length > 0 ? (longWins / longTrades.length) * 100 : 0;
+  const shortWinRate = shortTrades.length > 0 ? (shortWins / shortTrades.length) * 100 : 0;
+
+  // 4. Total Traded Volume (Lots / Units)
+  const totalVolume = closedTrades.reduce((acc, t) => acc + (t.quantity || 0), 0);
+
+  // 5. Daily Run Rate (Avg PnL per active trading day)
+  const activeTradingDays = Object.keys(dailyPnlMap).length;
+  const dailyRunRate = activeTradingDays > 0 ? totalPnL / activeTradingDays : 0;
+
   return {
     totalTrades: totalTradesCount,
     winningTrades: winningTrades.length,
@@ -165,7 +187,17 @@ export const calculateAccountMetrics = (
     currentStreak,
     avgHoldingMinutes,
     avgHoldingFormatted,
-    dailyPnlMap
+    dailyPnlMap,
+    disciplineRate,
+    rulesFollowedCount,
+    recoveryFactor,
+    longWinRate,
+    shortWinRate,
+    longTradesCount: longTrades.length,
+    shortTradesCount: shortTrades.length,
+    totalVolume,
+    dailyRunRate,
+    activeTradingDays
   };
 };
 

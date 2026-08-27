@@ -16,7 +16,13 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Clock,
-  Sparkles
+  Sparkles,
+  CheckCircle2,
+  ShieldAlert,
+  Zap,
+  Compass,
+  Layers,
+  Calendar
 } from 'lucide-react';
 import { Trade } from '../../types';
 
@@ -138,6 +144,58 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           icon={Flame}
           iconColor="#ec4899"
           iconBg="rgba(236, 72, 153, 0.12)"
+        />
+
+        <StatCard
+          title="Trade Discipline Rate"
+          value={`${metrics.disciplineRate.toFixed(1)}%`}
+          subValue={`${metrics.rulesFollowedCount}/${metrics.totalTrades} Rules Followed`}
+          subValueType={metrics.disciplineRate >= 80 ? 'positive' : metrics.disciplineRate >= 50 ? 'neutral' : 'negative'}
+          icon={CheckCircle2}
+          iconColor="#10b981"
+          iconBg="rgba(16, 185, 129, 0.12)"
+          progress={metrics.disciplineRate}
+          progressColor={metrics.disciplineRate >= 80 ? '#10b981' : '#f59e0b'}
+        />
+
+        <StatCard
+          title="Recovery Factor"
+          value={`${metrics.recoveryFactor > 99 ? '99.0+' : metrics.recoveryFactor.toFixed(2)}x`}
+          subValue={metrics.recoveryFactor >= 2 ? 'Excellent Resilience' : 'Moderate Resilience'}
+          subValueType={metrics.recoveryFactor >= 2 ? 'positive' : 'neutral'}
+          icon={Zap}
+          iconColor="#f59e0b"
+          iconBg="rgba(245, 158, 11, 0.12)"
+        />
+
+        <StatCard
+          title="Long vs Short Bias"
+          value={`L ${metrics.longWinRate.toFixed(0)}% | S ${metrics.shortWinRate.toFixed(0)}%`}
+          subValue={`${metrics.longTradesCount} Longs / ${metrics.shortTradesCount} Shorts`}
+          subValueType={metrics.longWinRate >= 50 && metrics.shortWinRate >= 50 ? 'positive' : 'accent'}
+          icon={Compass}
+          iconColor="#60a5fa"
+          iconBg="rgba(96, 165, 250, 0.12)"
+        />
+
+        <StatCard
+          title="Total Traded Volume"
+          value={`${metrics.totalVolume >= 100 ? metrics.totalVolume.toFixed(1) : metrics.totalVolume.toFixed(2)}`}
+          subValue="Lots / Contracts / Units"
+          subValueType="accent"
+          icon={Layers}
+          iconColor="#a855f7"
+          iconBg="rgba(168, 85, 247, 0.12)"
+        />
+
+        <StatCard
+          title="Daily Run Rate"
+          value={`${metrics.dailyRunRate >= 0 ? '+' : ''}${formatCurrency(metrics.dailyRunRate, currentCurrency)}`}
+          subValue={`Across ${metrics.activeTradingDays} active days`}
+          subValueType={metrics.dailyRunRate >= 0 ? 'positive' : 'negative'}
+          icon={Calendar}
+          iconColor="#14b8a6"
+          iconBg="rgba(20, 184, 166, 0.12)"
         />
       </div>
 
