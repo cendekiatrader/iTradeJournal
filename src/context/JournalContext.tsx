@@ -13,9 +13,10 @@ import {
   loadTrades, 
   saveTrades, 
   loadWithdrawals, 
-  saveWithdrawals, 
-  loadActiveAccountId, 
-  saveActiveAccountId 
+  saveWithdrawals,
+  loadActiveAccountId,
+  saveActiveAccountId,
+  clearAllStorage
 } from '../utils/storage';
 import { 
   isSupabaseConfigured, 
@@ -30,6 +31,7 @@ import {
   syncWithdrawalToCloud, 
   deleteWithdrawalFromCloud 
 } from '../utils/supabase';
+import { useAuth } from './AuthContext';
 import { calculateAccountMetrics, generateEquityCurve } from '../utils/calculations';
 import { INITIAL_ACCOUNTS, INITIAL_TRADES, INITIAL_WITHDRAWALS } from '../data/seedData';
 import confetti from 'canvas-confetti';
@@ -91,6 +93,7 @@ const defaultFilter: TradeFilter = {
 const JournalContext = createContext<JournalContextType | undefined>(undefined);
 
 export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [accounts, setAccounts] = useState<TradingAccount[]>(() => loadAccounts());
   const [trades, setTrades] = useState<Trade[]>(() => loadTrades());
   const [withdrawals, setWithdrawals] = useState<WithdrawalRecord[]>(() => loadWithdrawals());
@@ -100,24 +103,21 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isCloudSync, setIsCloudSync] = useState<boolean>(false);
   const [isLoadingCloud, setIsLoadingCloud] = useState<boolean>(false);
 
-  // Sync with Supabase on mount if configured
+  // Sync with Supabase on mount or user change if configured
   useEffect(() => {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured() && user) {
       setIsLoadingCloud(true);
       Promise.all([fetchCloudAccounts(), fetchCloudTrades(), fetchCloudWithdrawals()])
         .then(([cloudAccounts, cloudTrades, cloudWithdrawals]) => {
-          if (cloudAccounts && cloudAccounts.length > 0) {
-            setAccounts(cloudAccounts);
-            saveAccounts(cloudAccounts);
-          }
-          if (cloudTrades) {
-            setTrades(cloudTrades);
-            saveTrades(cloudTrades);
-          }
-          if (cloudWithdrawals) {
-            setWithdrawals(cloudWithdrawals);
-            saveWithdrawals(cloudWithdrawals);
-          }
+          setAccounts(cloudAccounts || []);
+          saveAccounts(cloudAccounts || []);
+
+          setTrades(cloudTrades || []);
+          saveTrades(cloudTrades || []);
+
+          setWithdrawals(cloudWithdrawals || []);
+          saveWithdrawals(cloudWithdrawals || []);
+
           setIsCloudSync(true);
         })
         .catch(err => {
@@ -126,8 +126,13 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .finally(() => {
           setIsLoadingCloud(false);
         });
+    } else if (!user) {
+      // If logged out or no user, keep clean state
+      setAccounts([]);
+      setTrades([]);
+      setWithdrawals([]);
     }
-  }, []);
+  }, [user]);
 
   // Save changes to localStorage as fallback & cache
   useEffect(() => {

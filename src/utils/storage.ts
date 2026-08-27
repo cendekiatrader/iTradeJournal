@@ -85,6 +85,7 @@ export const clearAllStorage = (): void => {
     localStorage.removeItem(TRADES_STORAGE_KEY);
     localStorage.removeItem(WITHDRAWALS_STORAGE_KEY);
     localStorage.removeItem(ACTIVE_ACCOUNT_KEY);
+    localStorage.removeItem('itrade_onboarding_dismissed');
   } catch (err) {
     console.error('Error clearing localStorage:', err);
   }
