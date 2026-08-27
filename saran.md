@@ -154,6 +154,25 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 38. **📚 Trading Playbook & Best Setups Catalog (Katalog Setup A+)**
     - *Konsep*: Folder khusus arsip trade terbaik (*Best Trades of the Month*) dengan rating bintang (⭐⭐⭐⭐⭐) sebagai panduan *cheat sheet*.
 
+### D. Fitur Baru Inovatif & Advanced Pro (Next Level)
+39. **🎙️ Voice Memo & Audio Post-Trade Review (Catatan Suara Kilat)**
+    - *Konsep*: Fitur rekam suara (audio memo) langsung di browser saat review trade tanpa perlu repot mengetik panjang setelah sesi trading yang melelahkan.
+
+40. **📊 3-Stage Multi-Timeframe Chart Flow (HTF ➔ MTF ➔ LTF Carousel)**
+    - *Konsep*: Carousel upload 3 tingkat gambar analisa dalam 1 trade: *Higher Timeframe Narrative (Daily/4H)* ➔ *Medium Timeframe Setup (15m)* ➔ *Lower Timeframe Trigger (1m/5m)*.
+
+41. **🧪 Backtest vs Live "Execution Gap" Simulator**
+    - *Konsep*: Memisahkan kurva data Backtesting vs Live Trading pada strategi yang sama untuk mengukur perbedaan (*Execution Gap*) antara teori strategi vs disiplin nyata.
+
+42. **🛡️ Prop Firm Trailing Drawdown High-Water Mark Engine**
+    - *Konsep*: Kalkulasi cerdas untuk aturan prop firm berbasis *Trailing Drawdown EOD / Intra-day (Apex, Topstep, FundedNext)* yang batas risikonya naik mengunci di saldo tertinggi.
+
+43. **🔥 Heatmap Matrix Sesi Trading x Pair (Pair Session Volatility Matcher)**
+    - *Konsep*: Matriks analitik yang menunjukkan pair mana yang paling menguntungkan di sesi tertentu (misal: *GBPJPY di London Open* vs *XAUUSD di NY AM*).
+
+44. **🛡️ Automated Account Risk Shield & Hard Lockout Timer**
+    - *Konsep*: Timer countdown lockout otomatis ketika menyentuh Max Daily Loss yang ditentukan sendiri untuk menghentikan siklus *revenge trading*.
+
 ---
 
 *Terakhir diperbarui: 27 Agustus 2026*
