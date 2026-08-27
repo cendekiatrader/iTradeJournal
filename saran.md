@@ -254,6 +254,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 68. **🛡️ Smart Compounding Withdrawal Planner (Rencana Penarikan Cerdas)**
     - *Konsep*: Simulasi penarikan profit berkala (misal: 50% profit tiap akhir bulan) vs full compounding, menunjukkan dampak jangka panjang terhadap pertumbuhan saldo dan *Time to Financial Freedom*.
 
+### H. Saran Fitur Baru & Inovasi Tingkat Lanjut (Batch 69 - 74)
+
+69. **📊 Equity Curve Benchmark Overlay (Bandingkan Kurva vs S&P 500 / Gold)**
+    - *Konsep*: Garis komparasi di grafik ekuitas untuk membandingkan % return performa akun Anda terhadap return instrumen global utama (*S&P 500, Bitcoin, Emas/XAUUSD*) dalam periode yang sama (Alpha vs Beta).
+
+70. **🎯 Strategy Winrate vs Risk Degradation Alert (Alarm Penurunan Edge SOP)**
+    - *Konsep*: Notifikasi otomatis jika salah satu SOP mengalami penurunan winrate lebih dari 15% dalam 15 trade terakhir, memberi saran untuk merevisi checklist atau jeda memakai setup tersebut.
+
+71. **🛡️ Daily Max Loss Limit Indicator (Visual Shield di Header)**
+    - *Konsep*: Bar meter pengaman di navbar atas yang menunjukkan sisa kapasitas rugi hari ini (misal: Sisa Risk Hari Ini: \$300 / 3%) yang otomatis berubah merah jika mendekati batas maksimal.
+
+72. **📑 1-Click Interactive Social Media Trade Card Exporter (Story & Feed Card)**
+    - *Konsep*: Generator gambar kartu grafis siap post beresolusi tinggi (format 1:1 Feed Instagram atau 9:16 Story/Reels) lengkap dengan detail setup, chart Before/After, PnL, dan R:R dalam desain luxury dark-mode.
+
+73. **⏱️ Session Liquidity Overlap Edge Analyzer (Edge Sesi London-NY Overlap)**
+    - *Konsep*: Analisis statistik mendalam performa trading yang dieksekusi tepat pada masa tumpang tindih likuiditas tinggi (*London-NY Overlap 19:00 - 22:00 WIB*) vs sesi tunggal biasa.
+
+74. **🧠 Post-Trade Regret & Execution Deviation Meter**
+    - *Konsep*: Slider penilaian subjektif pasca-trade (*Plan Executed Perfectly vs Exited Early / Moved SL*) untuk melacak pola perilaku psikologis yang menyebabkan kehilangan potensi profit.
+
 ---
 
-*Terakhir diperbarui: 27 Agustus 2026*
+*Terakhir diperbarui: 28 Agustus 2026*
