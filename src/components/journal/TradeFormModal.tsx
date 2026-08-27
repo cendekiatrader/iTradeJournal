@@ -21,7 +21,10 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   Clock,
-  Calendar
+  Calendar,
+  Calculator,
+  Zap,
+  Target
 } from 'lucide-react';
 import { formatDateTimeDDMMYYYY, formatDuration } from '../../utils/formatters';
 import { RichTextEditor } from '../common/RichTextEditor';
@@ -109,6 +112,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   const [lessons, setLessons] = useState('');
   const [screenshotBefore, setScreenshotBefore] = useState('');
   const [screenshotAfter, setScreenshotAfter] = useState('');
+  const [riskPercentPreset, setRiskPercentPreset] = useState<number>(1.0);
+  const [showQuickSizer, setShowQuickSizer] = useState<boolean>(false);
 
   useEffect(() => {
     if (initialTrade) {
@@ -143,7 +148,44 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
     }
   }, [initialTrade, activeAccountId, accounts, isOpen]);
 
-  // Auto calculate R:R
+  // Auto calculate Quick Lot & Risk Size
+  const currentAccount = accounts.find(a => a.id === accountId) || accounts[0];
+  const currentAccBalance = currentAccount?.currentBalance || currentAccount?.initialBalance || 10000;
+  
+  const calculatedRiskAmount = (currentAccBalance * riskPercentPreset) / 100;
+  const priceDistance = Math.abs(entryPrice - stopLoss);
+
+  const calculatedLotSize = React.useMemo(() => {
+    if (!priceDistance || priceDistance <= 0) return 0;
+    if (assetClass === 'Commodities') {
+      // Gold / Oil ($1 move = $100 per 1 standard lot)
+      return calculatedRiskAmount / (priceDistance * 100);
+    } else if (assetClass === 'Forex') {
+      // 1 pip = 0.0001 ($10 per standard lot) or JPY 0.01
+      const isJpy = symbol.includes('JPY');
+      const pipValue = isJpy ? 0.01 : 0.0001;
+      const pipsCount = priceDistance / pipValue;
+      return calculatedRiskAmount / (pipsCount * 10);
+    } else if (assetClass === 'Crypto') {
+      // Direct spot/contract units
+      return calculatedRiskAmount / priceDistance;
+    } else if (assetClass === 'Indices') {
+      // US30/NAS100: $5 per contract pt approx
+      return calculatedRiskAmount / (priceDistance * 5);
+    }
+    return calculatedRiskAmount / (priceDistance * 100);
+  }, [calculatedRiskAmount, priceDistance, assetClass, symbol]);
+
+  const applyAutoLot = () => {
+    if (calculatedLotSize > 0) {
+      const formatted = assetClass === 'Crypto' 
+        ? (calculatedLotSize >= 10 ? Number(calculatedLotSize.toFixed(2)) : Number(calculatedLotSize.toFixed(4))) 
+        : Number(calculatedLotSize.toFixed(2));
+      setQuantity(formatted);
+      showToast(`Lot size diset ke ${formatted} (${riskPercentPreset}% risk = $${calculatedRiskAmount.toFixed(2)})`, 'success');
+    }
+  };
+
   const plannedRR = React.useMemo(() => {
     if (!entryPrice || !stopLoss || !takeProfit) return 0;
     const risk = Math.abs(entryPrice - stopLoss);
@@ -455,6 +497,86 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   required={status !== 'OPEN'}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Quick Lot & Risk Auto-Sizer Trigger Bar */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 14px',
+            borderRadius: '10px',
+            backgroundColor: '#0a1224',
+            border: '1px solid #1e2c48',
+            marginBottom: '14px',
+            flexWrap: 'wrap',
+            gap: '8px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '26px',
+                height: '26px',
+                borderRadius: '6px',
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#60a5fa'
+              }}>
+                <Calculator size={15} />
+              </div>
+              <div>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f8fafc' }}>
+                  Risk & Position Auto-Sizer
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>
+                  Saldo: ${currentAccBalance.toLocaleString()} • Risiko: ${calculatedRiskAmount.toFixed(2)} ({riskPercentPreset}%)
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {/* Presets 0.5%, 1.0%, 2.0% */}
+              {[0.5, 1.0, 2.0].map((pct) => (
+                <button
+                  type="button"
+                  key={pct}
+                  onClick={() => setRiskPercentPreset(pct)}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    borderRadius: '6px',
+                    backgroundColor: riskPercentPreset === pct ? '#2563eb' : '#0c152a',
+                    border: riskPercentPreset === pct ? '1px solid #3b82f6' : '1px solid #1c273e',
+                    color: riskPercentPreset === pct ? '#ffffff' : '#94a3b8',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {pct}%
+                </button>
+              ))}
+
+              {calculatedLotSize > 0 && (
+                <button
+                  type="button"
+                  onClick={applyAutoLot}
+                  className="btn btn-sm"
+                  style={{
+                    padding: '5px 12px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    backgroundColor: 'rgba(16, 185, 129, 0.18)',
+                    borderColor: 'rgba(16, 185, 129, 0.4)',
+                    color: 'var(--profit-green)',
+                    gap: '4px'
+                  }}
+                >
+                  <Zap size={13} />
+                  <span>Set {calculatedLotSize > 0 ? (assetClass === 'Crypto' ? (calculatedLotSize >= 10 ? calculatedLotSize.toFixed(2) : calculatedLotSize.toFixed(4)) : calculatedLotSize.toFixed(2)) : '0.00'} Lot</span>
+                </button>
+              )}
             </div>
           </div>
 

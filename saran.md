@@ -26,6 +26,8 @@ Dokumen ini mencatat seluruh daftar saran fitur, inovasi, dan roadmap pengembang
 | 16 | **Multi-Account & Multi-Asset Support** | 🟢 **SELESAI** | Dukungan multi-akun (Live, Prop Firm, Challenge), sistem withdrawal terpisah, serta satuan Lot (Forex/Gold), Unit (Crypto), dan Kontrak (Indeks). |
 | 17 | **Interactive Calendar Heatmap** | 🟢 **SELESAI** | Tampilan kalender harian dengan kalkulasi RRR dan PnL harian serta detail trade popup. |
 | 18 | **CSV Exporter** | 🟢 **SELESAI** | Kemampuan ekspor seluruh data trade dan metrik ke format CSV dalam 1-klik. |
+| 19 | **Quick Lot & Risk Auto-Sizer Terintegrasi di Form Input** | 🟢 **SELESAI** | Auto-kalkulator lot size instan langsung di dalam modal input trade berdasarkan jarak Entry/SL, saldo akun, dan persentase risiko (0.5%, 1%, 2%). |
+
 
 ---
 
