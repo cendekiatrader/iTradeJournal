@@ -19,6 +19,7 @@ import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
 import { EconomicCalendarView } from './components/news/EconomicCalendarView';
+import { PlaybookView } from './components/playbook/PlaybookView';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
@@ -97,6 +98,9 @@ const MainApp: React.FC = () => {
       } else if (e.key === 'j' || e.key === 'J') {
         e.preventDefault();
         setActiveTab('journal');
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        setActiveTab('playbook');
       } else if (e.key === 'a' || e.key === 'A') {
         e.preventDefault();
         setActiveTab('analytics');
@@ -231,6 +235,10 @@ const MainApp: React.FC = () => {
 
           {activeTab === 'analytics' && (
             <AnalyticsView />
+          )}
+
+          {activeTab === 'playbook' && (
+            <PlaybookView />
           )}
 
           {activeTab === 'news' && (

@@ -5,7 +5,8 @@ import {
   TradeFilter, 
   AccountMetrics, 
   EquityPoint, 
-  WithdrawalRecord 
+  WithdrawalRecord,
+  PlaybookModel
 } from '../types';
 import { 
   loadAccounts, 
@@ -14,6 +15,8 @@ import {
   saveTrades, 
   loadWithdrawals, 
   saveWithdrawals,
+  loadPlaybooks,
+  savePlaybooks,
   loadActiveAccountId,
   saveActiveAccountId,
   clearAllStorage
@@ -47,6 +50,7 @@ interface JournalContextType {
   accounts: TradingAccount[];
   trades: Trade[];
   withdrawals: WithdrawalRecord[];
+  playbooks: PlaybookModel[];
   activeAccountId: string;
   activeAccount: TradingAccount | null;
   accountsMap: Record<string, TradingAccount>;
@@ -66,6 +70,9 @@ interface JournalContextType {
   bulkDeleteTrades: (ids: string[]) => void;
   addWithdrawal: (withdrawal: Omit<WithdrawalRecord, 'id' | 'createdAt'>) => void;
   deleteWithdrawal: (id: string) => void;
+  addPlaybook: (playbook: Omit<PlaybookModel, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updatePlaybook: (id: string, updates: Partial<PlaybookModel>) => void;
+  deletePlaybook: (id: string) => void;
   importData: (jsonData: any) => boolean;
   resetAllData: () => void;
   resetToDemoData?: () => void;
@@ -100,6 +107,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [accounts, setAccounts] = useState<TradingAccount[]>(() => loadAccounts());
   const [trades, setTrades] = useState<Trade[]>(() => loadTrades());
   const [withdrawals, setWithdrawals] = useState<WithdrawalRecord[]>(() => loadWithdrawals());
+  const [playbooks, setPlaybooks] = useState<PlaybookModel[]>(() => loadPlaybooks());
   const [activeAccountId, setActiveAccountIdState] = useState<string>(() => loadActiveAccountId());
   const [filters, setFiltersState] = useState<TradeFilter>(defaultFilter);
   const [toast, setToast] = useState<ToastState>({ message: '', type: 'info', visible: false });
@@ -505,6 +513,41 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     showToast('Withdrawal record removed.', 'info');
   };
 
+  // Playbook CRUD Actions
+  const addPlaybook = (pbData: Omit<PlaybookModel, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const now = new Date().toISOString();
+    const newPb: PlaybookModel = {
+      ...pbData,
+      id: `pb-${Date.now()}`,
+      createdAt: now,
+      updatedAt: now
+    };
+    setPlaybooks(prev => {
+      const updated = [newPb, ...prev];
+      savePlaybooks(updated);
+      return updated;
+    });
+    showToast(`Setup playbook "${newPb.title}" berhasil disimpan!`, 'success');
+  };
+
+  const updatePlaybook = (id: string, updates: Partial<PlaybookModel>) => {
+    setPlaybooks(prev => {
+      const updated = prev.map(pb => pb.id === id ? { ...pb, ...updates, updatedAt: new Date().toISOString() } : pb);
+      savePlaybooks(updated);
+      return updated;
+    });
+    showToast('Playbook SOP diperbarui.', 'success');
+  };
+
+  const deletePlaybook = (id: string) => {
+    setPlaybooks(prev => {
+      const updated = prev.filter(pb => pb.id !== id);
+      savePlaybooks(updated);
+      return updated;
+    });
+    showToast('Playbook SOP dihapus.', 'info');
+  };
+
   // Backup & Import
   const importData = (jsonData: any) => {
     try {
@@ -577,6 +620,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         accounts,
         trades,
         withdrawals,
+        playbooks,
         activeAccountId,
         activeAccount,
         accountsMap,
@@ -596,6 +640,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         bulkDeleteTrades,
         addWithdrawal,
         deleteWithdrawal,
+        addPlaybook,
+        updatePlaybook,
+        deletePlaybook,
         importData,
         resetAllData,
         resetToDemoData,

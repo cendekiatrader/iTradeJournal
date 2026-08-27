@@ -162,6 +162,24 @@ export interface EquityPoint {
   drawdown: number;
 }
 
+export interface PlaybookModel {
+  id: string;
+  title: string;
+  category: StrategyType | string;
+  timeframe: string;
+  winrateTarget?: number;
+  rrTarget?: number;
+  description: string;
+  rules: string[];
+  confluences: string[];
+  mistakesToAvoid?: string[];
+  chartBeforeUrl?: string;
+  chartAfterUrl?: string;
+  rating?: number; // 1-5 stars
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface UserProfile {
   id: string;
   username: string;
