@@ -334,6 +334,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 92. **⏱️ Pre-Trade Risk Confirmation Modal (Zero-Impulse Gatekeeper)**
     - *Konsep*: Pop-up konfirmasi ringkas 3 detik sebelum menyimpan trade yang menampilkan: total risiko (\$ & %), jarak Stop Loss, dan checklist rencana untuk memastikan tidak ada trade impulsif.
 
+### L. Saran Fitur Baru & Inovasi Tingkat Lanjut (Batch 93 - 98)
+
+93. **🌐 Multi-Broker API Sync & Realtime Account Bridge (MT4/MT5/cTrader Webhook)**
+    - *Konsep*: Endpoint Webhook internal untuk menerima eksekusi trade secara real-time langsung dari Expert Advisor (EA) MetaTrader 4/5 atau cTrader, sehingga journal terisi 100% otomatis tanpa input manual.
+
+94. **🎯 Capital Preservation Multiplier & Dynamic Risk Scaling (Anti-Martingale)**
+    - *Konsep*: Model manajemen risiko dinamis yang otomatis menyarankan penurunan persentase risiko (misal dari 1% menjadi 0.5%) saat mengalami 2 loss beruntun untuk melindungi ekuitas modal.
+
+95. **📊 Benchmark vs Institutional Hedge Fund Indices (HFRX / BarclayHedge)**
+    - *Konsep*: Grafik komparasi performa rasio Sharpe, Sortino, dan Max Drawdown trader terhadap indeks rata-rata Hedge Fund global terakreditasi.
+
+96. **🏷️ Setup Quality Star Rating System (⭐⭐⭐⭐⭐ A+ Setup Classifier)**
+    - *Konsep*: Penilaian bintang 1-5 pada setiap trade yang dicatat untuk menyaring trade kategori *A+ Setup* (skor 5 bintang) dan membandingkan performanya dengan setup biasa.
+
+97. **📉 Rolling Profit Factor & Volatility Curve (Window 20 Trade)**
+    - *Konsep*: Grafik garis yang melacak pergerakan Profit Factor setiap 20 trade terakhir untuk mendeteksi apakah keunggulan (*edge*) strategi sedang menguat atau melemah.
+
+98. **📑 Executive Dark-Mode Investor Presentation Deck Generator (HTML5 / Slide Format)**
+    - *Konsep*: Generator slide presentasi portofolio interaktif berbasis web (HTML5) siap tayang untuk pitching ke investor modal atau mitra prop trading.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
