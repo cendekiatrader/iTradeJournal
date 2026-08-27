@@ -24,12 +24,10 @@ import {
   Calendar,
   Calculator,
   Zap,
-  Target,
-  PenTool
+  Target
 } from 'lucide-react';
 import { formatDateTimeDDMMYYYY, formatDuration } from '../../utils/formatters';
 import { RichTextEditor } from '../common/RichTextEditor';
-import { ScreenshotAnnotator } from './ScreenshotAnnotator';
 
 interface TradeFormModalProps {
   isOpen: boolean;
@@ -116,7 +114,6 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   const [screenshotAfter, setScreenshotAfter] = useState('');
   const [riskPercentPreset, setRiskPercentPreset] = useState<number>(1.0);
   const [showQuickSizer, setShowQuickSizer] = useState<boolean>(false);
-  const [annotatorOpen, setAnnotatorOpen] = useState<'before' | 'after' | null>(null);
 
   useEffect(() => {
     if (initialTrade) {
@@ -830,26 +827,14 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#93c5fd', display: 'block', marginBottom: '4px' }}>
                   1. Before (Setup / Plan Chart)
                 </span>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <input
-                    type="text"
-                    value={screenshotBefore}
-                    onChange={(e) => setScreenshotBefore(e.target.value)}
-                    placeholder="https://www.tradingview.com/x/... (Before)"
-                    className="input-control font-mono"
-                    style={{ flex: 1, fontSize: '0.78rem' }}
-                  />
-                  {screenshotBefore && (
-                    <button
-                      type="button"
-                      onClick={() => setAnnotatorOpen('before')}
-                      className="btn btn-secondary btn-sm"
-                      style={{ padding: '6px 10px', fontSize: '0.72rem', whiteSpace: 'nowrap' }}
-                    >
-                      <PenTool size={14} /> Annotate
-                    </button>
-                  )}
-                </div>
+                <input
+                  type="text"
+                  value={screenshotBefore}
+                  onChange={(e) => setScreenshotBefore(e.target.value)}
+                  placeholder="https://www.tradingview.com/x/... (Before)"
+                  className="input-control font-mono"
+                  style={{ width: '100%', fontSize: '0.78rem' }}
+                />
               </div>
 
               {/* After Screenshot */}
@@ -857,26 +842,14 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#34d399', display: 'block', marginBottom: '4px' }}>
                   2. After (Execution / Outcome Chart)
                 </span>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <input
-                    type="text"
-                    value={screenshotAfter}
-                    onChange={(e) => setScreenshotAfter(e.target.value)}
-                    placeholder="https://www.tradingview.com/x/... (After)"
-                    className="input-control font-mono"
-                    style={{ flex: 1, fontSize: '0.78rem' }}
-                  />
-                  {screenshotAfter && (
-                    <button
-                      type="button"
-                      onClick={() => setAnnotatorOpen('after')}
-                      className="btn btn-secondary btn-sm"
-                      style={{ padding: '6px 10px', fontSize: '0.72rem', whiteSpace: 'nowrap' }}
-                    >
-                      <PenTool size={14} /> Annotate
-                    </button>
-                  )}
-                </div>
+                <input
+                  type="text"
+                  value={screenshotAfter}
+                  onChange={(e) => setScreenshotAfter(e.target.value)}
+                  placeholder="https://www.tradingview.com/x/... (After)"
+                  className="input-control font-mono"
+                  style={{ width: '100%', fontSize: '0.78rem' }}
+                />
               </div>
             </div>
           </div>
@@ -922,22 +895,6 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
           </div>
         </form>
       </div>
-
-      {/* Screenshot Annotator Modal */}
-      {annotatorOpen && (
-        <ScreenshotAnnotator
-          imageUrl={annotatorOpen === 'before' ? screenshotBefore : screenshotAfter}
-          onSave={(annotatedDataUrl) => {
-            if (annotatorOpen === 'before') {
-              setScreenshotBefore(annotatedDataUrl);
-            } else {
-              setScreenshotAfter(annotatedDataUrl);
-            }
-            setAnnotatorOpen(null);
-          }}
-          onClose={() => setAnnotatorOpen(null)}
-        />
-      )}
     </div>
   );
 };
