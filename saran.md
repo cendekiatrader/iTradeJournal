@@ -274,6 +274,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 74. **🧠 Post-Trade Regret & Execution Deviation Meter**
     - *Konsep*: Slider penilaian subjektif pasca-trade (*Plan Executed Perfectly vs Exited Early / Moved SL*) untuk melacak pola perilaku psikologis yang menyebabkan kehilangan potensi profit.
 
+### I. Saran Fitur Baru & Inovasi Tingkat Lanjut (Batch 75 - 80)
+
+75. **🌡️ Real-Time Account Temperature & Tilt Meter**
+    - *Konsep*: Indikator meteran kondisi psikologi akun (skor 0-100: *Zen Mode*, *Normal*, *Mild Overtrading*, *Extreme Tilt Warning*) berdasarkan kecepatan buka posisi beruntun, kenaikan lot mendadak, dan frekuensi trade pasca-loss.
+
+76. **⚡ 1-Click Duplicate Setup Logger (Kloning Trade Cepat)**
+    - *Konsep*: Tombol duplikasi instan di tabel jurnal untuk membuat trade baru dengan Pair, Timeframe, Setup, dan Session yang sama tanpa perlu mengisi ulang dari nol saat scale-in.
+
+77. **📊 Target Milestone Countdown & Forecast Widget (Hitung Mundur Target Saldo)**
+    - *Konsep*: Widget kartu pencapaian target saldo (misal: Menuju \$25.000 / Phase 1 Funded Target: 68% selesai) lengkap dengan estimasi sisa trade yang dibutuhkan berdasarkan *Average Expectancy* saat ini.
+
+78. **📉 Drawdown Duration & Underwater Time Matrix**
+    - *Konsep*: Analisis statistik berapa lama akun rata-rata berada di zona floating minus / *underwater* sebelum menembus rekor saldo tertinggi baru (*New High-Water Mark*).
+
+79. **🔒 Auto-Lockout Weekend Trading Discipline Mode**
+    - *Konsep*: Sakelar pengunci jurnal di akhir pekan (Sabtu-Minggu) untuk membantu trader melepaskan pikiran dari chart (*Detox & Recharge*) dan mencegah trade impulsif di aset OTC/kripto tanpa setup matang.
+
+80. **📑 Multi-Account Aggregated Growth Comparison (Visual Overlay 3 Akun)**
+    - *Konsep*: Grafik overlay membandingkan kurva pertumbuhan hingga 3 akun sekaligus (misal: Akun Personal vs Akun MFF vs Akun FTMO) dalam 1 kanvas untuk melihat konsistensi eksekusi antar akun.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
