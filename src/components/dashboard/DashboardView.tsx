@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { StatCard } from '../common/StatCard';
 import { EquityChart } from '../common/EquityChart';
@@ -22,7 +22,11 @@ import {
   Zap,
   Compass,
   Layers,
-  Calendar
+  Calendar,
+  SlidersHorizontal,
+  X,
+  RotateCcw,
+  Check
 } from 'lucide-react';
 import { Trade } from '../../types';
 
@@ -33,6 +37,36 @@ interface DashboardViewProps {
   onNavigateToNews?: () => void;
 }
 
+const DEFAULT_CARD_VISIBILITY: Record<string, boolean> = {
+  netPnl: true,
+  winRate: true,
+  profitFactor: true,
+  avgRR: true,
+  maxDrawdown: true,
+  recoveryFactor: true,
+  disciplineRate: true,
+  dailyRunRate: true,
+  currentStreak: true,
+  longShortBias: true,
+  avgHolding: true,
+  totalVolume: true,
+};
+
+const CARD_CONFIG: { id: string; label: string; category: string }[] = [
+  { id: 'netPnl', label: 'Net Cumulative PnL', category: 'Core Profitability' },
+  { id: 'winRate', label: 'Win Rate', category: 'Core Profitability' },
+  { id: 'profitFactor', label: 'Profit Factor', category: 'Core Profitability' },
+  { id: 'avgRR', label: 'Average Realized R:R', category: 'Core Profitability' },
+  { id: 'maxDrawdown', label: 'Max Drawdown', category: 'Risk Management' },
+  { id: 'recoveryFactor', label: 'Recovery Factor', category: 'Risk Management' },
+  { id: 'disciplineRate', label: 'Trade Discipline Rate', category: 'Risk Management' },
+  { id: 'dailyRunRate', label: 'Daily Run Rate', category: 'Risk Management' },
+  { id: 'currentStreak', label: 'Current Streak', category: 'Execution Habits' },
+  { id: 'longShortBias', label: 'Long vs Short Bias', category: 'Execution Habits' },
+  { id: 'avgHolding', label: 'Avg Holding Period', category: 'Execution Habits' },
+  { id: 'totalVolume', label: 'Total Traded Volume', category: 'Execution Habits' },
+];
+
 export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenTradeModal,
   onViewTradeDetail,
@@ -42,14 +76,52 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap } = useJournal();
   const currentCurrency = activeAccount?.currency || 'USD';
 
+  const [visibleCards, setVisibleCards] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('itrade_dashboard_cards');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_CARD_VISIBILITY;
+  });
+
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('itrade_dashboard_cards', JSON.stringify(visibleCards));
+    } catch (e) {
+      // ignore
+    }
+  }, [visibleCards]);
+
+  const toggleCard = (id: string) => {
+    setVisibleCards(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const handleSelectAll = () => {
+    const allTrue = CARD_CONFIG.reduce((acc, c) => ({ ...acc, [c.id]: true }), {});
+    setVisibleCards(allTrue);
+  };
+
+  const handleReset = () => {
+    setVisibleCards(DEFAULT_CARD_VISIBILITY);
+  };
+
   const recentTrades = [...filteredTrades]
     .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
     .slice(0, 6);
 
+  const activeCount = Object.values(visibleCards).filter(Boolean).length;
+
   return (
     <div>
       {/* Top Welcome & Summary Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
             Performance Dashboard
@@ -59,8 +131,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={onOpenTradeModal} className="btn btn-primary">
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={() => setShowCustomizeModal(true)}
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', fontSize: '0.8rem' }}
+            title="Pilih kartu metrik yang ingin ditampilkan atau disembunyikan"
+          >
+            <SlidersHorizontal size={15} />
+            <span>Customize Cards ({activeCount}/12)</span>
+          </button>
+
+          <button onClick={onOpenTradeModal} className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
             + Log New Trade
           </button>
         </div>
@@ -75,131 +158,155 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Key Metric Stats Grid */}
       <div className="grid-stats">
         {/* Row 1: Core Profitability & Edge */}
-        <StatCard
-          title="Net Cumulative PnL"
-          value={formatCurrency(metrics.totalPnL, currentCurrency)}
-          subValue={formatPercent(metrics.totalPnlPercent)}
-          subValueType={metrics.totalPnL >= 0 ? 'positive' : 'negative'}
-          icon={metrics.totalPnL >= 0 ? TrendingUp : TrendingDown}
-          iconColor={metrics.totalPnL >= 0 ? 'var(--profit-green)' : 'var(--loss-red)'}
-          iconBg={metrics.totalPnL >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}
-        />
+        {visibleCards.netPnl && (
+          <StatCard
+            title="Net Cumulative PnL"
+            value={formatCurrency(metrics.totalPnL, currentCurrency)}
+            subValue={formatPercent(metrics.totalPnlPercent)}
+            subValueType={metrics.totalPnL >= 0 ? 'positive' : 'negative'}
+            icon={metrics.totalPnL >= 0 ? TrendingUp : TrendingDown}
+            iconColor={metrics.totalPnL >= 0 ? 'var(--profit-green)' : 'var(--loss-red)'}
+            iconBg={metrics.totalPnL >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}
+          />
+        )}
 
-        <StatCard
-          title="Win Rate"
-          value={`${metrics.winRate.toFixed(1)}%`}
-          subValue={`${metrics.winningTrades} Wins / ${metrics.losingTrades} Losses`}
-          subValueType={metrics.winRate >= 50 ? 'positive' : 'negative'}
-          icon={Percent}
-          iconColor="#3b82f6"
-          iconBg="rgba(59, 130, 246, 0.12)"
-          progress={metrics.winRate}
-          progressColor={metrics.winRate >= 50 ? 'var(--profit-green)' : 'var(--loss-red)'}
-        />
+        {visibleCards.winRate && (
+          <StatCard
+            title="Win Rate"
+            value={`${metrics.winRate.toFixed(1)}%`}
+            subValue={`${metrics.winningTrades} Wins / ${metrics.losingTrades} Losses`}
+            subValueType={metrics.winRate >= 50 ? 'positive' : 'negative'}
+            icon={Percent}
+            iconColor="#3b82f6"
+            iconBg="rgba(59, 130, 246, 0.12)"
+            progress={metrics.winRate}
+            progressColor={metrics.winRate >= 50 ? 'var(--profit-green)' : 'var(--loss-red)'}
+          />
+        )}
 
-        <StatCard
-          title="Profit Factor"
-          value={metrics.profitFactor > 99 ? '99.0+' : metrics.profitFactor.toFixed(2)}
-          subValue={`Gross Profit: ${formatCurrency(metrics.grossProfit, currentCurrency, true)}`}
-          subValueType={metrics.profitFactor >= 1.5 ? 'positive' : 'neutral'}
-          icon={Scale}
-          iconColor="#f59e0b"
-          iconBg="rgba(245, 158, 11, 0.12)"
-        />
+        {visibleCards.profitFactor && (
+          <StatCard
+            title="Profit Factor"
+            value={metrics.profitFactor > 99 ? '99.0+' : metrics.profitFactor.toFixed(2)}
+            subValue={`Gross Profit: ${formatCurrency(metrics.grossProfit, currentCurrency, true)}`}
+            subValueType={metrics.profitFactor >= 1.5 ? 'positive' : 'neutral'}
+            icon={Scale}
+            iconColor="#f59e0b"
+            iconBg="rgba(245, 158, 11, 0.12)"
+          />
+        )}
 
-        <StatCard
-          title="Average Realized R:R"
-          value={`1 : ${metrics.avgRR > 0 ? metrics.avgRR.toFixed(2) : '0.00'}`}
-          subValue={`Expectancy: ${formatCurrency(metrics.expectancy, currentCurrency)} / trade`}
-          subValueType="accent"
-          icon={Activity}
-          iconColor="#8b5cf6"
-          iconBg="rgba(139, 92, 246, 0.12)"
-        />
+        {visibleCards.avgRR && (
+          <StatCard
+            title="Average Realized R:R"
+            value={`1 : ${metrics.avgRR > 0 ? metrics.avgRR.toFixed(2) : '0.00'}`}
+            subValue={`Expectancy: ${formatCurrency(metrics.expectancy, currentCurrency)} / trade`}
+            subValueType="accent"
+            icon={Activity}
+            iconColor="#8b5cf6"
+            iconBg="rgba(139, 92, 246, 0.12)"
+          />
+        )}
 
         {/* Row 2: Risk Management & Account Defense */}
-        <StatCard
-          title="Max Drawdown"
-          value={`${metrics.maxDrawdownPercent.toFixed(1)}%`}
-          subValue={formatCurrency(metrics.maxDrawdown, currentCurrency)}
-          subValueType={metrics.maxDrawdownPercent < 5 ? 'positive' : 'negative'}
-          icon={ShieldCheck}
-          iconColor={metrics.maxDrawdownPercent < 5 ? 'var(--profit-green)' : 'var(--loss-red)'}
-          iconBg="rgba(239, 68, 68, 0.1)"
-        />
+        {visibleCards.maxDrawdown && (
+          <StatCard
+            title="Max Drawdown"
+            value={`${metrics.maxDrawdownPercent.toFixed(1)}%`}
+            subValue={formatCurrency(metrics.maxDrawdown, currentCurrency)}
+            subValueType={metrics.maxDrawdownPercent < 5 ? 'positive' : 'negative'}
+            icon={ShieldCheck}
+            iconColor={metrics.maxDrawdownPercent < 5 ? 'var(--profit-green)' : 'var(--loss-red)'}
+            iconBg="rgba(239, 68, 68, 0.1)"
+          />
+        )}
 
-        <StatCard
-          title="Recovery Factor"
-          value={`${metrics.recoveryFactor > 99 ? '99.0+' : metrics.recoveryFactor.toFixed(2)}x`}
-          subValue={metrics.recoveryFactor >= 2 ? 'Excellent Resilience' : 'Moderate Resilience'}
-          subValueType={metrics.recoveryFactor >= 2 ? 'positive' : 'neutral'}
-          icon={Zap}
-          iconColor="#f59e0b"
-          iconBg="rgba(245, 158, 11, 0.12)"
-        />
+        {visibleCards.recoveryFactor && (
+          <StatCard
+            title="Recovery Factor"
+            value={`${metrics.recoveryFactor > 99 ? '99.0+' : metrics.recoveryFactor.toFixed(2)}x`}
+            subValue={metrics.recoveryFactor >= 2 ? 'Excellent Resilience' : 'Moderate Resilience'}
+            subValueType={metrics.recoveryFactor >= 2 ? 'positive' : 'neutral'}
+            icon={Zap}
+            iconColor="#f59e0b"
+            iconBg="rgba(245, 158, 11, 0.12)"
+          />
+        )}
 
-        <StatCard
-          title="Trade Discipline Rate"
-          value={`${metrics.disciplineRate.toFixed(1)}%`}
-          subValue={`${metrics.rulesFollowedCount}/${metrics.totalTrades} Rules Followed`}
-          subValueType={metrics.disciplineRate >= 80 ? 'positive' : metrics.disciplineRate >= 50 ? 'neutral' : 'negative'}
-          icon={CheckCircle2}
-          iconColor="#10b981"
-          iconBg="rgba(16, 185, 129, 0.12)"
-          progress={metrics.disciplineRate}
-          progressColor={metrics.disciplineRate >= 80 ? '#10b981' : '#f59e0b'}
-        />
+        {visibleCards.disciplineRate && (
+          <StatCard
+            title="Trade Discipline Rate"
+            value={`${metrics.disciplineRate.toFixed(1)}%`}
+            subValue={`${metrics.rulesFollowedCount}/${metrics.totalTrades} Rules Followed`}
+            subValueType={metrics.disciplineRate >= 80 ? 'positive' : metrics.disciplineRate >= 50 ? 'neutral' : 'negative'}
+            icon={CheckCircle2}
+            iconColor="#10b981"
+            iconBg="rgba(16, 185, 129, 0.12)"
+            progress={metrics.disciplineRate}
+            progressColor={metrics.disciplineRate >= 80 ? '#10b981' : '#f59e0b'}
+          />
+        )}
 
-        <StatCard
-          title="Daily Run Rate"
-          value={`${metrics.dailyRunRate >= 0 ? '+' : ''}${formatCurrency(metrics.dailyRunRate, currentCurrency)}`}
-          subValue={`Across ${metrics.activeTradingDays} active days`}
-          subValueType={metrics.dailyRunRate >= 0 ? 'positive' : 'negative'}
-          icon={Calendar}
-          iconColor="#14b8a6"
-          iconBg="rgba(20, 184, 166, 0.12)"
-        />
+        {visibleCards.dailyRunRate && (
+          <StatCard
+            title="Daily Run Rate"
+            value={`${metrics.dailyRunRate >= 0 ? '+' : ''}${formatCurrency(metrics.dailyRunRate, currentCurrency)}`}
+            subValue={`Across ${metrics.activeTradingDays} active days`}
+            subValueType={metrics.dailyRunRate >= 0 ? 'positive' : 'negative'}
+            icon={Calendar}
+            iconColor="#14b8a6"
+            iconBg="rgba(20, 184, 166, 0.12)"
+          />
+        )}
 
         {/* Row 3: Execution Habits & Momentum */}
-        <StatCard
-          title="Current Streak"
-          value={metrics.currentStreak.count > 0 ? `${metrics.currentStreak.count} ${metrics.currentStreak.type}` : 'None'}
-          subValue={`Best: ${metrics.bestTrade > 0 ? `+${formatCurrency(metrics.bestTrade, currentCurrency, true)}` : '-'}${metrics.worstTrade < 0 ? ` • Worst: -${formatCurrency(Math.abs(metrics.worstTrade), currentCurrency, true)}` : ''}`}
-          subValueType={metrics.currentStreak.type === 'WIN' ? 'positive' : 'negative'}
-          icon={Flame}
-          iconColor="#ec4899"
-          iconBg="rgba(236, 72, 153, 0.12)"
-        />
+        {visibleCards.currentStreak && (
+          <StatCard
+            title="Current Streak"
+            value={metrics.currentStreak.count > 0 ? `${metrics.currentStreak.count} ${metrics.currentStreak.type}` : 'None'}
+            subValue={`Best: ${metrics.bestTrade > 0 ? `+${formatCurrency(metrics.bestTrade, currentCurrency, true)}` : '-'}${metrics.worstTrade < 0 ? ` • Worst: -${formatCurrency(Math.abs(metrics.worstTrade), currentCurrency, true)}` : ''}`}
+            subValueType={metrics.currentStreak.type === 'WIN' ? 'positive' : 'negative'}
+            icon={Flame}
+            iconColor="#ec4899"
+            iconBg="rgba(236, 72, 153, 0.12)"
+          />
+        )}
 
-        <StatCard
-          title="Long vs Short Bias"
-          value={`L ${metrics.longWinRate.toFixed(0)}% | S ${metrics.shortWinRate.toFixed(0)}%`}
-          subValue={`${metrics.longTradesCount} Longs / ${metrics.shortTradesCount} Shorts`}
-          subValueType={metrics.longWinRate >= 50 && metrics.shortWinRate >= 50 ? 'positive' : 'accent'}
-          icon={Compass}
-          iconColor="#60a5fa"
-          iconBg="rgba(96, 165, 250, 0.12)"
-        />
+        {visibleCards.longShortBias && (
+          <StatCard
+            title="Long vs Short Bias"
+            value={`L ${metrics.longWinRate.toFixed(0)}% | S ${metrics.shortWinRate.toFixed(0)}%`}
+            subValue={`${metrics.longTradesCount} Longs / ${metrics.shortTradesCount} Shorts`}
+            subValueType={metrics.longWinRate >= 50 && metrics.shortWinRate >= 50 ? 'positive' : 'accent'}
+            icon={Compass}
+            iconColor="#60a5fa"
+            iconBg="rgba(96, 165, 250, 0.12)"
+          />
+        )}
 
-        <StatCard
-          title="Avg Holding Period"
-          value={metrics.avgHoldingFormatted}
-          subValue={`Based on ${metrics.totalTrades} closed trades`}
-          subValueType="accent"
-          icon={Clock}
-          iconColor="#06b6d4"
-          iconBg="rgba(6, 182, 212, 0.12)"
-        />
+        {visibleCards.avgHolding && (
+          <StatCard
+            title="Avg Holding Period"
+            value={metrics.avgHoldingFormatted}
+            subValue={`Based on ${metrics.totalTrades} closed trades`}
+            subValueType="accent"
+            icon={Clock}
+            iconColor="#06b6d4"
+            iconBg="rgba(6, 182, 212, 0.12)"
+          />
+        )}
 
-        <StatCard
-          title="Total Traded Volume"
-          value={`${metrics.totalVolume >= 100 ? metrics.totalVolume.toFixed(1) : metrics.totalVolume.toFixed(2)}`}
-          subValue="Lots / Contracts / Units"
-          subValueType="accent"
-          icon={Layers}
-          iconColor="#a855f7"
-          iconBg="rgba(168, 85, 247, 0.12)"
-        />
+        {visibleCards.totalVolume && (
+          <StatCard
+            title="Total Traded Volume"
+            value={`${metrics.totalVolume >= 100 ? metrics.totalVolume.toFixed(1) : metrics.totalVolume.toFixed(2)}`}
+            subValue="Lots / Contracts / Units"
+            subValueType="accent"
+            icon={Layers}
+            iconColor="#a855f7"
+            iconBg="rgba(168, 85, 247, 0.12)"
+          />
+        )}
       </div>
 
       {/* Main Charts & Breakdown Section */}
@@ -396,6 +503,169 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Customize Stat Cards Modal */}
+      {showCustomizeModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#0c1322',
+            border: '1px solid #1e293b',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '560px',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            padding: '24px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <SlidersHorizontal size={20} color="#3b82f6" />
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                  Customize Dashboard Cards
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCustomizeModal(false)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '20px', lineHeight: 1.5 }}>
+              Pilih metrik yang ingin Anda tampilkan atau sembunyikan di dashboard utama. Preferensi akan otomatis tersimpan di browser Anda.
+            </p>
+
+            {/* Quick Actions */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #1a2538' }}>
+              <span style={{ fontSize: '0.78rem', color: '#60a5fa', fontWeight: 700 }}>
+                {activeCount} dari 12 Kartu Aktif
+              </span>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleSelectAll}
+                  style={{
+                    fontSize: '0.72rem',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                    color: '#60a5fa',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    cursor: 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  Tampilkan Semua
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  style={{
+                    fontSize: '0.72rem',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    backgroundColor: '#131b2e',
+                    color: '#94a3b8',
+                    border: '1px solid #23304a',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <RotateCcw size={12} /> Reset Default
+                </button>
+              </div>
+            </div>
+
+            {/* Cards Checkbox List by Category */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              {['Core Profitability', 'Risk Management', 'Execution Habits'].map((cat) => {
+                const catCards = CARD_CONFIG.filter(c => c.category === cat);
+                return (
+                  <div key={cat}>
+                    <div style={{ fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                      {cat}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      {catCards.map((card) => {
+                        const isChecked = !!visibleCards[card.id];
+                        return (
+                          <button
+                            type="button"
+                            key={card.id}
+                            onClick={() => toggleCard(card.id)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '10px 12px',
+                              borderRadius: '8px',
+                              backgroundColor: isChecked ? 'rgba(59, 130, 246, 0.12)' : '#070b16',
+                              border: isChecked ? '1px solid #3b82f6' : '1px solid #1a2538',
+                              color: isChecked ? '#f8fafc' : '#64748b',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <span style={{ fontSize: '0.8rem', fontWeight: isChecked ? 600 : 400 }}>
+                              {card.label}
+                            </span>
+                            <div style={{
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '4px',
+                              backgroundColor: isChecked ? '#3b82f6' : '#141d2e',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#fff',
+                              fontSize: '11px',
+                              flexShrink: 0
+                            }}>
+                              {isChecked && <Check size={12} />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #1a2538', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setShowCustomizeModal(false)}
+                className="btn btn-primary"
+                style={{ padding: '8px 24px', fontSize: '0.85rem' }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
