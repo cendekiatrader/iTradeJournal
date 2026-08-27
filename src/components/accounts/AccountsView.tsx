@@ -216,6 +216,41 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                   </div>
                 </div>
 
+                {/* Fee & Tax Breakdown Strip if configured */}
+                {(acc.commissionPerLot || acc.swapPerLot || acc.taxPercent) && (() => {
+                  const totalLots = accTrades.reduce((sum, t) => sum + (t.quantity || 0), 0);
+                  const totalComm = (acc.commissionPerLot || 0) * totalLots;
+                  const totalSwap = (acc.swapPerLot || 0) * accTrades.length;
+                  const grossProfit = Math.max(0, netPnL);
+                  const totalTax = (grossProfit * (acc.taxPercent || 0)) / 100;
+                  const totalDeductions = totalComm + totalSwap + totalTax;
+                  const estimatedNetProfit = netPnL - totalComm - totalSwap - totalTax;
+
+                  return (
+                    <div style={{
+                      backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                      border: '1px solid #1e293b',
+                      borderRadius: '8px',
+                      padding: '8px 10px',
+                      marginBottom: '12px',
+                      fontSize: '0.72rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '4px' }}>
+                        <span>Deductions (Comm/Swap/Tax):</span>
+                        <span style={{ color: '#f87171', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                          -{formatCurrency(totalDeductions, acc.currency)}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#f8fafc', fontWeight: 700 }}>
+                        <span>Net Take-Home Gain:</span>
+                        <span style={{ color: estimatedNetProfit >= 0 ? 'var(--profit-green)' : 'var(--loss-red)', fontFamily: 'var(--font-mono)' }}>
+                          {estimatedNetProfit >= 0 ? '+' : ''}{formatCurrency(estimatedNetProfit, acc.currency)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Notes if any */}
                 {acc.notes && (
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: 1.4 }}>

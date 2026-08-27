@@ -46,6 +46,9 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
   const [dailyDrawdownPercent, setDailyDrawdownPercent] = useState<number | undefined>(5);
   const [status, setStatus] = useState<AccountStatus>('Active');
   const [colorTag, setColorTag] = useState<string>('#3b82f6');
+  const [commissionPerLot, setCommissionPerLot] = useState<number | undefined>(undefined);
+  const [swapPerLot, setSwapPerLot] = useState<number | undefined>(undefined);
+  const [taxPercent, setTaxPercent] = useState<number | undefined>(undefined);
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -60,6 +63,9 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
       setDailyDrawdownPercent(initialAccount.dailyDrawdownPercent);
       setStatus(initialAccount.status);
       setColorTag(initialAccount.colorTag);
+      setCommissionPerLot(initialAccount.commissionPerLot);
+      setSwapPerLot(initialAccount.swapPerLot);
+      setTaxPercent(initialAccount.taxPercent);
       setNotes(initialAccount.notes || '');
     } else {
       setName('');
@@ -72,6 +78,9 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
       setDailyDrawdownPercent(5);
       setStatus('Active');
       setColorTag('#3b82f6');
+      setCommissionPerLot(undefined);
+      setSwapPerLot(undefined);
+      setTaxPercent(undefined);
       setNotes('');
     }
   }, [initialAccount, isOpen]);
@@ -93,6 +102,9 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
       dailyDrawdownPercent: dailyDrawdownPercent ? Number(dailyDrawdownPercent) : undefined,
       status,
       colorTag,
+      commissionPerLot: commissionPerLot !== undefined && !isNaN(commissionPerLot) ? Number(commissionPerLot) : undefined,
+      swapPerLot: swapPerLot !== undefined && !isNaN(swapPerLot) ? Number(swapPerLot) : undefined,
+      taxPercent: taxPercent !== undefined && !isNaN(taxPercent) ? Number(taxPercent) : undefined,
       notes: notes.trim()
     };
 
@@ -245,6 +257,51 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
                   value={dailyDrawdownPercent || ''}
                   onChange={(e) => setDailyDrawdownPercent(e.target.value ? parseFloat(e.target.value) : undefined)}
                   placeholder="5"
+                  className="input-control font-mono"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Fees, Commission & Tax Settings Section */}
+          <div style={{ backgroundColor: '#060913', padding: '14px', borderRadius: '10px', border: '1px solid #1c273a', marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#34d399', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Wallet size={14} /> Fee, Commission & Tax Settings (Optional)
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+              <div className="input-group" style={{ margin: 0 }}>
+                <label className="input-label">Commission / Lot ($)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={commissionPerLot !== undefined ? commissionPerLot : ''}
+                  onChange={(e) => setCommissionPerLot(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="e.g. 6.0"
+                  className="input-control font-mono"
+                />
+              </div>
+
+              <div className="input-group" style={{ margin: 0 }}>
+                <label className="input-label">Avg Swap / Trade ($)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={swapPerLot !== undefined ? swapPerLot : ''}
+                  onChange={(e) => setSwapPerLot(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="e.g. 1.5"
+                  className="input-control font-mono"
+                />
+              </div>
+
+              <div className="input-group" style={{ margin: 0 }}>
+                <label className="input-label">Tax / Split Cut (%)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={taxPercent !== undefined ? taxPercent : ''}
+                  onChange={(e) => setTaxPercent(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="e.g. 10%"
                   className="input-control font-mono"
                 />
               </div>

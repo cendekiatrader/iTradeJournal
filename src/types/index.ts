@@ -18,6 +18,9 @@ export interface TradingAccount {
   maxDrawdownAmount?: number; // Calculated or manual
   status: AccountStatus;
   colorTag: string; // Hex color or badge color for quick identification
+  commissionPerLot?: number; // E.g. $6 per lot
+  swapPerLot?: number; // E.g. estimated swap per trade
+  taxPercent?: number; // E.g. 10% tax or profit split
   totalWithdrawn?: number;
   notes?: string;
   createdAt: string;
