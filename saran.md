@@ -314,6 +314,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 86. **📑 Automated Monthly PDF Trading Certificate of Consistency**
     - *Konsep*: Generator lembar sertifikat performa konsistensi bulanan berformat PDF elegan yang merangkum *Discipline Score*, *Profit Factor*, dan *Max Drawdown* untuk portofolio pribadi atau reputasi trading.
 
+### K. Saran Fitur Baru & Inovasi Tingkat Lanjut (Batch 87 - 92)
+
+87. **📊 Trade Efficiency Ratio & MAE/MFE Execution Quadrant**
+    - *Konsep*: Grafik kuadran 2D memetakan seberapa dekat entry dengan harga terbaik (*Entry Precision*) vs seberapa optimal exit sebelum harga berbalik (*Exit Efficiency %*).
+
+88. **🛡️ Prop Firm Daily Reset Countdown & Breach Safeguard Clock**
+    - *Konsep*: Jam hitung mundur waktu reset harian broker/prop firm (misal: 17:00 NY / 04:00 WIB) lengkap dengan indikator sisa toleransi drawdown hari berjalan.
+
+89. **🔄 Dynamic Position Sizing Table per Stop Loss Distance**
+    - *Konsep*: Tabel matriks cepat yang langsung menampilkan ukuran lot rekomendasi jika Stop Loss berjarak 5, 10, 15, 20, 25, 30 pips tanpa perlu mengetik angka berulang-ulang.
+
+90. **🧠 Emotion Impact Matrix on Winrate & PnL**
+    - *Konsep*: Matriks visual dampak status emosi (*Disciplined, Fearful, Greedy, Revenge, Hesitant*) terhadap nominal perolehan profit dan persentase winrate jangka panjang.
+
+91. **📑 Multi-Trade CSV & Excel Consolidated Tax Exporter**
+    - *Konsep*: Template ekspor khusus dengan kolom terpisah untuk *Gross Realized Profit*, *Spread Cost*, *Swap*, dan *Net Taxable Gain* untuk pelaporan finansial tahunan.
+
+92. **⏱️ Pre-Trade Risk Confirmation Modal (Zero-Impulse Gatekeeper)**
+    - *Konsep*: Pop-up konfirmasi ringkas 3 detik sebelum menyimpan trade yang menampilkan: total risiko (\$ & %), jarak Stop Loss, dan checklist rencana untuk memastikan tidak ada trade impulsif.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
