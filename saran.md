@@ -294,6 +294,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 80. **📑 Multi-Account Aggregated Growth Comparison (Visual Overlay 3 Akun)**
     - *Konsep*: Grafik overlay membandingkan kurva pertumbuhan hingga 3 akun sekaligus (misal: Akun Personal vs Akun MFF vs Akun FTMO) dalam 1 kanvas untuk melihat konsistensi eksekusi antar akun.
 
+### J. Saran Fitur Baru & Inovasi Tingkat Lanjut (Batch 81 - 86)
+
+81. **🧮 Dynamic Pip Value & Margin Requirement Previewer**
+    - *Konsep*: Pratinjau langsung kebutuhan margin broker (\$ margin required) dan nilai per pip saat mengisi volume lot di modal form input, mencegah margin call tak terduga pada leverage ketat.
+
+82. **📈 R-Multiple Rolling Median & Outlier Filter**
+    - *Konsep*: Grafik R:R menggunakan nilai median (bukan rata-rata biasa) untuk memfilter trade outlier ekstrim (misal satu trade win 10R yang mendistorsi statistik asli), menyajikan gambaran performa realistis.
+
+83. **🏷️ Custom Tag Hierarchy & Sub-Tags Engine**
+    - *Konsep*: Sistem pemberian tag bertingkat (contoh: Kategori `#SMC` ➔ Sub-tag `#FVG_Mitigation`, `#TurtleSoup`, `#BOS_Retest`) untuk analisis data jurnal yang jauh lebih rapi dan terspesialisasi.
+
+84. **🛡️ Daily Session Loss Cap with Soft Audio Warning**
+    - *Konsep*: Peringatan suara lembut dan badge status waspada jika akumulasi loss dalam satu sesi (misal sesi London) telah mencapai batas maksimal yang ditentukan (misal -2R).
+
+85. **📅 Trade Recurrence & Day-Time Density Matrix (Peta Kepadatan Eksekusi)**
+    - *Konsep*: Heatmap 2 dimensi (Hari vs Jam Pasar) yang memetakan frekuensi dan volume eksekusi trader untuk menemukan jam-jam overtrading yang rawan loss.
+
+86. **📑 Automated Monthly PDF Trading Certificate of Consistency**
+    - *Konsep*: Generator lembar sertifikat performa konsistensi bulanan berformat PDF elegan yang merangkum *Discipline Score*, *Profit Factor*, dan *Max Drawdown* untuk portofolio pribadi atau reputasi trading.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
