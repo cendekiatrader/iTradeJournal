@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
-import { TradingAccount, Trade, WithdrawalRecord, UserProfile } from '../types';
+import { TradingAccount, Trade, WithdrawalRecord, UserProfile, PlaybookModel } from '../types';
 
 const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
@@ -281,6 +281,87 @@ export const deleteWithdrawalFromCloud = async (id: string): Promise<boolean> =>
     return true;
   } catch (err) {
     console.error('Error deleting withdrawal from Supabase:', err);
+    return false;
+  }
+};
+
+// ==========================================
+// Playbooks Sync
+// ==========================================
+export const fetchCloudPlaybooks = async (): Promise<PlaybookModel[] | null> => {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from('playbooks')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    if (!data) return [];
+
+    return data.map(item => ({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      timeframe: item.timeframe || '',
+      winrateTarget: item.winrate_target ? Number(item.winrate_target) : undefined,
+      rrTarget: item.rr_target ? Number(item.rr_target) : undefined,
+      description: item.description || '',
+      rules: Array.isArray(item.rules) ? item.rules : [],
+      confluences: Array.isArray(item.confluences) ? item.confluences : [],
+      mistakesToAvoid: Array.isArray(item.mistakes_to_avoid) ? item.mistakes_to_avoid : [],
+      chartBeforeUrl: item.chart_before_url || undefined,
+      chartAfterUrl: item.chart_after_url || undefined,
+      rating: item.rating ? Number(item.rating) : 5,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at || item.created_at
+    }));
+  } catch (err) {
+    console.error('Error fetching playbooks from Supabase:', err);
+    return null;
+  }
+};
+
+export const syncPlaybookToCloud = async (playbook: PlaybookModel): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const payload = {
+      id: playbook.id,
+      user_id: user?.id || null,
+      title: playbook.title,
+      category: playbook.category,
+      timeframe: playbook.timeframe,
+      winrate_target: playbook.winrateTarget || null,
+      rr_target: playbook.rrTarget || null,
+      description: playbook.description || null,
+      rules: playbook.rules || [],
+      confluences: playbook.confluences || [],
+      mistakes_to_avoid: playbook.mistakesToAvoid || [],
+      chart_before_url: playbook.chartBeforeUrl || null,
+      chart_after_url: playbook.chartAfterUrl || null,
+      rating: playbook.rating || 5,
+      created_at: playbook.createdAt,
+      updated_at: playbook.updatedAt
+    };
+
+    const { error } = await supabase.from('playbooks').upsert(payload);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Error syncing playbook to Supabase:', err);
+    return false;
+  }
+};
+
+export const deletePlaybookFromCloud = async (id: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('playbooks').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Error deleting playbook from Supabase:', err);
     return false;
   }
 };

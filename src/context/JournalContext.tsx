@@ -26,13 +26,16 @@ import {
   fetchCloudAccounts, 
   fetchCloudTrades, 
   fetchCloudWithdrawals, 
+  fetchCloudPlaybooks,
   syncAccountToCloud, 
   deleteAccountFromCloud, 
   syncTradeToCloud, 
   deleteTradeFromCloud, 
   bulkDeleteTradesFromCloud, 
   syncWithdrawalToCloud, 
-  deleteWithdrawalFromCloud 
+  deleteWithdrawalFromCloud,
+  syncPlaybookToCloud,
+  deletePlaybookFromCloud
 } from '../utils/supabase';
 import { useAuth } from './AuthContext';
 import { calculateAccountMetrics, generateEquityCurve } from '../utils/calculations';
@@ -141,8 +144,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     if (isSupabaseConfigured() && user) {
       setIsLoadingCloud(true);
-      Promise.all([fetchCloudAccounts(), fetchCloudTrades(), fetchCloudWithdrawals()])
-        .then(([cloudAccounts, cloudTrades, cloudWithdrawals]) => {
+      Promise.all([fetchCloudAccounts(), fetchCloudTrades(), fetchCloudWithdrawals(), fetchCloudPlaybooks()])
+        .then(([cloudAccounts, cloudTrades, cloudWithdrawals, cloudPlaybooks]) => {
           setAccounts(cloudAccounts || []);
           saveAccounts(cloudAccounts || []);
 
@@ -151,6 +154,11 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
           setWithdrawals(cloudWithdrawals || []);
           saveWithdrawals(cloudWithdrawals || []);
+
+          if (cloudPlaybooks && cloudPlaybooks.length > 0) {
+            setPlaybooks(cloudPlaybooks);
+            savePlaybooks(cloudPlaybooks);
+          }
 
           setIsCloudSync(true);
         })
@@ -165,14 +173,17 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const localAccs = loadAccounts();
       const localTrades = loadTrades();
       const localWds = loadWithdrawals();
+      const localPbs = loadPlaybooks();
       setAccounts(localAccs.length > 0 ? localAccs : INITIAL_ACCOUNTS);
       setTrades(localTrades.length > 0 ? localTrades : INITIAL_TRADES);
       setWithdrawals(localWds.length > 0 ? localWds : INITIAL_WITHDRAWALS);
+      setPlaybooks(localPbs);
     } else if (!user) {
       // Supabase configured but logged out
       setAccounts([]);
       setTrades([]);
       setWithdrawals([]);
+      setPlaybooks([]);
     }
   }, [user]);
 
@@ -527,6 +538,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       savePlaybooks(updated);
       return updated;
     });
+    if (isSupabaseConfigured()) {
+      syncPlaybookToCloud(newPb);
+    }
     showToast(`Setup playbook "${newPb.title}" berhasil disimpan!`, 'success');
   };
 
@@ -534,6 +548,10 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setPlaybooks(prev => {
       const updated = prev.map(pb => pb.id === id ? { ...pb, ...updates, updatedAt: new Date().toISOString() } : pb);
       savePlaybooks(updated);
+      const target = updated.find(pb => pb.id === id);
+      if (target && isSupabaseConfigured()) {
+        syncPlaybookToCloud(target);
+      }
       return updated;
     });
     showToast('Playbook SOP diperbarui.', 'success');
@@ -545,6 +563,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       savePlaybooks(updated);
       return updated;
     });
+    if (isSupabaseConfigured()) {
+      deletePlaybookFromCloud(id);
+    }
     showToast('Playbook SOP dihapus.', 'info');
   };
 
