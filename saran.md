@@ -234,6 +234,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 62. **📑 Single-Page PDF Trade Case Study Exporter (Lembar Bedah 1 Trade)**
     - *Konsep*: Cetak 1 lembar dokumen PDF eksklusif khusus untuk satu trade terpilih: berisi screenshot Before/After resolusi tinggi, checklist konfluensi, metrik angka, evaluasi psikologi, dan catatan pelajaran penting.
 
+### G. Saran Fitur Baru Batch (63 - 68)
+
+63. **🧮 Auto-Calculated Account Risk Per Day Tracker (Batas Risiko Harian Otomatis)**
+    - *Konsep*: Kalkulator otomatis yang menyarankan *Max Daily Loss Limit* (misal: 3% dari saldo) berdasarkan kondisi volatilitas pasar dan rata-rata risiko per trade trader, lengkap dengan progress bar sisa risiko harian.
+
+64. **📐 Liquidity Sweep & Inducement Quality Scorer**
+    - *Konsep*: Fitur input penilaian kualitas (Skor 1-10) untuk setup SMC (*Liquidity Sweep, Inducement, BOS, CHoCH*) di form input trade, lalu dianalisis korelasinya dengan Winrate jangka panjang.
+
+65. **🖼️ Auto-Annotate Screenshot Editor (Editor Anotasi Chart Instan)**
+    - *Konsep*: Editor bawaan ringan di dalam modal upload screenshot untuk menggambar garis Support/Resistance, panah arah, lingkaran FVG, dan label teks langsung di atas gambar chart.
+
+66. **📊 Equity Curve Smoothing & Moving Average Overlay (MA Ekuitas)**
+    - *Konsep*: Menambahkan garis *Moving Average* (misal: EMA 20 Trade) di atas kurva ekuitas saldo untuk mendeteksi tren performa: apakah kurva sedang *Uptrend* (bagus) atau *Downtrend* (perlu evaluasi).
+
+67. **🔄 Multi-Timeframe Confluence Score Calculator**
+    - *Konsep*: Kalkulator skor konfluensi otomatis berdasarkan checklist HTF (Daily/4H), MTF (1H/15m), dan LTF (5m/1m) yang dipilih trader sebelum entry, menghasilkan skor 0-100%.
+
+68. **🛡️ Smart Compounding Withdrawal Planner (Rencana Penarikan Cerdas)**
+    - *Konsep*: Simulasi penarikan profit berkala (misal: 50% profit tiap akhir bulan) vs full compounding, menunjukkan dampak jangka panjang terhadap pertumbuhan saldo dan *Time to Financial Freedom*.
+
 ---
 
 *Terakhir diperbarui: 27 Agustus 2026*
