@@ -172,7 +172,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
           {/* Date & Time */}
           <div className="input-group" style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <label className="input-label" style={{ margin: 0 }}>Payout Date (DD/MM/YYYY, hh:mm) *</label>
+              <label className="input-label" style={{ margin: 0 }}>Payout Date *</label>
               <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
                 {formatDateTimeDDMMYYYY(date)}
               </span>

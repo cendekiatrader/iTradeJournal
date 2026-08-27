@@ -108,7 +108,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Opened At (DD/MM/YYYY, hh:mm)
+                  Opened At
                 </div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc', marginTop: '2px' }}>
                   {formatDateTimeDDMMYYYY(trade.entryDate)}
@@ -119,7 +119,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
 
               <div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Closed At (DD/MM/YYYY, hh:mm)
+                  Closed At
                 </div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc', marginTop: '2px' }}>
                   {trade.exitDate ? formatDateTimeDDMMYYYY(trade.exitDate) : 'Trade Still Open'}

@@ -307,7 +307,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
                 </th>
                 <th style={{ padding: '12px 14px', cursor: 'pointer' }} onClick={() => handleSort('entryDate')}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    Opened At (DD/MM/YYYY, hh:mm) <ArrowUpDown size={12} />
+                    Opened At <ArrowUpDown size={12} />
                   </div>
                 </th>
                 <th style={{ padding: '12px 14px' }}>Account</th>

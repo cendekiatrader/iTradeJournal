@@ -255,7 +255,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #1e293b', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                  <th style={{ padding: '10px 12px' }}>Opened At (DD/MM/YYYY, hh:mm)</th>
+                  <th style={{ padding: '10px 12px' }}>Opened At</th>
                   <th style={{ padding: '10px 12px' }}>Account</th>
                   <th style={{ padding: '10px 12px' }}>Symbol</th>
                   <th style={{ padding: '10px 12px' }}>Side</th>

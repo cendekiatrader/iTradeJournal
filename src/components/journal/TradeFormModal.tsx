@@ -452,7 +452,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#93c5fd', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Clock size={15} />
-                <span>Execution Timeline (DD/MM/YYYY, hh:mm)</span>
+                <span>Execution Timeline</span>
               </div>
               {holdingDuration && (
                 <span className="badge" style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.3)', textTransform: 'none' }}>
