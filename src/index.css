@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root, [data-theme="emerald"] {
   --bg-main: #040814;
   --bg-card: #090f20;
@@ -706,12 +710,25 @@ textarea.input-control {
   }
 }
 
-/* Touch Friendly Utilities */
+/* Touch Friendly Utilities & Micro-interactions */
 @media (pointer: coarse) {
-  button, select, input, .badge {
-    min-height: 38px;
+  button, select, input, .badge, a {
+    min-height: 44px;
   }
 }
+
+.btn {
+  touch-action: manipulation;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
 
 /* Ensure all tables scroll smoothly on touch devices */
 table {

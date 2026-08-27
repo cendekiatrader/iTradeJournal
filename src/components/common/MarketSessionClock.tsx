@@ -190,9 +190,24 @@ export const MarketSessionClock: React.FC = () => {
                   padding: '2px 6px',
                   borderRadius: '4px',
                   backgroundColor: open ? (killzone ? '#ef4444' : '#10b981') : '#1e293b',
-                  color: '#ffffff'
+                  color: '#ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
                 }}>
-                  {killzone ? '⚡ KILLZONE' : open ? '🟢 OPEN' : '⚪ CLOSED'}
+                  {killzone ? (
+                    <>
+                      <Zap size={10} /> KILLZONE
+                    </>
+                  ) : open ? (
+                    <>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-300"></span> OPEN
+                    </>
+                  ) : (
+                    <>
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span> CLOSED
+                    </>
+                  )}
                 </span>
               </div>
 

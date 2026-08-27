@@ -10,7 +10,9 @@ import {
   Hourglass, 
   Layers,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  AlertTriangle,
+  Scale
 } from 'lucide-react';
 
 interface HoldingDurationMatrixProps {
@@ -251,12 +253,12 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
                     <ShieldCheck size={13} color="#10b981" /> High-Performing Edge
                   </span>
                 ) : bracket.pnl < 0 ? (
-                  <span style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 600 }}>
-                    ⚠️ Potential Drag / Negative Edge
+                  <span style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertTriangle size={13} color="#f87171" /> Potential Drag / Negative Edge
                   </span>
                 ) : (
-                  <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                    ⚖️ Moderate Performance
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Scale size={13} color="#94a3b8" /> Moderate Performance
                   </span>
                 )}
               </div>

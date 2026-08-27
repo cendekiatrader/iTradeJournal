@@ -168,11 +168,10 @@ export const AnalyticsView: React.FC = () => {
 
         <button
           onClick={() => setReportModalOpen(true)}
-          className="btn btn-primary"
-          style={{ padding: '8px 18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
+          className="btn btn-primary min-h-touch px-4.5 font-semibold flex items-center gap-2"
         >
           <FileText size={16} />
-          <span>📄 Executive PDF Audit Report</span>
+          <span>Executive PDF Audit Report</span>
         </button>
       </div>
 

@@ -165,9 +165,13 @@ export const EconomicCalendarView: React.FC = () => {
               borderRadius: '20px',
               backgroundColor: 'rgba(239, 68, 68, 0.15)',
               color: '#f87171',
-              border: '1px solid rgba(239, 68, 68, 0.3)'
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
             }}>
-              LIVE 🔴
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+              LIVE
             </span>
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -287,7 +291,7 @@ export const EconomicCalendarView: React.FC = () => {
             }}
           >
             <Flame size={13} color="#ef4444" />
-            <span>High Impact Only (Red Folder 🔴)</span>
+            <span>High Impact Only (Red Folder)</span>
           </button>
         </div>
       </div>
@@ -343,9 +347,13 @@ export const EconomicCalendarView: React.FC = () => {
                       padding: '2px 6px',
                       borderRadius: '4px',
                       backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                      color: '#f87171'
+                      color: '#f87171',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
                     }}>
-                      🔴 HIGH
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                      HIGH
                     </span>
                   </div>
 

@@ -58,9 +58,8 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
           <button
             type="button"
             onClick={() => setViewMode('slider')}
-            className="btn btn-sm"
+            className="btn btn-sm flex items-center gap-1 min-h-[32px] px-2.5"
             style={{
-              padding: '4px 10px',
               fontSize: '0.72rem',
               borderRadius: '6px',
               backgroundColor: viewMode === 'slider' ? '#1e3a8a' : '#0c1222',
@@ -68,14 +67,13 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
               color: viewMode === 'slider' ? '#93c5fd' : '#94a3b8'
             }}
           >
-            🔄 Interactive Slider
+            <SplitSquareVertical size={13} /> Interactive Slider
           </button>
           <button
             type="button"
             onClick={() => setViewMode('side-by-side')}
-            className="btn btn-sm"
+            className="btn btn-sm flex items-center gap-1 min-h-[32px] px-2.5"
             style={{
-              padding: '4px 10px',
               fontSize: '0.72rem',
               borderRadius: '6px',
               backgroundColor: viewMode === 'side-by-side' ? '#1e3a8a' : '#0c1222',
@@ -83,7 +81,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
               color: viewMode === 'side-by-side' ? '#93c5fd' : '#94a3b8'
             }}
           >
-            📊 Side-by-Side
+            <Columns size={13} /> Side-by-Side
           </button>
         </div>
       </div>

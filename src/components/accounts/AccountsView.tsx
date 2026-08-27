@@ -87,8 +87,8 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                 from {formatCurrency(totalPortfolioInitial, 'USD')} initial
               </span>
               {totalPortfolioWithdrawn > 0 && (
-                <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--profit-green)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                  💰 Total Paid Out: {formatCurrency(totalPortfolioWithdrawn, 'USD')}
+                <span className="badge flex items-center gap-1.5" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--profit-green)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                  <DollarSign size={13} /> Total Paid Out: {formatCurrency(totalPortfolioWithdrawn, 'USD')}
                 </span>
               )}
             </div>

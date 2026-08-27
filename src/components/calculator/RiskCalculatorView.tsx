@@ -103,9 +103,8 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
           <button
             type="button"
             onClick={() => setActiveSubTab('lot')}
-            className="btn btn-sm"
+            className="btn btn-sm flex items-center gap-1.5 min-h-[38px] px-3.5"
             style={{
-              padding: '6px 14px',
               fontSize: '0.78rem',
               fontWeight: 700,
               borderRadius: '8px',
@@ -114,14 +113,13 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               color: activeSubTab === 'lot' ? '#93c5fd' : '#94a3b8'
             }}
           >
-            🎯 Position Size & Lot
+            <Target size={14} /> Position Size & Lot
           </button>
           <button
             type="button"
             onClick={() => setActiveSubTab('compounding')}
-            className="btn btn-sm"
+            className="btn btn-sm flex items-center gap-1.5 min-h-[38px] px-3.5"
             style={{
-              padding: '6px 14px',
               fontSize: '0.78rem',
               fontWeight: 700,
               borderRadius: '8px',
@@ -130,14 +128,13 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               color: activeSubTab === 'compounding' ? '#93c5fd' : '#94a3b8'
             }}
           >
-            📈 Compounding Planner
+            <TrendingUp size={14} /> Compounding Planner
           </button>
           <button
             type="button"
             onClick={() => setActiveSubTab('kelly')}
-            className="btn btn-sm"
+            className="btn btn-sm flex items-center gap-1.5 min-h-[38px] px-3.5"
             style={{
-              padding: '6px 14px',
               fontSize: '0.78rem',
               fontWeight: 700,
               borderRadius: '8px',
@@ -146,7 +143,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               color: activeSubTab === 'kelly' ? '#93c5fd' : '#94a3b8'
             }}
           >
-            🧮 Kelly Criterion Sizing
+            <Calculator size={14} /> Kelly Criterion Sizing
           </button>
         </div>
       </div>

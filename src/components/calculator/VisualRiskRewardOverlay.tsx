@@ -80,7 +80,17 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
                 color: isLong ? '#34d399' : '#f87171',
                 border: isLong ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(239, 68, 68, 0.4)'
               }}>
-                {isLong ? '🟢 BUY / LONG' : '🔴 SELL / SHORT'}
+                {isLong ? (
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    BUY / LONG
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                    SELL / SHORT
+                  </span>
+                )}
               </span>
             </h3>
             <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
