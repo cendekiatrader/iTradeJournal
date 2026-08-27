@@ -313,10 +313,6 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteAccount = (id: string) => {
-    if (accounts.length <= 1) {
-      showToast('Cannot delete the only remaining account.', 'error');
-      return;
-    }
     setAccounts(prev => prev.filter(a => a.id !== id));
     setTrades(prev => prev.filter(t => t.accountId !== id));
     setWithdrawals(prev => prev.filter(w => w.accountId !== id));
