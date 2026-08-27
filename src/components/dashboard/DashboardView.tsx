@@ -16,8 +16,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Clock,
-  Sparkles,
-  AlertTriangle
+  Sparkles
 } from 'lucide-react';
 import { Trade } from '../../types';
 
@@ -59,53 +58,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             + Log New Trade
           </button>
         </div>
-      </div>
-
-      {/* High-Impact News Live Indicator Banner */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '12px 18px',
-        borderRadius: '14px',
-        backgroundColor: 'rgba(239, 68, 68, 0.08)',
-        border: '1px solid rgba(239, 68, 68, 0.25)',
-        marginBottom: '20px',
-        flexWrap: 'wrap',
-        gap: '10px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '8px',
-            backgroundColor: 'rgba(239, 68, 68, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#f87171'
-          }}>
-            <AlertTriangle size={16} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#f87171' }}>
-              High-Impact Economic Radar: Waspada Rilis Berita Red Folder Hari Ini
-            </div>
-            <div style={{ fontSize: '0.74rem', color: '#cbd5e1' }}>
-              US CPI, NFP, & Keputusan Suku Bunga The Fed/FOMC memicu lonjakan volatilitas & pelebaran spread.
-            </div>
-          </div>
-        </div>
-
-        {onNavigateToNews && (
-          <button 
-            onClick={onNavigateToNews}
-            className="btn btn-secondary btn-sm"
-            style={{ padding: '6px 12px', fontSize: '0.76rem', borderColor: 'rgba(239,68,68,0.4)', color: '#fca5a5', whiteSpace: 'nowrap' }}
-          >
-            Lihat Kalender Berita Live →
-          </button>
-        )}
       </div>
 
       {/* Real-time Multi-Market Session & Killzone Radar */}
