@@ -33,6 +33,7 @@ import {
 } from '../utils/supabase';
 import { useAuth } from './AuthContext';
 import { calculateAccountMetrics, generateEquityCurve } from '../utils/calculations';
+import { setStealthModeState } from '../utils/formatters';
 import { INITIAL_ACCOUNTS, INITIAL_TRADES, INITIAL_WITHDRAWALS } from '../data/seedData';
 import confetti from 'canvas-confetti';
 
@@ -70,6 +71,8 @@ interface JournalContextType {
   resetToDemoData?: () => void;
   isCloudSync: boolean;
   isLoadingCloud: boolean;
+  isStealthMode: boolean;
+  toggleStealthMode: () => void;
   toast: ToastState;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   hideToast: () => void;
@@ -102,6 +105,29 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [toast, setToast] = useState<ToastState>({ message: '', type: 'info', visible: false });
   const [isCloudSync, setIsCloudSync] = useState<boolean>(false);
   const [isLoadingCloud, setIsLoadingCloud] = useState<boolean>(false);
+  const [isStealthMode, setIsStealthMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('itrade_stealth_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    setStealthModeState(isStealthMode);
+    try {
+      localStorage.setItem('itrade_stealth_mode', String(isStealthMode));
+    } catch {}
+  }, [isStealthMode]);
+
+  const toggleStealthMode = useCallback(() => {
+    setIsStealthMode(prev => {
+      const next = !prev;
+      setStealthModeState(next);
+      showToast(next ? '👁️ Stealth Mode Aktif: Saldo disensor' : '👁️ Stealth Mode Nonaktif: Saldo ditampilkan', 'info');
+      return next;
+    });
+  }, []);
 
   // Sync with Supabase on mount or user change if configured
   useEffect(() => {
@@ -575,6 +601,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         resetToDemoData,
         isCloudSync,
         isLoadingCloud,
+        isStealthMode,
+        toggleStealthMode,
         toast,
         showToast,
         hideToast,

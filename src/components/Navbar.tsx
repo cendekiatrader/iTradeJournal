@@ -20,7 +20,9 @@ import {
   Palette,
   Globe,
   Keyboard,
-  Menu
+  Menu,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { AuthModal, AuthMode } from './auth/AuthModal';
 import { ThemeSelectorModal } from './common/ThemeSelectorModal';
@@ -48,6 +50,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     withdrawals,
     importData,
     resetAllData,
+    isStealthMode,
+    toggleStealthMode,
     showToast
   } = useJournal();
 
@@ -591,6 +595,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Sign In</span>
           </button>
         )}
+
+        {/* Stealth / Privacy Toggle Button */}
+        <button
+          type="button"
+          onClick={toggleStealthMode}
+          className="btn btn-secondary btn-icon btn-sm"
+          title={isStealthMode ? 'Tampilkan Saldo (Stealth Mode Aktif)' : 'Sembunyikan Saldo (Stealth Mode)'}
+          style={{
+            backgroundColor: isStealthMode ? 'rgba(239, 68, 68, 0.15)' : '#0c1222',
+            borderColor: isStealthMode ? '#ef4444' : '#1e293b',
+            color: isStealthMode ? '#f87171' : '#94a3b8',
+            padding: '7px 10px'
+          }}
+        >
+          {isStealthMode ? <EyeOff size={15} /> : <Eye size={15} />}
+        </button>
 
         {/* Primary Action: Log Trade Button */}
         <button

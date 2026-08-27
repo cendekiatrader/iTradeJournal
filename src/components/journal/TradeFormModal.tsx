@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { formatDateTimeDDMMYYYY, formatDuration } from '../../utils/formatters';
 import { RichTextEditor } from '../common/RichTextEditor';
+import { parseTradeFromOCRText } from '../../utils/ocrParser';
+import { createWorker } from 'tesseract.js';
 
 interface TradeFormModalProps {
   isOpen: boolean;
@@ -114,6 +116,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   const [screenshotAfter, setScreenshotAfter] = useState('');
   const [riskPercentPreset, setRiskPercentPreset] = useState<number>(1.0);
   const [showQuickSizer, setShowQuickSizer] = useState<boolean>(false);
+  const [isProcessingOCR, setIsProcessingOCR] = useState<boolean>(false);
+  const [pastedImagePreview, setPastedImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialTrade) {
@@ -212,6 +216,106 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
 
   if (!isOpen) return null;
 
+  const processImageWithOCR = async (imageSrc: string) => {
+    setIsProcessingOCR(true);
+    setPastedImagePreview(imageSrc);
+    showToast('🔍 Membaca data trade dari screenshot...', 'info');
+
+    try {
+      const worker = await createWorker('eng');
+      const ret = await worker.recognize(imageSrc);
+      await worker.terminate();
+
+      const extracted = parseTradeFromOCRText(ret.data.text);
+      let filledFieldsCount = 0;
+
+      if (extracted.symbol) {
+        setSymbol(extracted.symbol);
+        filledFieldsCount++;
+      }
+      if (extracted.assetClass) {
+        setAssetClass(extracted.assetClass);
+      }
+      if (extracted.direction) {
+        setDirection(extracted.direction);
+        filledFieldsCount++;
+      }
+      if (extracted.timeframe) {
+        setTimeframe(extracted.timeframe);
+        filledFieldsCount++;
+      }
+      if (extracted.entryPrice) {
+        setEntryPrice(extracted.entryPrice);
+        filledFieldsCount++;
+      }
+      if (extracted.exitPrice) {
+        setExitPrice(extracted.exitPrice);
+        filledFieldsCount++;
+      }
+      if (extracted.stopLoss) {
+        setStopLoss(extracted.stopLoss);
+        filledFieldsCount++;
+      }
+      if (extracted.takeProfit) {
+        setTakeProfit(extracted.takeProfit);
+        filledFieldsCount++;
+      }
+      if (extracted.quantity) {
+        setQuantity(extracted.quantity);
+        filledFieldsCount++;
+      }
+      if (extracted.pnl !== undefined) {
+        setPnl(extracted.pnl);
+        setStatus(extracted.pnl >= 0 ? 'WIN' : 'LOSS');
+        filledFieldsCount++;
+      }
+
+      // Attach screenshot to before/after if empty
+      if (!screenshotBefore) {
+        setScreenshotBefore(imageSrc);
+      } else if (!screenshotAfter) {
+        setScreenshotAfter(imageSrc);
+      }
+
+      if (filledFieldsCount > 0) {
+        showToast(`⚡ Auto-Fill Berhasil: ${filledFieldsCount} data terdeteksi dari gambar!`, 'success');
+      } else {
+        showToast('Screenshot terlampir. Tidak ada parameter teks yang cocok otomatis.', 'info');
+      }
+    } catch (err) {
+      console.error('OCR Processing error:', err);
+      showToast('Gagal memproses OCR gambar, namun gambar tetap dilampirkan.', 'info');
+      if (!screenshotBefore) setScreenshotBefore(imageSrc);
+    } finally {
+      setIsProcessingOCR(false);
+    }
+  };
+
+  // Paste handler for modal window
+  const handleModalPaste = (e: React.ClipboardEvent) => {
+    // If user is pasting in a regular text field or rich editor with plain text, let it be
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          e.preventDefault();
+          const reader = new FileReader();
+          reader.onload = (uploadEvent) => {
+            const base64 = uploadEvent.target?.result as string;
+            if (base64) {
+              processImageWithOCR(base64);
+            }
+          };
+          reader.readAsDataURL(file);
+          break;
+        }
+      }
+    }
+  };
+
   const toggleConfluence = (item: string) => {
     setConfluences(prev =>
       prev.includes(item) ? prev.filter(c => c !== item) : [...prev, item]
@@ -276,22 +380,60 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={onClose} onPaste={handleModalPaste}>
       <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px' }}>
         {/* Modal Header */}
         <div className="modal-header">
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
-              {initialTrade ? 'Edit Trade Entry' : 'Log New Trade Execution'}
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                {initialTrade ? 'Edit Trade Entry' : 'Log New Trade Execution'}
+              </h2>
+              <span style={{
+                fontSize: '0.68rem',
+                backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                color: '#60a5fa',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                padding: '2px 7px',
+                borderRadius: '4px',
+                fontWeight: 700
+              }}>
+                ⚡ Ctrl+V to OCR
+              </span>
+            </div>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              Trade checklist & psychology record
+              Paste screenshot langsung untuk auto-fill parameter trade
             </span>
           </div>
           <button onClick={onClose} className="btn btn-ghost btn-icon">
             <X size={20} />
           </button>
         </div>
+
+        {/* OCR Processing Indicator Banner */}
+        {isProcessingOCR && (
+          <div style={{
+            padding: '10px 16px',
+            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+            borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            color: '#93c5fd',
+            fontSize: '0.82rem',
+            fontWeight: 600
+          }}>
+            <div style={{
+              width: '14px',
+              height: '14px',
+              border: '2px solid #60a5fa',
+              borderTopColor: 'transparent',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <span>Membaca dan mengekstrak data dari screenshot...</span>
+          </div>
+        )}
 
         {/* Modal Form Body */}
         <form onSubmit={handleSubmit} className="modal-body">
@@ -780,9 +922,14 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             border: '1px solid #1e293b',
             marginBottom: '16px'
           }}>
-            <label className="input-label" style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>Dual Chart Comparison (Before & After Screenshots)</span>
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <label className="input-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>Dual Chart Comparison (Before & After Screenshots)</span>
+              </label>
+              <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                Tekan <strong>Ctrl + V</strong> di mana saja untuk paste gambar & auto-fill
+              </span>
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {/* Before Screenshot */}
@@ -794,10 +941,15 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   type="text"
                   value={screenshotBefore}
                   onChange={(e) => setScreenshotBefore(e.target.value)}
-                  placeholder="https://www.tradingview.com/x/... (Before)"
+                  placeholder="https://www.tradingview.com/x/... atau Paste Gambar (Before)"
                   className="input-control font-mono"
                   style={{ width: '100%', fontSize: '0.78rem' }}
                 />
+                {screenshotBefore && (
+                  <div style={{ marginTop: '6px', maxHeight: '90px', overflow: 'hidden', borderRadius: '6px', border: '1px solid #1e293b' }}>
+                    <img src={screenshotBefore} alt="Before preview" style={{ width: '100%', height: '90px', objectFit: 'cover' }} />
+                  </div>
+                )}
               </div>
 
               {/* After Screenshot */}
@@ -809,10 +961,15 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   type="text"
                   value={screenshotAfter}
                   onChange={(e) => setScreenshotAfter(e.target.value)}
-                  placeholder="https://www.tradingview.com/x/... (After)"
+                  placeholder="https://www.tradingview.com/x/... atau Paste Gambar (After)"
                   className="input-control font-mono"
                   style={{ width: '100%', fontSize: '0.78rem' }}
                 />
+                {screenshotAfter && (
+                  <div style={{ marginTop: '6px', maxHeight: '90px', overflow: 'hidden', borderRadius: '6px', border: '1px solid #1e293b' }}>
+                    <img src={screenshotAfter} alt="After preview" style={{ width: '100%', height: '90px', objectFit: 'cover' }} />
+                  </div>
+                )}
               </div>
             </div>
           </div>

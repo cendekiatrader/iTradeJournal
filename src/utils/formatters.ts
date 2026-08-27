@@ -1,6 +1,22 @@
 import { Currency } from '../types';
 
-export const formatCurrency = (amount: number, currency: Currency = 'USD', compact: boolean = false): string => {
+let isStealthModeActive = false;
+
+export const setStealthModeState = (active: boolean) => {
+  isStealthModeActive = active;
+};
+
+export const getStealthModeState = () => isStealthModeActive;
+
+export const formatCurrency = (
+  amount: number, 
+  currency: Currency = 'USD', 
+  compact: boolean = false,
+  overrideStealth?: boolean
+): string => {
+  if (isStealthModeActive && overrideStealth !== true) {
+    return '••••••';
+  }
   const isNegative = amount < 0;
   const absAmount = Math.abs(amount);
 
