@@ -139,7 +139,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <StatCard
           title="Current Streak"
           value={metrics.currentStreak.count > 0 ? `${metrics.currentStreak.count} ${metrics.currentStreak.type}` : 'None'}
-          subValue={`Best: +${formatCurrency(metrics.bestTrade, currentCurrency, true)} • Worst: -${formatCurrency(Math.abs(metrics.worstTrade), currentCurrency, true)}`}
+          subValue={`Best: ${metrics.bestTrade > 0 ? `+${formatCurrency(metrics.bestTrade, currentCurrency, true)}` : '-'}${metrics.worstTrade < 0 ? ` • Worst: -${formatCurrency(Math.abs(metrics.worstTrade), currentCurrency, true)}` : ''}`}
           subValueType={metrics.currentStreak.type === 'WIN' ? 'positive' : 'negative'}
           icon={Flame}
           iconColor="#ec4899"
