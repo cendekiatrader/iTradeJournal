@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { MonteCarloView } from './MonteCarloView';
 import { HoldingDurationMatrix } from './HoldingDurationMatrix';
+import { WinrateRRRMatrix } from './WinrateRRRMatrix';
 import { ExecutiveReportModal } from '../reports/ExecutiveReportModal';
 import { Trade } from '../../types';
 
@@ -408,6 +409,9 @@ export const AnalyticsView: React.FC = () => {
 
       {/* Trade Holding Duration & Time Edge Matrix */}
       <HoldingDurationMatrix trades={filteredTrades} currency={currentCurrency} />
+
+      {/* Winrate vs RRR Sensitivity Threshold */}
+      <WinrateRRRMatrix />
 
       {/* Monte Carlo Risk & Equity Forecaster Engine */}
       <MonteCarloView />

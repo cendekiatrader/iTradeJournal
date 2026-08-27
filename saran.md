@@ -196,4 +196,44 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 
 ---
 
+### F. Saran Fitur Baru & Inovasi Tingkat Lanjut (Batch 51 - 62)
+
+51. **📊 Trade Equity Curve & Watermark Overlay (Pemisahan Kurva Profit per Setup)**
+    - *Konsep*: Memecah kurva ekuitas saldo keseluruhan menjadi beberapa sub-kurva berwarna untuk tiap Setup/SOP (misal: kurva *FVG Mitigation* vs *Breakout*) dalam satu grafik, sehingga terlihat jelas strategi mana yang menggendong portofolio dan mana yang membebani.
+
+52. **🎯 Live Risk of Ruin & Drawdown Probability Matrix**
+    - *Konsep*: Menghitung probabilitas matematis akun mengalami drawdown 10%, 20%, 50%, atau modal habis (Ruin) berdasarkan formula statistik *Vince / Ralph* menggunakan data historis Winrate & Payoff Ratio aktual.
+
+53. **🔄 Live Position Sizing Converter & Multi-Pair Currency Cross Rates**
+    - *Konsep*: Konverter pip value otomatis real-time untuk cross pair eksotis (misal: EURGBP, EURAUD, GBPCHF) yang menghitung rate konversi mata uang akun (misal USD) ke quote currency tanpa perlu tebak-tebakan pip value.
+
+54. **🧠 Smart AI Rule Adherence Audit & Tagging (AI Post-Mortem Analyzer)**
+    - *Konsep*: Evaluasi otomatis via prompt analitis internal terhadap isian catatan `Lessons` dan `Notes` trader untuk memberikan skor objektivitas, mendeteksi kata-kata bernada panik/FOMO, dan memberi saran perbaikan mindset.
+
+55. **📈 Rolling Sharpe & Sortino Ratio Performance Gauge**
+    - *Konsep*: Menampilkan grafik metrik hedge fund standar (Sharpe Ratio untuk volatilitas total, Sortino Ratio khusus volatilitas downside negatif) dengan window 30 trade bergulir (*rolling 30-trade window*) untuk mengukur konsistensi risiko.
+
+56. **📋 Automated End-of-Day / Weekend PDF Digest to Telegram/Email**
+    - *Konsep*: Pengiriman ringkasan performa harian / mingguan (Total Trade, Winrate, Net PnL, Top Winner, Biggest Mistake) otomatis ke bot Telegram atau Email pribadi trader pada penutupan pasar Jumat malam.
+
+57. **🎯 R-Multiple Distribution Histogram & Expectancy Curve**
+    - *Konsep*: Visualisasi histogram sebaran keuntungan dalam kelipatan R (+1R, +2R, +3R, -1R) untuk melihat apakah kurva profit trader memiliki *fat positive tail* (laba besar asimetris) atau justru sering terkena *negative outlier*.
+
+58. **🛡️ Max Floating Profit Loss Guard (Trailing Profit Protector Calculator)**
+    - *Konsep*: Menghitung seberapa sering posisi floating profit tinggi (+2R atau lebih) berakhir kena Stop Loss atau Break-Even, lengkap dengan rekomendasi level *Take Profit parsial* optimal.
+
+59. **⏱️ Pre-Market Warmup & Readiness Assessment Quiz (Tes Kesiapan Mental Sebelum Trading)**
+    - *Konsep*: Kuis singkat 3 pertanyaan (Kondisi fisik, rencana risiko hari ini, daftar berita berdampak tinggi) sebelum tombol 'New Trade' aktif untuk memastikan kesiapan trading 100%.
+
+60. **🗃️ Trade Grouping & Scale-In / Scale-Out Position Bundler**
+    - *Konsep*: Kemampuan menggabungkan beberapa order/tiket parsial (misal: entry 3 kali dengan layer lot bertingkat pada satu setup yang sama) menjadi satu kesatuan *Parent Trade Campaign* dengan kalkulasi rata-rata entry (Average Weighted Entry).
+
+61. **📊 Winrate & RRR Sensitivity Threshold (Tabel Sensitivitas Impas)**
+    - *Konsep*: Tabel matriks dinamis yang menunjukkan jika winrate turun 5%–10%, berapa RRR minimum yang wajib dipertahankan agar portofolio tetap profit bersih.
+
+62. **📑 Single-Page PDF Trade Case Study Exporter (Lembar Bedah 1 Trade)**
+    - *Konsep*: Cetak 1 lembar dokumen PDF eksklusif khusus untuk satu trade terpilih: berisi screenshot Before/After resolusi tinggi, checklist konfluensi, metrik angka, evaluasi psikologi, dan catatan pelajaran penting.
+
+---
+
 *Terakhir diperbarui: 27 Agustus 2026*
