@@ -59,8 +59,10 @@ export const fetchCloudAccounts = async (): Promise<TradingAccount[] | null> => 
 export const syncAccountToCloud = async (account: TradingAccount): Promise<boolean> => {
   if (!supabase) return false;
   try {
+    const { data: { user } } = await supabase.auth.getUser();
     const payload = {
       id: account.id,
+      user_id: user?.id || null,
       name: account.name,
       type: account.type,
       broker: account.broker,
@@ -153,8 +155,10 @@ export const fetchCloudTrades = async (): Promise<Trade[] | null> => {
 export const syncTradeToCloud = async (trade: Trade): Promise<boolean> => {
   if (!supabase) return false;
   try {
+    const { data: { user } } = await supabase.auth.getUser();
     const payload = {
       id: trade.id,
+      user_id: user?.id || null,
       account_id: trade.accountId,
       symbol: trade.symbol,
       asset_class: trade.assetClass,
@@ -248,8 +252,10 @@ export const fetchCloudWithdrawals = async (): Promise<WithdrawalRecord[] | null
 export const syncWithdrawalToCloud = async (withdrawal: WithdrawalRecord): Promise<boolean> => {
   if (!supabase) return false;
   try {
+    const { data: { user } } = await supabase.auth.getUser();
     const payload = {
       id: withdrawal.id,
+      user_id: user?.id || null,
       account_id: withdrawal.accountId,
       amount: withdrawal.amount,
       date: withdrawal.date,

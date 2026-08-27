@@ -90,8 +90,7 @@ const MainApp: React.FC = () => {
         setShortcutsModalOpen(prev => !prev);
       } else if (e.key === 'n' || e.key === 'N') {
         e.preventDefault();
-        setEditingTrade(null);
-        setTradeFormOpen(true);
+        handleOpenNewTrade();
       } else if (e.key === 'd' || e.key === 'D') {
         e.preventDefault();
         setActiveTab('dashboard');
@@ -144,6 +143,11 @@ const MainApp: React.FC = () => {
   };
 
   const handleOpenNewTrade = () => {
+    if (accounts.length === 0) {
+      setEditingAccount(null);
+      setAccountFormOpen(true);
+      return;
+    }
     setEditingTrade(null);
     setTradeFormOpen(true);
   };
