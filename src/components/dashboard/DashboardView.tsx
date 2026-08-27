@@ -74,6 +74,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Key Metric Stats Grid */}
       <div className="grid-stats">
+        {/* Row 1: Core Profitability & Edge */}
         <StatCard
           title="Net Cumulative PnL"
           value={formatCurrency(metrics.totalPnL, currentCurrency)}
@@ -116,6 +117,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           iconBg="rgba(139, 92, 246, 0.12)"
         />
 
+        {/* Row 2: Risk Management & Account Defense */}
         <StatCard
           title="Max Drawdown"
           value={`${metrics.maxDrawdownPercent.toFixed(1)}%`}
@@ -127,23 +129,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         />
 
         <StatCard
-          title="Avg Holding Period"
-          value={metrics.avgHoldingFormatted}
-          subValue={`Based on ${metrics.totalTrades} closed trades`}
-          subValueType="accent"
-          icon={Clock}
-          iconColor="#06b6d4"
-          iconBg="rgba(6, 182, 212, 0.12)"
-        />
-
-        <StatCard
-          title="Current Streak"
-          value={metrics.currentStreak.count > 0 ? `${metrics.currentStreak.count} ${metrics.currentStreak.type}` : 'None'}
-          subValue={`Best: ${metrics.bestTrade > 0 ? `+${formatCurrency(metrics.bestTrade, currentCurrency, true)}` : '-'}${metrics.worstTrade < 0 ? ` • Worst: -${formatCurrency(Math.abs(metrics.worstTrade), currentCurrency, true)}` : ''}`}
-          subValueType={metrics.currentStreak.type === 'WIN' ? 'positive' : 'negative'}
-          icon={Flame}
-          iconColor="#ec4899"
-          iconBg="rgba(236, 72, 153, 0.12)"
+          title="Recovery Factor"
+          value={`${metrics.recoveryFactor > 99 ? '99.0+' : metrics.recoveryFactor.toFixed(2)}x`}
+          subValue={metrics.recoveryFactor >= 2 ? 'Excellent Resilience' : 'Moderate Resilience'}
+          subValueType={metrics.recoveryFactor >= 2 ? 'positive' : 'neutral'}
+          icon={Zap}
+          iconColor="#f59e0b"
+          iconBg="rgba(245, 158, 11, 0.12)"
         />
 
         <StatCard
@@ -159,13 +151,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         />
 
         <StatCard
-          title="Recovery Factor"
-          value={`${metrics.recoveryFactor > 99 ? '99.0+' : metrics.recoveryFactor.toFixed(2)}x`}
-          subValue={metrics.recoveryFactor >= 2 ? 'Excellent Resilience' : 'Moderate Resilience'}
-          subValueType={metrics.recoveryFactor >= 2 ? 'positive' : 'neutral'}
-          icon={Zap}
-          iconColor="#f59e0b"
-          iconBg="rgba(245, 158, 11, 0.12)"
+          title="Daily Run Rate"
+          value={`${metrics.dailyRunRate >= 0 ? '+' : ''}${formatCurrency(metrics.dailyRunRate, currentCurrency)}`}
+          subValue={`Across ${metrics.activeTradingDays} active days`}
+          subValueType={metrics.dailyRunRate >= 0 ? 'positive' : 'negative'}
+          icon={Calendar}
+          iconColor="#14b8a6"
+          iconBg="rgba(20, 184, 166, 0.12)"
+        />
+
+        {/* Row 3: Execution Habits & Momentum */}
+        <StatCard
+          title="Current Streak"
+          value={metrics.currentStreak.count > 0 ? `${metrics.currentStreak.count} ${metrics.currentStreak.type}` : 'None'}
+          subValue={`Best: ${metrics.bestTrade > 0 ? `+${formatCurrency(metrics.bestTrade, currentCurrency, true)}` : '-'}${metrics.worstTrade < 0 ? ` • Worst: -${formatCurrency(Math.abs(metrics.worstTrade), currentCurrency, true)}` : ''}`}
+          subValueType={metrics.currentStreak.type === 'WIN' ? 'positive' : 'negative'}
+          icon={Flame}
+          iconColor="#ec4899"
+          iconBg="rgba(236, 72, 153, 0.12)"
         />
 
         <StatCard
@@ -179,6 +182,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         />
 
         <StatCard
+          title="Avg Holding Period"
+          value={metrics.avgHoldingFormatted}
+          subValue={`Based on ${metrics.totalTrades} closed trades`}
+          subValueType="accent"
+          icon={Clock}
+          iconColor="#06b6d4"
+          iconBg="rgba(6, 182, 212, 0.12)"
+        />
+
+        <StatCard
           title="Total Traded Volume"
           value={`${metrics.totalVolume >= 100 ? metrics.totalVolume.toFixed(1) : metrics.totalVolume.toFixed(2)}`}
           subValue="Lots / Contracts / Units"
@@ -186,16 +199,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           icon={Layers}
           iconColor="#a855f7"
           iconBg="rgba(168, 85, 247, 0.12)"
-        />
-
-        <StatCard
-          title="Daily Run Rate"
-          value={`${metrics.dailyRunRate >= 0 ? '+' : ''}${formatCurrency(metrics.dailyRunRate, currentCurrency)}`}
-          subValue={`Across ${metrics.activeTradingDays} active days`}
-          subValueType={metrics.dailyRunRate >= 0 ? 'positive' : 'negative'}
-          icon={Calendar}
-          iconColor="#14b8a6"
-          iconBg="rgba(20, 184, 166, 0.12)"
         />
       </div>
 
