@@ -21,6 +21,7 @@ import { PublicProfileView } from './components/profile/PublicProfileView';
 import { EconomicCalendarView } from './components/news/EconomicCalendarView';
 import { PlaybookView } from './components/playbook/PlaybookView';
 import { QuickRiskDock } from './components/calculator/QuickRiskDock';
+import { WorkspaceView } from './components/workspace/WorkspaceView';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
@@ -96,6 +97,9 @@ const MainApp: React.FC = () => {
       } else if (e.key === 'd' || e.key === 'D') {
         e.preventDefault();
         setActiveTab('dashboard');
+      } else if (e.key === 'w' || e.key === 'W') {
+        e.preventDefault();
+        setActiveTab('workspace');
       } else if (e.key === 'j' || e.key === 'J') {
         e.preventDefault();
         setActiveTab('journal');
@@ -217,6 +221,13 @@ const MainApp: React.FC = () => {
               onViewTradeDetail={handleViewTradeDetail}
               onNavigateToJournal={() => setActiveTab('journal')}
               onNavigateToNews={() => setActiveTab('news')}
+            />
+          )}
+
+          {activeTab === 'workspace' && (
+            <WorkspaceView
+              onOpenTradeModal={handleOpenNewTrade}
+              onViewTradeDetail={handleViewTradeDetail}
             />
           )}
 

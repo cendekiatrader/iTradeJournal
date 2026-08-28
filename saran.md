@@ -31,6 +31,7 @@ Dokumen ini mencatat seluruh daftar saran fitur, inovasi, dan roadmap pengembang
 | 21 | **A+ Setup Playbook Gallery (Knowledge Base & Supabase Sync)** | 🟢 **SELESAI** | Tab khusus di sidebar (shortcut `P`) untuk arsip SOP setup A+, checklist rules/confluences, blueprint Before/After, dan terintegrasi langsung ke dropdown Strategy form trade & cloud database Supabase. |
 | 22 | **Sticky Quick-Risk Mini Dock Bar (Always-on-Top Desktop PiP)** | 🟢 **SELESAI** | Dock melayang di pojok kanan bawah untuk hitung lot kilat, salin lot 1-klik, dan tombol pop-out *Document Picture-in-Picture* Always-on-Top di atas MT5 / TradingView. |
 | 23 | **User-Isolated Dashboard Card Customization Cloud Sync** | 🟢 **SELESAI** | Kustomisasi tampilan kartu metrik dashboard (tampilkan/sembunyikan) yang tersimpan otomatis per user di cloud Supabase (`user_metadata`) & `localStorage`. |
+| 24 | **Custom Multi-Monitor Workspace Hub & Presets** | 🟢 **SELESAI** | Menu tab "Workspace" di Sidebar (shortcut `W`) dengan konfigurasi modular (TradingView Chart, Market Clock, Economic Calendar, Risk Calculator, Recent Trades) dan pop-out detached window multi-layar, tersimpan otomatis per akun di Supabase cloud. |
 
 
 ---

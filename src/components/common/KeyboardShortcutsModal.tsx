@@ -18,6 +18,7 @@ const SHORTCUTS: ShortcutItem[] = [
   { key: 'Esc', description: 'Tutup modal / popup / fullscreen', category: 'General' },
   { key: '?', description: 'Buka panduan Keyboard Shortcuts ini', category: 'General' },
   { key: 'D', description: 'Pindah ke tab Performance Dashboard', category: 'Navigation' },
+  { key: 'W', description: 'Pindah ke tab Multi-Screen Workspace', category: 'Navigation' },
   { key: 'J', description: 'Pindah ke tab Trade Log (Journal)', category: 'Navigation' },
   { key: 'P', description: 'Pindah ke tab Playbook', category: 'Navigation' },
   { key: 'A', description: 'Pindah ke tab Analytics & Setups', category: 'Navigation' },
