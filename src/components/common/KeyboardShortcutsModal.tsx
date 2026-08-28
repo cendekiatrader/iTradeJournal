@@ -14,7 +14,6 @@ interface ShortcutItem {
 
 const SHORTCUTS: ShortcutItem[] = [
   { key: 'N', description: 'Buka form Log New Trade (Catat Posisi Baru)', category: 'Actions' },
-  { key: 'Ctrl + V', description: 'Paste screenshot chart langsung ke modal OCR', category: 'Actions' },
   { key: 'Ctrl + Enter', description: 'Simpan / Submit form trade langsung', category: 'Actions' },
   { key: 'Esc', description: 'Tutup modal / popup / fullscreen', category: 'General' },
   { key: '?', description: 'Buka panduan Keyboard Shortcuts ini', category: 'General' },
