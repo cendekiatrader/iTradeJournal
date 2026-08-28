@@ -29,8 +29,8 @@ export const QuickRiskDock: React.FC = () => {
   const [isPipActive, setIsPipActive] = useState<boolean>(false);
   const [instrument, setInstrument] = useState<'Gold' | 'Forex' | 'Crypto' | 'Indices'>('Gold');
   const [riskPercent, setRiskPercent] = useState<number>(1.0);
-  const [entryPrice, setEntryPrice] = useState<number>(2500);
-  const [stopLossPrice, setStopLossPrice] = useState<number>(2490);
+  const [entryPrice, setEntryPrice] = useState<string>('2500');
+  const [stopLossPrice, setStopLossPrice] = useState<string>('2490');
   const [copied, setCopied] = useState<boolean>(false);
 
   const pipWindowRef = useRef<any>(null);
@@ -45,7 +45,9 @@ export const QuickRiskDock: React.FC = () => {
   const currentBalance = activeAccount?.currentBalance || accounts[0]?.currentBalance || 10000;
   const currentCurrency = activeAccount?.currency || 'USD';
   const riskAmount = (currentBalance * riskPercent) / 100;
-  const stopDistance = Math.abs(entryPrice - stopLossPrice);
+  const entryNum = parseFloat(entryPrice) || 0;
+  const slNum = parseFloat(stopLossPrice) || 0;
+  const stopDistance = Math.abs(entryNum - slNum);
 
   let calculatedLot = 0;
   if (stopDistance > 0) {
@@ -123,7 +125,7 @@ export const QuickRiskDock: React.FC = () => {
 
       // Render content
       const renderPiPContent = () => {
-        const dist = Math.abs(entryPrice - stopLossPrice);
+        const dist = Math.abs(entryNum - slNum);
         let lot = 0;
         if (dist > 0) {
           if (instrument === 'Gold') lot = riskAmount / (dist * 100);
@@ -180,14 +182,12 @@ export const QuickRiskDock: React.FC = () => {
 
         if (entryInput) {
           entryInput.addEventListener('input', (e: any) => {
-            const val = parseFloat(e.target.value) || 0;
-            setEntryPrice(val);
+            setEntryPrice(e.target.value);
           });
         }
         if (slInput) {
           slInput.addEventListener('input', (e: any) => {
-            const val = parseFloat(e.target.value) || 0;
-            setStopLossPrice(val);
+            setStopLossPrice(e.target.value);
           });
         }
         if (copyBtn) {
@@ -321,10 +321,10 @@ export const QuickRiskDock: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setInstrument(ast);
-                    if (ast === 'Gold') { setEntryPrice(2500); setStopLossPrice(2490); }
-                    else if (ast === 'Forex') { setEntryPrice(1.0850); setStopLossPrice(1.0820); }
-                    else if (ast === 'Crypto') { setEntryPrice(60000); setStopLossPrice(59000); }
-                    else if (ast === 'Indices') { setEntryPrice(40000); setStopLossPrice(39800); }
+                    if (ast === 'Gold') { setEntryPrice('2500'); setStopLossPrice('2490'); }
+                    else if (ast === 'Forex') { setEntryPrice('1.0850'); setStopLossPrice('1.0820'); }
+                    else if (ast === 'Crypto') { setEntryPrice('60000'); setStopLossPrice('59000'); }
+                    else if (ast === 'Indices') { setEntryPrice('40000'); setStopLossPrice('39800'); }
                   }}
                   style={{
                     flex: 1,
@@ -345,27 +345,41 @@ export const QuickRiskDock: React.FC = () => {
 
             {/* Entry & SL Input */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-              <div className="input-group" style={{ margin: 0 }}>
-                <label className="input-label" style={{ fontSize: '0.7rem', marginBottom: '2px' }}>Entry Price</label>
+              <div style={{ minWidth: 0 }}>
+                <label className="input-label" style={{ fontSize: '0.7rem', marginBottom: '2px', display: 'block' }}>Entry Price</label>
                 <input
                   type="number"
                   step="any"
                   value={entryPrice}
-                  onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setEntryPrice(e.target.value)}
                   className="input-control font-mono"
-                  style={{ fontSize: '0.78rem', padding: '5px 8px' }}
+                  style={{
+                    fontSize: '0.78rem',
+                    padding: '5px 8px',
+                    width: '100%',
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                    display: 'block'
+                  }}
                 />
               </div>
 
-              <div className="input-group" style={{ margin: 0 }}>
-                <label className="input-label" style={{ fontSize: '0.7rem', marginBottom: '2px' }}>Stop Loss</label>
+              <div style={{ minWidth: 0 }}>
+                <label className="input-label" style={{ fontSize: '0.7rem', marginBottom: '2px', display: 'block' }}>Stop Loss</label>
                 <input
                   type="number"
                   step="any"
                   value={stopLossPrice}
-                  onChange={(e) => setStopLossPrice(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setStopLossPrice(e.target.value)}
                   className="input-control font-mono"
-                  style={{ fontSize: '0.78rem', padding: '5px 8px' }}
+                  style={{
+                    fontSize: '0.78rem',
+                    padding: '5px 8px',
+                    width: '100%',
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                    display: 'block'
+                  }}
                 />
               </div>
             </div>
