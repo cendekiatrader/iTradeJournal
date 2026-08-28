@@ -105,3 +105,112 @@ export function parseTradeFromOCRText(rawText: string): ExtractedTradeData {
 
   return result;
 }
+
+/**
+ * Parses raw text copied directly from MetaTrader (MT4/MT5), TradingView,
+ * cTrader, or Telegram signal channels into structured trade fields.
+ *
+ * Example formats supported:
+ * 1. MT5 tab-separated history line:
+ *    "2026.08.28 14:30:00	buy	0.50	xauusd	2500.50	2490.00	2520.00	2026.08.28 16:45:12	2515.20	0.00	0.00	735.00"
+ * 2. Signal syntax:
+ *    "BUY XAUUSD @ 2500 SL: 2490 TP: 2520 LOT: 0.5 PROFIT: +735"
+ * 3. Compact notation:
+ *    "EURUSD SELL 1.0850 SL 1.0880 TP 1.0790 1.0 LOT"
+ */
+export function parseRawTradeText(rawInput: string): ExtractedTradeData | null {
+  if (!rawInput || typeof rawInput !== 'string') return null;
+  const raw = rawInput.trim();
+  if (raw.length === 0) return null;
+
+  // 1. Try Tab-Separated or Multi-Space MT4 / MT5 History Row
+  // Standard MT5: [Time, Position/Ticket, Type(buy/sell), Volume, Symbol, PriceOpen, S/L, T/P, TimeClose, PriceClose, Commission, Swap, Profit]
+  const tabTokens = raw.split(/\t+/).map(t => t.trim()).filter(Boolean);
+  if (tabTokens.length >= 5) {
+    const parsed = parseMetaTraderTokens(tabTokens);
+    if (parsed && (parsed.symbol || parsed.entryPrice)) {
+      return parsed;
+    }
+  }
+
+  // 2. Try space-separated tokens if it looks like MT row
+  const spaceTokens = raw.split(/\s+/);
+  if (spaceTokens.length >= 6) {
+    const parsed = parseMetaTraderTokens(spaceTokens);
+    if (parsed && (parsed.symbol || parsed.entryPrice)) {
+      return parsed;
+    }
+  }
+
+  // 3. Fallback to NLP / regex rule matcher (signals / sentences / raw formats)
+  const regexResult = parseTradeFromOCRText(raw);
+  if (regexResult.symbol || regexResult.entryPrice || regexResult.pnl !== undefined) {
+    return regexResult;
+  }
+
+  return null;
+}
+
+function parseMetaTraderTokens(tokens: string[]): ExtractedTradeData | null {
+  const result: ExtractedTradeData = {};
+
+  // Find symbol in tokens
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i].toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const matchedSym = COMMON_SYMBOLS.find(s => token === s || token.startsWith(s));
+    if (matchedSym) {
+      result.symbol = matchedSym;
+      if (['XAUUSD', 'XAGUSD'].includes(matchedSym)) result.assetClass = 'Commodities';
+      else if (matchedSym.endsWith('USDT') || ['BTC', 'ETH', 'SOL'].some(c => matchedSym.startsWith(c))) result.assetClass = 'Crypto';
+      else if (['US30', 'NAS100', 'SPX500', 'GER40', 'UK100', 'JPN225'].includes(matchedSym)) result.assetClass = 'Indices';
+      else if (['NVDA', 'AAPL', 'TSLA'].includes(matchedSym)) result.assetClass = 'Stocks';
+      else result.assetClass = 'Forex';
+      break;
+    }
+  }
+
+  // Find Direction
+  for (const t of tokens) {
+    const upper = t.toUpperCase();
+    if (['BUY', 'LONG', 'BUY_LIMIT', 'BUY_STOP'].includes(upper)) {
+      result.direction = 'LONG';
+      break;
+    } else if (['SELL', 'SHORT', 'SELL_LIMIT', 'SELL_STOP'].includes(upper)) {
+      result.direction = 'SHORT';
+      break;
+    }
+  }
+
+  // Extract all pure numeric tokens (possible prices, lot, pnl)
+  const numericValues: number[] = [];
+  for (const t of tokens) {
+    const cleaned = t.replace(/[$,]/g, '');
+    const num = parseFloat(cleaned);
+    if (!isNaN(num) && !/^\d{4}[.-/]\d{2}[.-/]\d{2}$/.test(t) && !/^\d{2}:\d{2}/.test(t)) {
+      numericValues.push(num);
+    }
+  }
+
+  // If we have numbers, intelligently map typical MT4/MT5 position columns:
+  // [volume, openPrice, sl, tp, closePrice, (commission), (swap), profit]
+  if (numericValues.length >= 3) {
+    // Check first small number as volume / lot
+    const firstNum = numericValues[0];
+    if (firstNum > 0 && firstNum <= 100 && numericValues.length >= 4) {
+      result.quantity = firstNum;
+      result.entryPrice = numericValues[1];
+      if (numericValues[2] > 0) result.stopLoss = numericValues[2];
+      if (numericValues[3] > 0) result.takeProfit = numericValues[3];
+      if (numericValues.length >= 5 && numericValues[4] > 0) result.exitPrice = numericValues[4];
+      // Last item is usually profit
+      const lastNum = numericValues[numericValues.length - 1];
+      result.pnl = lastNum;
+    } else {
+      // Fallback: search prices based on magnitude
+      if (!result.entryPrice && numericValues[0]) result.entryPrice = numericValues[0];
+      if (!result.exitPrice && numericValues.length >= 2) result.exitPrice = numericValues[1];
+    }
+  }
+
+  return (result.symbol || result.entryPrice || result.pnl !== undefined) ? result : null;
+}

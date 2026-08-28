@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { formatDateTimeDDMMYYYY, formatDuration } from '../../utils/formatters';
 import { RichTextEditor } from '../common/RichTextEditor';
-import { parseTradeFromOCRText } from '../../utils/ocrParser';
+import { parseTradeFromOCRText, parseRawTradeText, ExtractedTradeData } from '../../utils/ocrParser';
 import { createWorker } from 'tesseract.js';
 
 interface TradeFormModalProps {
@@ -216,6 +216,56 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
 
   if (!isOpen) return null;
 
+  const applyExtractedData = (extracted: ExtractedTradeData, sourceLabel: string) => {
+    let filledFieldsCount = 0;
+
+    if (extracted.symbol) {
+      setSymbol(extracted.symbol);
+      filledFieldsCount++;
+    }
+    if (extracted.assetClass) {
+      setAssetClass(extracted.assetClass);
+    }
+    if (extracted.direction) {
+      setDirection(extracted.direction);
+      filledFieldsCount++;
+    }
+    if (extracted.timeframe) {
+      setTimeframe(extracted.timeframe);
+      filledFieldsCount++;
+    }
+    if (extracted.entryPrice) {
+      setEntryPrice(extracted.entryPrice);
+      filledFieldsCount++;
+    }
+    if (extracted.exitPrice) {
+      setExitPrice(extracted.exitPrice);
+      filledFieldsCount++;
+    }
+    if (extracted.stopLoss) {
+      setStopLoss(extracted.stopLoss);
+      filledFieldsCount++;
+    }
+    if (extracted.takeProfit) {
+      setTakeProfit(extracted.takeProfit);
+      filledFieldsCount++;
+    }
+    if (extracted.quantity) {
+      setQuantity(extracted.quantity);
+      filledFieldsCount++;
+    }
+    if (extracted.pnl !== undefined) {
+      setPnl(extracted.pnl);
+      setStatus(extracted.pnl >= 0 ? 'WIN' : 'LOSS');
+      filledFieldsCount++;
+    }
+
+    if (filledFieldsCount > 0) {
+      showToast(`⚡ Auto-Fill Berhasil: ${filledFieldsCount} data terdeteksi dari ${sourceLabel}!`, 'success');
+    }
+    return filledFieldsCount;
+  };
+
   const processImageWithOCR = async (imageSrc: string) => {
     setIsProcessingOCR(true);
     setPastedImagePreview(imageSrc);
@@ -227,48 +277,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       await worker.terminate();
 
       const extracted = parseTradeFromOCRText(ret.data.text);
-      let filledFieldsCount = 0;
-
-      if (extracted.symbol) {
-        setSymbol(extracted.symbol);
-        filledFieldsCount++;
-      }
-      if (extracted.assetClass) {
-        setAssetClass(extracted.assetClass);
-      }
-      if (extracted.direction) {
-        setDirection(extracted.direction);
-        filledFieldsCount++;
-      }
-      if (extracted.timeframe) {
-        setTimeframe(extracted.timeframe);
-        filledFieldsCount++;
-      }
-      if (extracted.entryPrice) {
-        setEntryPrice(extracted.entryPrice);
-        filledFieldsCount++;
-      }
-      if (extracted.exitPrice) {
-        setExitPrice(extracted.exitPrice);
-        filledFieldsCount++;
-      }
-      if (extracted.stopLoss) {
-        setStopLoss(extracted.stopLoss);
-        filledFieldsCount++;
-      }
-      if (extracted.takeProfit) {
-        setTakeProfit(extracted.takeProfit);
-        filledFieldsCount++;
-      }
-      if (extracted.quantity) {
-        setQuantity(extracted.quantity);
-        filledFieldsCount++;
-      }
-      if (extracted.pnl !== undefined) {
-        setPnl(extracted.pnl);
-        setStatus(extracted.pnl >= 0 ? 'WIN' : 'LOSS');
-        filledFieldsCount++;
-      }
+      const filledFieldsCount = applyExtractedData(extracted, 'gambar screenshot');
 
       // Attach screenshot to before/after if empty
       if (!screenshotBefore) {
@@ -277,9 +286,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
         setScreenshotAfter(imageSrc);
       }
 
-      if (filledFieldsCount > 0) {
-        showToast(`⚡ Auto-Fill Berhasil: ${filledFieldsCount} data terdeteksi dari gambar!`, 'success');
-      } else {
+      if (filledFieldsCount === 0) {
         showToast('Screenshot terlampir. Tidak ada parameter teks yang cocok otomatis.', 'info');
       }
     } catch (err) {
@@ -291,12 +298,16 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
     }
   };
 
-  // Paste handler for modal window
+  // Paste handler for modal window (Handles both Screenshot OCR & Raw MT4/MT5 Text Paste)
   const handleModalPaste = (e: React.ClipboardEvent) => {
-    // If user is pasting in a regular text field or rich editor with plain text, let it be
     const items = e.clipboardData?.items;
     if (!items) return;
 
+    // Check if target is an active editable input or textarea
+    const targetTag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+    const isInsideInput = targetTag === 'input' || targetTag === 'textarea';
+
+    // 1. Check for Image Paste (OCR Flow)
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf('image') !== -1) {
         const file = items[i].getAsFile();
@@ -310,7 +321,19 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             }
           };
           reader.readAsDataURL(file);
-          break;
+          return;
+        }
+      }
+    }
+
+    // 2. Check for Plain Text Paste (Smart Magic MetaTrader / Signal Parser)
+    if (!isInsideInput) {
+      const text = e.clipboardData.getData('text');
+      if (text && text.trim().length > 3) {
+        const parsed = parseRawTradeText(text);
+        if (parsed && (parsed.symbol || parsed.entryPrice || parsed.pnl !== undefined)) {
+          e.preventDefault();
+          applyExtractedData(parsed, 'MetaTrader / teks clipboard');
         }
       }
     }
@@ -398,11 +421,11 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 borderRadius: '4px',
                 fontWeight: 700
               }}>
-                ⚡ Ctrl+V to OCR
+                ⚡ Ctrl+V to OCR & Magic MT Paste
               </span>
             </div>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              Paste screenshot langsung untuk auto-fill parameter trade
+              Paste screenshot chart atau baris riwayat teks MT4/MT5 langsung untuk auto-fill parameter trade
             </span>
           </div>
           <button onClick={onClose} className="btn btn-ghost btn-icon">

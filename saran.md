@@ -442,6 +442,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 124. **🧲 Liquidity & Fair Value Gap Zone Mapper**
      - *Konsep*: Komponen visual canvas interaktif di form trade untuk memetakan level FVG (Premium vs Discount 50% CE) dan Likuiditas (Buy-side / Sell-side Liquidity) secara terstruktur.
 
+### P. Smart Workflow, AI & Ekosistem Lanjutan (Batch 125 - 130)
+
+125. **⚡ Smart Magic Copy-Paste dari MetaTrader History (Paste Clipboard Raw Text)**
+     - *Konsep*: Copy 1 baris teks riwayat eksekusi MT4/MT5 atau notifikasi sinyal di clipboard, lalu tekan `Ctrl + V` di modal form trade untuk auto-fill parameter (Symbol, Direction, Volume, Entry, SL, TP, Exit, PnL) secara instan tanpa konflik dengan OCR gambar.
+
+126. **🧩 Drag & Drop Dashboard Metric Grid (Reorderable Cards)**
+     - *Konsep*: Mengatur ulang urutan posisi kartu statistik metrik di Performance Dashboard dengan cara ditarik dan digeser (*drag-and-drop*), tersimpan permanen per user di cloud Supabase.
+
+127. **🤖 AI Voice-to-Trade Logger (Dikte Suara ke Form Trade)**
+     - *Konsep*: Tombol mikrofon interaktif di form trade untuk mendikte alasan entri dan parameter setup (*Web Speech API / AI Whisper*) langsung di-transcribe menjadi field trade dan catatan jurnal.
+
+128. **🌓 Split-Screen Multi-Tasking Mode (Journal + Live TradingView)**
+     - *Konsep*: Tata letak split 50:50 pada layar desktop antara tabel/form jurnal di sisi kiri dan embedded chart TradingView live di sisi kanan tanpa perlu alt-tab.
+
+129. **🎯 Execution Slippage & Broker Quality Benchmark Index**
+     - *Konsep*: Analisis deviasi antara *Planned Entry* vs *Executed Price* untuk mengukur besaran slippage dan memberikan skor rating kualitas broker secara objektif.
+
+130. **📱 PWA Mobile Haptic Feedback & Swipe Review Gesture**
+     - *Konsep*: Getaran haptik responsif pada perangkat smartphone saat menekan tombol eksekusi serta gesture geser kanan/kiri untuk mereview detail trade di mobile.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
