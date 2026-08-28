@@ -563,6 +563,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 160. **🧘 Ergonomics & Screen Fatigue Pomodoro Guard**
      - *Konsep*: Timer kesehatan mata dan postur otomatis saat sesi trading panjang untuk menjaga fokus psikologis tetap optimal.
 
+### V. Visualisasi Aliran Modal, Disiplin & Otomasi Lanjutan (Batch 161 - 166)
+
+161. **📊 Account Equity Waterfall Breakdown Chart**
+     - *Konsep*: Grafik air terjun (*Waterfall Chart*) yang membedah kontribusi laba/rugi per pair atau setup terhadap total saldo secara berurutan.
+
+162. **🧭 Long vs Short Directional Edge per Killzone Matrix**
+     - *Konsep*: Matriks analitik yang mendeteksi arah posisi paling profitabel di tiap sesi (misal: *Long XAUUSD kuat di London Killzone*, *Short kuat di NY PM*).
+
+163. **🛡️ Prop Firm Lot Size Consistency Rule Validator**
+     - *Konsep*: Peringatan dini jika volume lot yang digunakan menyimpang jauh dari rata-rata (*Lot Deviation Rule* khas prop firm) untuk mencegah diskualifikasi akun.
+
+164. **🚨 1-Click Emergency Tilt Panic Shield (Mute & Chill)**
+     - *Konsep*: Tombol darurat di navbar/dock untuk langsung menutup tampilan chart, memutar audio relaksasi, dan mengunci akses catat trade selama 30 menit pasca-loss.
+
+165. **🔍 Stop-Hunt vs Clean Sweep Execution Ratio**
+     - *Konsep*: Analisis rasio seberapa sering posisi terkena *wick stop-hunt* sebelum harga melesat ke arah analisa vs posisi yang memang salah arah tren.
+
+166. **📱 Telegram Instant Daily Trade Summary Push**
+     - *Konsep*: Pengiriman otomatis infografis ringkasan performa harian (Total PnL, Winrate, Evaluasi) ke channel/chat Telegram pribadi trader setiap pergantian hari.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
