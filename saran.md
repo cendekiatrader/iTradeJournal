@@ -27,6 +27,9 @@ Dokumen ini mencatat seluruh daftar saran fitur, inovasi, dan roadmap pengembang
 | 17 | **Interactive Calendar Heatmap** | 🟢 **SELESAI** | Tampilan kalender harian dengan kalkulasi RRR dan PnL harian serta detail trade popup. |
 | 18 | **CSV Exporter** | 🟢 **SELESAI** | Kemampuan ekspor seluruh data trade dan metrik ke format CSV dalam 1-klik. |
 | 19 | **Quick Lot & Risk Auto-Sizer Terintegrasi di Form Input** | 🟢 **SELESAI** | Auto-kalkulator lot size instan langsung di dalam modal input trade berdasarkan jarak Entry/SL, saldo akun, dan persentase risiko (0.5%, 1%, 2%). |
+| 20 | **Stealth Privacy Mode (Sensor Saldo Instan)** | 🟢 **SELESAI** | Tombol 1-klik di Navbar (`Eye` / `EyeOff`) untuk menyensor otomatis seluruh nominal saldo/profit menjadi `••••••` (tersimpan di `localStorage`). |
+| 21 | **Clipboard Screenshot OCR & Quick Auto-Fill** | 🟢 **SELESAI** | Dukungan paste screenshot langsung (`Ctrl + V`) di form trade yang diproses mesin OCR (`tesseract.js`) untuk auto-fill Pair, Direction, Entry/SL/TP, Timeframe, Lot, dan PnL. |
+| 22 | **A+ Setup Playbook Gallery (Knowledge Base & Supabase Sync)** | 🟢 **SELESAI** | Tab khusus di sidebar (shortcut `P`) untuk arsip SOP setup A+, checklist rules/confluences, blueprint Before/After, dan terintegrasi langsung ke dropdown Strategy form trade & cloud database Supabase. |
 
 
 ---
@@ -423,6 +426,20 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 
 120. **🧘 60-Second Post-Loss Cooldown & Box Breathing Relaxer**
      - *Konsep*: Modal visual pereda stres otomatis pasca penutupan trade loss untuk menurunkan detak jantung dan mencegah revenge trading sebelum menyentuh posisi berikutnya.
+
+### O. Inovasi Interaktif & Advanced Visual Experience (Batch 121 - 124)
+
+121. **🎮 Interactive Trade Execution Replay Slider**
+     - *Konsep*: Slider interaktif di modal detail trade untuk memutar ulang alur eksekusi (*Entry ➔ Titik Floating Drawdown/MAE ➔ Titik Floating Profit/MFE ➔ Exit*) guna mengevaluasi kronologi psikologis saat menahan posisi.
+
+122. **⚡ Sticky Quick-Risk Mini Dock Bar**
+     - *Konsep*: Bar melayang mini (*Floating Dock*) di bagian bawah layar berisi kalkulator lot kilat dan ringkasan kapasitas risiko harian tanpa perlu berpindah tab kalkulator.
+
+123. **🏆 Trader Discipline XP & Level Progression System**
+     - *Konsep*: Sistem level akun (*Level 1 Novice ➔ Level 50 Institutional Master*) dengan perolehan XP berdasarkan kepatuhan rule SOP dan eksekusi Stop Loss disiplin untuk membangun kebiasaan trading yang konsisten.
+
+124. **🧲 Liquidity & Fair Value Gap Zone Mapper**
+     - *Konsep*: Komponen visual canvas interaktif di form trade untuk memetakan level FVG (Premium vs Discount 50% CE) dan Likuiditas (Buy-side / Sell-side Liquidity) secara terstruktur.
 
 ---
 
