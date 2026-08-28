@@ -523,6 +523,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 148. **🖥️ Custom Modular Multi-Window Workspace Hub (Sidebar Tab & Cloud Sync)**
      - *Konsep*: Menu tab khusus "Workspace" di Sidebar utama yang memungkinkan trader mengonfigurasi layout split multi-panel bebas (kombinasi modular: Jurnal, Chart TradingView Live, Kalender Berita, Radar Sesi, Monte Carlo, Kalkulator Lot). Konfigurasi workspace tersimpan terisolasi per user di database Supabase cloud (`user_metadata`) dan cache lokal multi-device.
 
+### T. Biometrik, Sentimen AI & Simulasi Replay (Batch 149 - 154)
+
+149. **⌚ Wearable Biometric Heart Rate Sync (Sensor Stres Apple Watch/Garmin)**
+     - *Konsep*: Sinkronisasi detak jantung (BPM) via Web Bluetooth / Health API saat open trade untuk melacak korelasi lonjakan stres fisik terhadap intervensi posisi prematur.
+
+150. **📦 Order Flow CVD & Volume Delta Absorption Visualizer**
+     - *Konsep*: Visualisasi grafik Cumulative Volume Delta (CVD) dan buyer/seller imbalance untuk memvalidasi absorbsi likuiditas institusi sebelum entry.
+
+151. **📰 Real-Time AI Financial Sentiment Radar (Twitter/X & News Feed)**
+     - *Konsep*: Skoring sentimen AI real-time (Skor Bullish/Bearish 0-100) dari headline berita finansial global (Fed, Bloomberg, Reuters) sebelum sesi killzone dimulai.
+
+152. **🪜 Multi-Target Scale-Out Funnel (Kalkulator Kunci Profit Bertingkat)**
+     - *Konsep*: Visualisasi pembagian TP1 (50%), TP2 (30%), Runner (20%) lengkap dengan proteksi otomatis geser Stop Loss ke Break-Even saat TP1 tercapai.
+
+153. **📼 Playbook Bar-by-Bar Replay & Practice Simulator**
+     - *Konsep*: Mode latihan replay candlestick per batang (*bar-by-bar*) menggunakan arsip SOP di Playbook untuk mengasah kecepatan identifikasi setup di akhir pekan.
+
+154. **🎯 Key Liquidity Level Sweep Radar (PDH/PDL & Session H/L)**
+     - *Konsep*: Widget radar jarak harga terhadap level likuiditas penting (*Previous Day High/Low, Asian High/Low, Weekly High/Low*) dengan alarm peringatan sweep.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
