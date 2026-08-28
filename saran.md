@@ -583,6 +583,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 166. **📱 Telegram Instant Daily Trade Summary Push**
      - *Konsep*: Pengiriman otomatis infografis ringkasan performa harian (Total PnL, Winrate, Evaluasi) ke channel/chat Telegram pribadi trader setiap pergantian hari.
 
+### W. Anotasi Interaktif, Kebiasaan Biometrik & Gamifikasi (Batch 167 - 172)
+
+167. **🎨 In-App Chart Markup & Drawing Canvas (Anotasi Screenshot Bawaan)**
+     - *Konsep*: Fitur menggambar langsung (panah, kotak FVG, garis support/resistance, label teks) di atas gambar screenshot trade tanpa perlu software pihak ketiga.
+
+168. **😴 Sleep & Circadian Rhythm Correlation (Korelasi Tidur vs Winrate)**
+     - *Konsep*: Integrasi data durasi tidur (Apple Health / Google Fit / manual) untuk menganalisis penurunan winrate saat kurang tidur (<6 jam).
+
+169. **🎙️ AI Voice Risk Copilot (Asisten Suara Kalkulator Risiko)**
+     - *Konsep*: Perintah suara di Quick-Risk Dock (*"Hitung lot risiko 1% Stop Loss 15 pip di Gold"*) yang langsung dijawab dan diisikan otomatis oleh AI.
+
+170. **📈 Rollover Spread Spike Simulator & Safety Buffer**
+     - *Konsep*: Pelacak riwayat pelebaran spread saat pergantian hari pasar (17:00 EST) untuk memperingatkan risiko stop-out dini pada posisi overnight.
+
+171. **🏆 Seasonal Discipline Battle Pass (Misi 30 Hari Bebas Emosi)**
+     - *Konsep*: Sistem quest bulanan (contoh: *20 trade beruntun wajib Hard SL*, *Zero trade saat NFP*) untuk membuka lencana disiplin dan tema eksklusif.
+
+172. **🧩 Multi-Account Instant Lot Pro-Rata Mirror (Kalkulator Proporsi Akun)**
+     - *Konsep*: Matriks pembagian otomatis 1 entri setup ke ukuran lot yang tepat untuk akun $10K, $25K, $100K, dan $200K secara simultan.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
