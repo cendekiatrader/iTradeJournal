@@ -30,6 +30,7 @@ Dokumen ini mencatat seluruh daftar saran fitur, inovasi, dan roadmap pengembang
 | 20 | **Stealth Privacy Mode (Sensor Saldo Instan)** | 🟢 **SELESAI** | Tombol 1-klik di Navbar (`Eye` / `EyeOff`) untuk menyensor otomatis seluruh nominal saldo/profit menjadi `••••••` (tersimpan di `localStorage`). |
 | 21 | **Clipboard Screenshot OCR & Quick Auto-Fill** | 🟢 **SELESAI** | Dukungan paste screenshot langsung (`Ctrl + V`) di form trade yang diproses mesin OCR (`tesseract.js`) untuk auto-fill Pair, Direction, Entry/SL/TP, Timeframe, Lot, dan PnL. |
 | 22 | **A+ Setup Playbook Gallery (Knowledge Base & Supabase Sync)** | 🟢 **SELESAI** | Tab khusus di sidebar (shortcut `P`) untuk arsip SOP setup A+, checklist rules/confluences, blueprint Before/After, dan terintegrasi langsung ke dropdown Strategy form trade & cloud database Supabase. |
+| 23 | **Sticky Quick-Risk Mini Dock Bar (Always-on-Top Desktop PiP)** | 🟢 **SELESAI** | Dock melayang di pojok kanan bawah untuk hitung lot kilat, salin lot 1-klik, dan tombol pop-out *Document Picture-in-Picture* Always-on-Top di atas MT5 / TradingView. |
 
 
 ---

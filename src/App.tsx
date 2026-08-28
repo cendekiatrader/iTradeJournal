@@ -20,6 +20,7 @@ import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
 import { EconomicCalendarView } from './components/news/EconomicCalendarView';
 import { PlaybookView } from './components/playbook/PlaybookView';
+import { QuickRiskDock } from './components/calculator/QuickRiskDock';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
@@ -316,6 +317,9 @@ const MainApp: React.FC = () => {
         onClose={() => setAuthModalOpen(false)}
         initialMode={authMode}
       />
+
+      {/* Sticky Quick-Risk Mini Dock Bar (Always on Top Capable) */}
+      <QuickRiskDock />
 
       {/* PWA Install Banner */}
       <PWAInstallPrompt />
