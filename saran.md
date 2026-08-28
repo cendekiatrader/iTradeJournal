@@ -357,7 +357,7 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 ### M. Saran Fitur Baru & Inovasi Tingkat Lanjut (Batch 99 - 104)
 
 99. **🛡️ Dynamic Stop Loss Cushion & ATR Buffer Sizer**
-    - *Konsep*: Kalkulator rekomendasi jarak buffer Stop Loss berbasis nilai *Average True Range (ATR)* pasar terkini untuk mencegah posisi tersapu oleh *wick spread / false stop hunt*.
+     - *Konsep*: Kalkulator rekomendasi jarak buffer Stop Loss berbasis nilai *Average True Range (ATR)* pasar terkini untuk mencegah posisi tersapu oleh *wick spread / false stop hunt*.
 
 100. **📱 WhatsApp & Telegram Instant Daily Performance Voice Note Digest**
      - *Konsep*: Bot pengirim ringkasan audio singkat berbasis AI ke WhatsApp / Telegram pribadi trader yang merangkum hasil trading hari ini beserta catatan evaluasi psikologi.
@@ -373,6 +373,56 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 
 104. **📑 Automated Trade Tax & Commission Fee Deduction Breakdown**
      - *Konsep*: Panel rincian biaya trading tahunan yang memisahkan laba bruto (*Gross*), potongan komisi broker, biaya inap *Swap*, dan laba bersih yang dapat ditarik (*Net Realized*).
+
+### N. Khusus Prop Firm, Challenge & Funded Account (Batch 105 - 120)
+
+105. **🛡️ Prop Firm Consistency Rule & Best-Day Profit Gauge**
+     - *Konsep*: Indikator visual real-time yang memantau apakah laba hari terbaik melebihi batas toleransi prop firm (misal max 30-40% dari total target) untuk menjaga kepatuhan konsistensi evaluasi.
+
+106. **📅 Challenge Phase Progress Bar & Scaling Roadmap**
+     - *Konsep*: Pelacak progress fase evaluasi (*Phase 1 ➔ Phase 2 ➔ Funded*) dan scaling plan multi-tingkat (kenaikan modal hingga $2.000.000) dengan persentase sisa target profit.
+
+107. **💸 Prop Firm Profit Split & Net Payout Estimator**
+     - *Konsep*: Kalkulator pembagian hasil bersih (*Net Payout*) setelah dikurangi *Profit Split* (80/20 atau 90/10), biaya pendaftaran challenge (*Refundable Fee*), dan biaya reset.
+
+108. **⚠️ High-Impact News Auto-Detection on Entry (News Rule Guard)**
+     - *Konsep*: Notifikasi otomatis dan penanda merah jika trade dibuka atau ditutup dalam rentang ±2 hingga ±5 menit dari jadwal rilis berita *High Impact / Red Folder*.
+
+109. **🛡️ Trailing Drawdown High-Water Mark Engine (Apex / Topstep Mode)**
+     - *Konsep*: Algoritma perhitungan batas drawdown yang bergerak naik otomatis mengunci saldo tertinggi akun (*High-Water Mark EOD/Intraday*) khas aturan prop firm futures.
+
+110. **🗓️ Minimum & Maximum Trading Days Tracker**
+     - *Konsep*: Kalender checklist kepatuhan hari aktif (misal wajib minimal 4-5 hari trading) dan deadline sisa hari kalender evaluasi challenge.
+
+111. **🏦 1-Click Vendor Preset Rules (FTMO, E8, The5ers, FundingPips, Apex)**
+     - *Konsep*: Pilihan preset instan saat membuat akun prop firm yang otomatis mengisi limit Daily Drawdown (5%), Max Drawdown (10%), Target Profit (8%), dan Leverage.
+
+112. **📑 Official Prop Firm Payout Request Audit Report (PDF)**
+     - *Konsep*: Generator dokumen PDF resmi laporan audit kepatuhan aturan yang merangkum riwayat trade, kepatuhan SL, dan rincian nominal penarikan untuk pengajuan payout.
+
+113. **⏰ Daily Server Rollover & Reset Countdown Clock**
+     - *Konsep*: Jam hitung mundur waktu reset harian server broker prop firm (misal: 17:00 EST / 00:00 UTC / 04:00 WIB) untuk mencegah floating loss tak terduga saat pergantian hari.
+
+114. **Weekend & Overnight Holding Restriction Alert**
+     - *Konsep*: Peringatan dini di hari Jumat bagi akun reguler/non-swing untuk menutup seluruh posisi sebelum market ditutup guna menghindari pelanggaran penahanan posisi akhir pekan.
+
+115. **🛡️ Hard SL Mandatory Compliance Checker**
+     - *Konsep*: Sistem validasi wajib yang memastikan setiap trade yang dicatat memiliki Hard Stop Loss terpasang demi memenuhi SOP aturan sebagian besar prop firm modern.
+
+116. **⚠️ Soft vs Hard Breach Early Warning Indicator**
+     - *Konsep*: Bar meter peringatan bertingkat (Hijau: Aman, Kuning: 75% Drawdown Limit, Merah: Bahaya Akun Hangus) untuk memberi alarm dini sebelum mencapai batas maksimal drawdown.
+
+117. **🎲 Challenge Pass-Rate Monte Carlo Simulator**
+     - *Konsep*: Algoritma matematika probabilitas untuk mensimulasikan persentase peluang lulus challenge dalam 30-60 hari ke depan berdasarkan winrate dan average R:R akun saat ini.
+
+118. **📅 Bi-Weekly & Monthly Payout Eligibility Calendar**
+     - *Konsep*: Kalender penanda tanggal kualifikasi pencairan profit berikutnya dan estimasi nominal saldo yang dapat ditarik.
+
+119. **🛡️ Multi-Prop Portfolio Total Risk Exposure Aggregator**
+     - *Konsep*: Panel pengontrol total modal risiko simultan bagi trader yang menjalankan beberapa akun challenge secara bersamaan agar tidak terjadi over-exposure pada pair yang sama.
+
+120. **🧘 60-Second Post-Loss Cooldown & Box Breathing Relaxer**
+     - *Konsep*: Modal visual pereda stres otomatis pasca penutupan trade loss untuk menurunkan detak jantung dan mencegah revenge trading sebelum menyentuh posisi berikutnya.
 
 ---
 
