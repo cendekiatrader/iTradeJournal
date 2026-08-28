@@ -543,6 +543,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 154. **🎯 Key Liquidity Level Sweep Radar (PDH/PDL & Session H/L)**
      - *Konsep*: Widget radar jarak harga terhadap level likuiditas penting (*Previous Day High/Low, Asian High/Low, Weekly High/Low*) dengan alarm peringatan sweep.
 
+### U. Makroekonomi, Volume Profile & Stress Testing (Batch 155 - 160)
+
+155. **🏦 Central Bank Rate Differential & FX Carry Matrix**
+     - *Konsep*: Matriks suku bunga bank sentral global (Fed, ECB, BOJ, BOE, SNB) dan estimasi yield *Swap Carry Trade* untuk posisi swing multi-hari.
+
+156. **🧲 Liquidity Void & Open Gap Gravity Heatmap**
+     - *Konsep*: Pelacak FVG/Weekly Gap besar yang belum terisi (*unfilled imbalances*) sebagai target magnet likuiditas harga institusional.
+
+157. **📊 Volume Profile Context Tagging (VAH / VAL / POC)**
+     - *Konsep*: Tagging posisi relatif terhadap area volume (*Value Area High, Value Area Low, Point of Control*) untuk mengukur efektivitas entry berbasis lelang pasar (*Auction Market Theory*).
+
+158. **⚡ Dynamic Risk Halving Circuit Breaker**
+     - *Konsep*: Sistem pemotong risiko otomatis dari 1% menjadi 0.5% lalu 0.25% jika mengalami 2-3 loss beruntun guna melindungi modal.
+
+159. **🛡️ Portfolio Value-at-Risk (VaR 99%) & Black Swan Stress Test**
+     - *Konsep*: Uji ketahanan simulasi matematis portofolio terhadap kejadian ekstrem (*Flash Crash, depegging, intervensi moneter*).
+
+160. **🧘 Ergonomics & Screen Fatigue Pomodoro Guard**
+     - *Konsep*: Timer kesehatan mata dan postur otomatis saat sesi trading panjang untuk menjaga fokus psikologis tetap optimal.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
