@@ -462,6 +462,46 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 130. **📱 PWA Mobile Haptic Feedback & Swipe Review Gesture**
      - *Konsep*: Getaran haptik responsif pada perangkat smartphone saat menekan tombol eksekusi serta gesture geser kanan/kiri untuk mereview detail trade di mobile.
 
+### Q. Analisis Edge Lanjutan & Profiling Mental (Batch 131 - 136)
+
+131. **🧬 Trader DNA & Archetype Fingerprint (Identifikasi Profil Gaya Trading)**
+     - *Konsep*: Algoritma profiling otomatis menganalisis riwayat trade untuk menentukan arketipe trader (*Aggressive Momentum Scalper*, *Patient Liquidity Hunter*, *Systematic Mean Reversion*) lengkap dengan peta kekuatan & kelemahan eksekusi.
+
+132. **📊 FVG & Imbalance Fill Rate Probability Matrix (Statistik Rasio Mitigasi)**
+     - *Konsep*: Analisis statistik seberapa sering setup FVG/Imbalance termitigasi sempurna (*100% Full Fill*), termitigasi separuh (*50% Consequent Encroachment*), atau langsung jalan (*Breakaway Gap*).
+
+133. **⚖️ Real-Time Multi-Pair Net Exposure & Hedging Conflict Barometer**
+     - *Konsep*: Indikator otomatis mendeteksi konflik korelasi posisi terbuka (contoh: Buy EURUSD & Sell GBPUSD simultan) untuk mengukur *Net USD Exposure* aktual dan mencegah korelasi ganda yang merugikan.
+
+134. **🙈 Blind Chart Hindsight Review Mode (Tes Evaluasi Tanpa Bias)**
+     - *Konsep*: Mode review jurnal dengan menyembunyikan hasil PnL dan grafik candlestick setelah titik entry untuk menguji apakah trader tetap mengambil keputusan setup yang sama secara murni objektif.
+
+135. **📈 Rolling Expectancy vs Market Regime Classifier (Regim Pasar Bull/Bear/Chop)**
+     - *Konsep*: Memetakan metrik performa terhadap kondisi pasar (*High Volatility Trend*, *Low Volatility Ranging*, *Consolidation*) untuk mengetahui di siklus pasar mana strategi menghasilkan profit terbesar.
+
+136. **🎯 Dynamic Prop Firm Scaling Step Calculator ($10K ➔ $2M Target Milestone)**
+     - *Konsep*: Kalkulator roadmap kenaikan alokasi modal prop firm resmi (*Scaling Plan*) dengan buffer persentase laba aman yang harus dikunci sebelum request naik akun.
+
+### R. Manajemen Multi-Akun, Likuiditas & Disiplin Eksekusi (Batch 137 - 142)
+
+137. **🪞 Multi-Account Risk Splitter & Prop Mirroring Matrix**
+     - *Konsep*: Kalkulator pembagian proporsi lot otomatis untuk 1 eksekusi setup ke banyak akun prop firm (misal: 1 master entry dipecah proporsional ke 3 akun $100K, $50K, $25K).
+
+138. **📉 MFE Peak Waste Analyzer (Analisis Profit Puncak yang Terbuang)**
+     - *Konsep*: Grafik analisis mendeteksi seberapa banyak nominal profit puncak (+3R, +5R) yang menguap kembali menjadi Break-Even/Loss akibat tidak mengambil parsial TP.
+
+139. **🧘 Post-Loss Reflection Gatekeeper (Kunci Refleksi Pasca Loss)**
+     - *Konsep*: Form "Log New Trade" terkunci 5-15 menit pasca trade loss sampai trader mengisi 2 pertanyaan refleksi wajib (*Root Cause & Pelajaran*) demi memutus siklus revenge trading.
+
+140. **🏖️ Global Bank Holiday & Low Liquidity Alert Banner**
+     - *Konsep*: Banner otomatis mendeteksi hari libur bank global (US Bank Holiday, UK Summer Holiday, Golden Week) untuk memperingatkan spread melebar dan volatilitas palsu.
+
+141. **🎯 Trade Setup Dependency & Synergy Matrix**
+     - *Konsep*: Analisis korelasi kombinasi setup (misal: *FVG + London Killzone* winrate 78% vs *FVG + Asian Session* winrate 34%) untuk menemukan kombinasi konfluensi paling mematikan.
+
+142. **📑 Dynamic Tax Deduction & Prop Firm Payout Invoicing Generator**
+     - *Konsep*: Generator invoice formal otomatis dengan template penagihan payout prop firm / pelaporan pajak dividen trading tahunan.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
