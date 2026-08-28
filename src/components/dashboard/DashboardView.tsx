@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useJournal } from '../../context/JournalContext';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../utils/supabase';
 import { StatCard } from '../common/StatCard';
 import { EquityChart } from '../common/EquityChart';
 import { MarketSessionClock } from '../common/MarketSessionClock';
@@ -74,7 +76,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateToNews
 }) => {
   const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap } = useJournal();
+  const { user } = useAuth();
   const currentCurrency = activeAccount?.currency || 'USD';
+  const isInitialCloudSyncDone = useRef(false);
 
   const [visibleCards, setVisibleCards] = useState<Record<string, boolean>>(() => {
     try {
@@ -88,13 +92,42 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
 
+  // 1. Fetch user-specific card visibility from database on login
+  useEffect(() => {
+    if (!user || !supabase) return;
+
+    const cloudCards = user.user_metadata?.dashboard_cards;
+    if (cloudCards && typeof cloudCards === 'object') {
+      setVisibleCards(cloudCards);
+      localStorage.setItem('itrade_dashboard_cards', JSON.stringify(cloudCards));
+    }
+    isInitialCloudSyncDone.current = true;
+  }, [user]);
+
+  // 2. Persist locally and sync to database for current user
   useEffect(() => {
     try {
       localStorage.setItem('itrade_dashboard_cards', JSON.stringify(visibleCards));
     } catch (e) {
       // ignore
     }
-  }, [visibleCards]);
+
+    // Debounce save to database (user metadata)
+    if (user && supabase && isInitialCloudSyncDone.current) {
+      const client = supabase;
+      const timer = setTimeout(async () => {
+        try {
+          await client.auth.updateUser({
+            data: { dashboard_cards: visibleCards }
+          });
+        } catch (err) {
+          console.error('Failed to sync card settings to database:', err);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [visibleCards, user]);
 
   const toggleCard = (id: string) => {
     setVisibleCards(prev => ({
