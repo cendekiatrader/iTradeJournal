@@ -77,6 +77,139 @@ export const QuickRiskDock: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Synchronize PiP window whenever relevant state changes
+  useEffect(() => {
+    if (pipWindowRef.current && isPipActive) {
+      renderPiP();
+    }
+  }, [entryPrice, stopLossPrice, instrument, riskPercent, currentBalance]);
+
+  const renderPiP = () => {
+    const pipWindow = pipWindowRef.current;
+    if (!pipWindow) return;
+
+    const eNum = parseFloat(entryPrice) || 0;
+    const sNum = parseFloat(stopLossPrice) || 0;
+    const dist = Math.abs(eNum - sNum);
+    const rAmt = (currentBalance * riskPercent) / 100;
+
+    let lot = 0;
+    if (dist > 0) {
+      if (instrument === 'Gold') lot = rAmt / (dist * 100);
+      else if (instrument === 'Forex') lot = rAmt / ((dist / 0.0001) * 10);
+      else if (instrument === 'Crypto') lot = rAmt / dist;
+      else if (instrument === 'Indices') lot = rAmt / (dist * 5);
+    }
+    const lotText = lot > 0 ? (instrument === 'Crypto' ? (lot >= 10 ? lot.toFixed(2) : lot.toFixed(4)) : lot.toFixed(2)) : '0.00';
+
+    pipWindow.document.body.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:10px; height:100%; box-sizing:border-box;">
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:15px;">🧮</span>
+            <span style="font-size:13px; font-weight:800; color:#f8fafc;">Quick-Risk Sizer</span>
+          </div>
+          <span style="font-size:10px; background:#1e293b; color:#38bdf8; padding:2px 6px; border-radius:4px; font-weight:700;">
+            Always-On-Top
+          </span>
+        </div>
+
+        <!-- Balance & Risk % Pill -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:#070b17; border-radius:8px; border:1px solid #1a2538; font-size:11px;">
+          <span style="color:#94a3b8;">Bal: <strong style="color:#f8fafc;">${formatCurrency(currentBalance, currentCurrency, true)}</strong></span>
+          <div style="display:flex; gap:4px;">
+            <button id="pip-risk-05" style="padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; background:${riskPercent === 0.5 ? '#3b82f6' : '#1e293b'}; color:${riskPercent === 0.5 ? '#fff' : '#94a3b8'}; border:none; cursor:pointer;">0.5%</button>
+            <button id="pip-risk-1" style="padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; background:${riskPercent === 1.0 ? '#3b82f6' : '#1e293b'}; color:${riskPercent === 1.0 ? '#fff' : '#94a3b8'}; border:none; cursor:pointer;">1%</button>
+            <button id="pip-risk-2" style="padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; background:${riskPercent === 2.0 ? '#3b82f6' : '#1e293b'}; color:${riskPercent === 2.0 ? '#fff' : '#94a3b8'}; border:none; cursor:pointer;">2%</button>
+          </div>
+        </div>
+
+        <!-- Asset Selector -->
+        <div style="display:flex; gap:4px;">
+          ${(['Gold', 'Forex', 'Crypto', 'Indices'] as const).map(ast => `
+            <button id="pip-ast-${ast}" style="flex:1; padding:5px 0; border-radius:6px; font-size:11px; font-weight:600; background:${instrument === ast ? '#1e293b' : 'transparent'}; color:${instrument === ast ? '#60a5fa' : '#64748b'}; border:1px solid ${instrument === ast ? '#3b82f6' : '#1e293b'}; cursor:pointer;">
+              ${ast}
+            </button>
+          `).join('')}
+        </div>
+
+        <!-- Entry & Stop Loss Input -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="min-width:0;">
+            <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:2px;">Entry Price</label>
+            <input id="pip-entry" type="number" step="any" value="${entryPrice}" style="width:100%; max-width:100%; box-sizing:border-box; background:#060913; border:1px solid #233148; color:#f8fafc; padding:6px 8px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;" />
+          </div>
+          <div style="min-width:0;">
+            <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:2px;">Stop Loss</label>
+            <input id="pip-sl" type="number" step="any" value="${stopLossPrice}" style="width:100%; max-width:100%; box-sizing:border-box; background:#060913; border:1px solid #233148; color:#f8fafc; padding:6px 8px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;" />
+          </div>
+        </div>
+
+        <!-- Result Box with Recommended Lot + Salin Lot Button -->
+        <div style="padding:10px; background:#070b17; border-radius:8px; border:1px solid rgba(59, 130, 246, 0.3); display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+          <div>
+            <span style="font-size:10px; color:#93c5fd; text-transform:uppercase; display:block; font-weight:600; letter-spacing:0.5px;">
+              RECOMMENDED LOT
+            </span>
+            <span style="font-size:22px; font-weight:800; color:#34d399; font-family:monospace;">
+              ${lotText}
+            </span>
+          </div>
+
+          <button id="pip-copy-btn" style="padding:6px 12px; font-size:12px; font-weight:700; background:#1e293b; color:#f8fafc; border:1px solid #334155; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+            <span>📋</span>
+            <span id="pip-copy-text">Salin Lot</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Event listeners
+    const entryInput = pipWindow.document.getElementById('pip-entry') as HTMLInputElement;
+    const slInput = pipWindow.document.getElementById('pip-sl') as HTMLInputElement;
+    const copyBtn = pipWindow.document.getElementById('pip-copy-btn');
+
+    if (entryInput) {
+      entryInput.addEventListener('input', (e: any) => setEntryPrice(e.target.value));
+    }
+    if (slInput) {
+      slInput.addEventListener('input', (e: any) => setStopLossPrice(e.target.value));
+    }
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        pipWindow.navigator.clipboard.writeText(lotText);
+        const textSpan = pipWindow.document.getElementById('pip-copy-text');
+        if (textSpan) textSpan.innerText = 'Tersalin!';
+        setTimeout(() => {
+          if (textSpan) textSpan.innerText = 'Salin Lot';
+        }, 1500);
+      });
+    }
+
+    // Risk buttons
+    const r05 = pipWindow.document.getElementById('pip-risk-05');
+    const r1 = pipWindow.document.getElementById('pip-risk-1');
+    const r2 = pipWindow.document.getElementById('pip-risk-2');
+    if (r05) r05.addEventListener('click', () => setRiskPercent(0.5));
+    if (r1) r1.addEventListener('click', () => setRiskPercent(1.0));
+    if (r2) r2.addEventListener('click', () => setRiskPercent(2.0));
+
+    // Asset buttons
+    (['Gold', 'Forex', 'Crypto', 'Indices'] as const).forEach(ast => {
+      const btn = pipWindow.document.getElementById(`pip-ast-${ast}`);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          setInstrument(ast);
+          if (ast === 'Gold') { setEntryPrice('2500'); setStopLossPrice('2490'); }
+          else if (ast === 'Forex') { setEntryPrice('1.0850'); setStopLossPrice('1.0820'); }
+          else if (ast === 'Crypto') { setEntryPrice('60000'); setStopLossPrice('59000'); }
+          else if (ast === 'Indices') { setEntryPrice('40000'); setStopLossPrice('39800'); }
+        });
+      }
+    });
+  };
+
   // Launch Always-on-Top Document Picture-in-Picture
   const launchAlwaysOnTopPiP = async () => {
     if (!('documentPictureInPicture' in window)) {
@@ -92,8 +225,8 @@ export const QuickRiskDock: React.FC = () => {
       }
 
       const pipWindow = await (window as any).documentPictureInPicture.requestWindow({
-        width: 320,
-        height: 380
+        width: 330,
+        height: 290
       });
 
       pipWindowRef.current = pipWindow;
@@ -117,91 +250,13 @@ export const QuickRiskDock: React.FC = () => {
       });
 
       // Basic Dark Style for PiP Window Body
-      pipWindow.document.body.style.backgroundColor = '#080c1b';
+      pipWindow.document.body.style.backgroundColor = '#0c1222';
       pipWindow.document.body.style.color = '#f8fafc';
       pipWindow.document.body.style.margin = '0';
-      pipWindow.document.body.style.padding = '12px';
+      pipWindow.document.body.style.padding = '14px';
       pipWindow.document.body.style.fontFamily = 'Inter, -apple-system, sans-serif';
 
-      // Render content
-      const renderPiPContent = () => {
-        const dist = Math.abs(entryNum - slNum);
-        let lot = 0;
-        if (dist > 0) {
-          if (instrument === 'Gold') lot = riskAmount / (dist * 100);
-          else if (instrument === 'Forex') lot = riskAmount / ((dist / 0.0001) * 10);
-          else if (instrument === 'Crypto') lot = riskAmount / dist;
-          else if (instrument === 'Indices') lot = riskAmount / (dist * 5);
-        }
-        const lotText = lot > 0 ? (instrument === 'Crypto' ? (lot >= 10 ? lot.toFixed(2) : lot.toFixed(4)) : lot.toFixed(2)) : '0.00';
-
-        pipWindow.document.body.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:10px; height:100%;">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; padding-bottom:8px;">
-              <span style="font-weight:800; font-size:13px; color:#60a5fa; display:flex; align-items:center; gap:4px;">
-                ⚡ iTrade Quick-Risk Dock
-              </span>
-              <span style="font-size:11px; background:#1e293b; padding:2px 6px; border-radius:4px; color:#94a3b8;">
-                Always on Top
-              </span>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:#94a3b8;">
-              <span>Balance: <strong>$${currentBalance.toLocaleString()}</strong></span>
-              <span>Risk: <strong style="color:#f87171;">${riskPercent}% ($${riskAmount.toFixed(0)})</strong></span>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-              <div>
-                <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:2px;">Entry Price</label>
-                <input id="pip-entry" type="number" step="any" value="${entryPrice}" style="width:100%; background:#0c1222; border:1px solid #1e293b; color:#fff; padding:6px 8px; border-radius:6px; font-family:monospace; font-size:12px; box-sizing:border-box;" />
-              </div>
-              <div>
-                <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:2px;">Stop Loss</label>
-                <input id="pip-sl" type="number" step="any" value="${stopLossPrice}" style="width:100%; background:#0c1222; border:1px solid #1e293b; color:#fff; padding:6px 8px; border-radius:6px; font-family:monospace; font-size:12px; box-sizing:border-box;" />
-              </div>
-            </div>
-
-            <div style="background:#0c1222; border:1px solid #2563eb; padding:12px; border-radius:8px; text-align:center; margin-top:4px;">
-              <div style="font-size:11px; color:#93c5fd; font-weight:600; text-transform:uppercase;">Ukuran Lot Direkomendasikan</div>
-              <div style="font-size:24px; font-weight:800; font-family:monospace; color:#34d399; margin:4px 0;">
-                ${lotText}
-              </div>
-              <div style="font-size:11px; color:#64748b;">${instrument} • SL: ${dist.toFixed(2)} pts</div>
-            </div>
-
-            <button id="pip-copy-btn" style="background:#2563eb; color:#fff; border:none; padding:8px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; width:100%; margin-top:auto;">
-              📋 Salin Lot ke Clipboard
-            </button>
-          </div>
-        `;
-
-        const entryInput = pipWindow.document.getElementById('pip-entry');
-        const slInput = pipWindow.document.getElementById('pip-sl');
-        const copyBtn = pipWindow.document.getElementById('pip-copy-btn');
-
-        if (entryInput) {
-          entryInput.addEventListener('input', (e: any) => {
-            setEntryPrice(e.target.value);
-          });
-        }
-        if (slInput) {
-          slInput.addEventListener('input', (e: any) => {
-            setStopLossPrice(e.target.value);
-          });
-        }
-        if (copyBtn) {
-          copyBtn.addEventListener('click', () => {
-            pipWindow.navigator.clipboard.writeText(lotText);
-            copyBtn.innerText = '✅ Tersalin!';
-            setTimeout(() => {
-              if (copyBtn) copyBtn.innerText = '📋 Salin Lot ke Clipboard';
-            }, 1500);
-          });
-        }
-      };
-
-      renderPiPContent();
+      renderPiP();
 
       pipWindow.addEventListener('pagehide', () => {
         setIsPipActive(false);
