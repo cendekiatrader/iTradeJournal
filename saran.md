@@ -502,6 +502,26 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 142. **📑 Dynamic Tax Deduction & Prop Firm Payout Invoicing Generator**
      - *Konsep*: Generator invoice formal otomatis dengan template penagihan payout prop firm / pelaporan pajak dividen trading tahunan.
 
+### S. Data Institusional, Ekosistem & Custom Workspace (Batch 143 - 148)
+
+143. **📊 CFTC Commitment of Traders (COT) Institutional Bias Radar**
+     - *Konsep*: Integrasi feed mingguan data *COT Report* (Smart Money vs Commercial vs Retail) untuk memvalidasi arah bias posisi di jurnal terhadap posisi riil institusi global.
+
+144. **⚡ Native MT4 / MT5 Webhook Bridge EA (Zero Manual Input)**
+     - *Konsep*: Expert Advisor (EA) ringan satu file (`.ex4`/`.ex5`) yang otomatis mengirim data trade (*Entry, Exit, SL, TP, PnL*) via webhook ke database begitu posisi ditutup di MetaTrader.
+
+145. **🎙️ AI Weekly Trading Podcast Debrief (Audio Refleksi Mingguan)**
+     - *Konsep*: Generator audio AI 2 menit setiap akhir pekan yang membacakan ringkasan performa mingguan, kesalahan emosi terbesar, dan evaluasi kepatuhan SOP secara natural.
+
+146. **🚨 Mentor & Accountability Partner Telegram SOS Alert**
+     - *Konsep*: Notifikasi darurat otomatis ke akun Telegram mentor atau rekan trading jika akun mendeteksi indikasi *overtrading* atau mendekati batas *Daily Loss*.
+
+147. **🎯 Sweep vs Continuation Edge Matrix (Turtle Soup vs Breakout)**
+     - *Konsep*: Analisis perbandingan performa antara tipe entry *Liquidity Sweep / Fakeout* vs *Breakout / Trend Following* untuk mengetahui tipe market yang paling dikuasai.
+
+148. **🖥️ Custom Modular Multi-Window Workspace Hub (Sidebar Tab & Cloud Sync)**
+     - *Konsep*: Menu tab khusus "Workspace" di Sidebar utama yang memungkinkan trader mengonfigurasi layout split multi-panel bebas (kombinasi modular: Jurnal, Chart TradingView Live, Kalender Berita, Radar Sesi, Monte Carlo, Kalkulator Lot). Konfigurasi workspace tersimpan terisolasi per user di database Supabase cloud (`user_metadata`) dan cache lokal multi-device.
+
 ---
 
 *Terakhir diperbarui: 28 Agustus 2026*
