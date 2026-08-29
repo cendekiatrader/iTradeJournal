@@ -70,10 +70,13 @@ export const QuickRiskDock: React.FC = () => {
         : calculatedLot.toFixed(2))
     : '0.00';
 
+  const unitLabel = instrument === 'Crypto' ? 'Units' : instrument === 'Indices' ? 'Contracts' : 'Lots';
+  const unitLabelSingular = instrument === 'Crypto' ? 'Unit' : instrument === 'Indices' ? 'Contract' : 'Lot';
+
   const copyLot = () => {
     navigator.clipboard.writeText(formattedLot);
     setCopied(true);
-    showToast(`Disalin ke clipboard: ${formattedLot} Lot!`, 'success');
+    showToast(`Disalin ke clipboard: ${formattedLot} ${unitLabelSingular}!`, 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -101,6 +104,9 @@ export const QuickRiskDock: React.FC = () => {
       else if (instrument === 'Indices') lot = rAmt / (dist * 5);
     }
     const lotText = lot > 0 ? (instrument === 'Crypto' ? (lot >= 10 ? lot.toFixed(2) : lot.toFixed(4)) : lot.toFixed(2)) : '0.00';
+
+    const pipUnitLabel = instrument === 'Crypto' ? 'RECOMMENDED UNITS' : instrument === 'Indices' ? 'RECOMMENDED CONTRACTS' : 'RECOMMENDED LOT';
+    const pipBtnLabel = instrument === 'Crypto' ? 'Salin Unit' : instrument === 'Indices' ? 'Salin Ctr' : 'Salin Lot';
 
     pipWindow.document.body.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:10px; height:100%; box-sizing:border-box;">
@@ -150,7 +156,7 @@ export const QuickRiskDock: React.FC = () => {
         <div style="padding:10px; background:#070b17; border-radius:8px; border:1px solid rgba(59, 130, 246, 0.3); display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
           <div>
             <span style="font-size:10px; color:#93c5fd; text-transform:uppercase; display:block; font-weight:600; letter-spacing:0.5px;">
-              RECOMMENDED LOT
+              ${pipUnitLabel}
             </span>
             <span style="font-size:22px; font-weight:800; color:#34d399; font-family:monospace;">
               ${lotText}
@@ -159,7 +165,7 @@ export const QuickRiskDock: React.FC = () => {
 
           <button id="pip-copy-btn" style="padding:6px 12px; font-size:12px; font-weight:700; background:#1e293b; color:#f8fafc; border:1px solid #334155; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:5px;">
             <span>📋</span>
-            <span id="pip-copy-text">Salin Lot</span>
+            <span id="pip-copy-text">${pipBtnLabel}</span>
           </button>
         </div>
       </div>
@@ -182,7 +188,7 @@ export const QuickRiskDock: React.FC = () => {
         const textSpan = pipWindow.document.getElementById('pip-copy-text');
         if (textSpan) textSpan.innerText = 'Tersalin!';
         setTimeout(() => {
-          if (textSpan) textSpan.innerText = 'Salin Lot';
+          if (textSpan) textSpan.innerText = pipBtnLabel;
         }, 1500);
       });
     }
@@ -452,7 +458,7 @@ export const QuickRiskDock: React.FC = () => {
             }}>
               <div>
                 <span style={{ fontSize: '0.68rem', color: '#93c5fd', textTransform: 'uppercase', display: 'block', fontWeight: 600 }}>
-                  Recommended Lot
+                  Recommended {unitLabelSingular}
                 </span>
                 <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--profit-green)', fontFamily: 'var(--font-mono)' }}>
                   {formattedLot}
@@ -466,7 +472,7 @@ export const QuickRiskDock: React.FC = () => {
                 style={{ padding: '6px 10px', fontSize: '0.75rem', gap: '4px' }}
               >
                 {copied ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
-                <span>{copied ? 'Tersalin' : 'Salin Lot'}</span>
+                <span>{copied ? 'Tersalin' : `Salin ${unitLabelSingular}`}</span>
               </button>
             </div>
 
@@ -500,7 +506,7 @@ export const QuickRiskDock: React.FC = () => {
           onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#233148'; }}
         >
           <Zap size={14} color="#3b82f6" />
-          <span>Quick Risk ({formattedLot} Lot)</span>
+          <span>Quick Risk ({formattedLot} {unitLabelSingular})</span>
           {isOpen ? <ChevronDown size={14} color="#94a3b8" /> : <ChevronUp size={14} color="#94a3b8" />}
         </button>
       </div>

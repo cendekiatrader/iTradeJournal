@@ -181,8 +181,9 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       const formatted = assetClass === 'Crypto' 
         ? (calculatedLotSize >= 10 ? Number(calculatedLotSize.toFixed(2)) : Number(calculatedLotSize.toFixed(4))) 
         : Number(calculatedLotSize.toFixed(2));
+      const unitLabel = assetClass === 'Crypto' ? 'Unit' : assetClass === 'Indices' ? 'Contract' : 'Lot';
       setQuantity(formatted);
-      showToast(`Lot size diset ke ${formatted} (${riskPercentPreset}% risk = $${calculatedRiskAmount.toFixed(2)})`, 'success');
+      showToast(`${unitLabel} size diset ke ${formatted} (${riskPercentPreset}% risk = $${calculatedRiskAmount.toFixed(2)})`, 'success');
     }
   };
 
@@ -574,7 +575,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   }}
                 >
                   <Zap size={13} />
-                  <span>Set {calculatedLotSize > 0 ? (assetClass === 'Crypto' ? (calculatedLotSize >= 10 ? calculatedLotSize.toFixed(2) : calculatedLotSize.toFixed(4)) : calculatedLotSize.toFixed(2)) : '0.00'} Lot</span>
+                  <span>Set {calculatedLotSize > 0 ? (assetClass === 'Crypto' ? (calculatedLotSize >= 10 ? calculatedLotSize.toFixed(2) : calculatedLotSize.toFixed(4)) : calculatedLotSize.toFixed(2)) : '0.00'} {assetClass === 'Crypto' ? 'Unit' : assetClass === 'Indices' ? 'Contract' : 'Lot'}</span>
                 </button>
               )}
             </div>

@@ -603,6 +603,58 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 172. **🧩 Multi-Account Instant Lot Pro-Rata Mirror (Kalkulator Proporsi Akun)**
      - *Konsep*: Matriks pembagian otomatis 1 entri setup ke ukuran lot yang tepat untuk akun $10K, $25K, $100K, dan $200K secara simultan.
 
+### X. Analisis L2 DOM, Bias Kognitif & Otomasi Sinyal (Batch 173 - 180)
+
+173. **⚡ Fast Order-Book Depth & Liquidity Heatmap Snapshot (Level II DOM)**
+     - *Konsep*: Simpan snapshot kedalaman order book dan volume resting liquidity saat entry untuk arsip analisa manipulasi pasar.
+
+174. **🧠 AI Cognitive Bias Detector on Trade Journal Notes**
+     - *Konsep*: Analisis teks otomatis untuk mendeteksi bias kognitif trader (*Confirmation Bias, Sunk Cost Fallacy, Gambler's Fallacy*) pada catatan review trade.
+
+175. **📊 Dynamic Value-at-Risk (VaR) Daily Portfolio Exposure Meter**
+     - *Konsep*: Meteran risiko statistik batas kerugian maksimum portofolio harian berdasarkan volatilitas historis 95%/99% confidence level.
+
+176. **🔄 Multi-Leg Hedging & Synthetic Position Tracker**
+     - *Konsep*: Pelacak posisi kombinasi arbitrase/hedging (misal: Long Spot Gold + Short Futures / Synthetic Forex Basket) dengan PnL gabungan real-time.
+
+177. **🕒 Session Open Volatility Burst Risk Gate (London/NY Open Delay Timer)**
+     - *Konsep*: Timer countdown 5-15 menit pasca pembukaan sesi (London 14:00 WIB / NY 19:30 WIB) untuk mencegah false breakout trap sebelum liquidity grab selesai.
+
+178. **📱 Webhook TradingView Alert to Journal Auto-Logger**
+     - *Konsep*: Endpoint webhook langsung dari Pine Script TradingView untuk mencatat sinyal dan parameter entry secara otomatis ke Supabase database.
+
+179. **📉 Rolling Recovery Factor & Calmar Ratio Trend Gauge**
+     - *Konsep*: Grafik rasio Calmar (Net Return vs Max Drawdown) per 30 trade untuk mengukur kecepatan pemulihan akun pasca fase drawdown.
+
+180. **🎯 Post-Trade Re-Entry Quality & Revenge Detection Matrix**
+     - *Konsep*: Matriks deteksi trade yang dibuka dalam durasi <10 menit di pair yang sama pasca SL untuk membedakan *Valid Re-Entry* vs *Revenge Entry*.
+
+### Y. Video Review, RAG AI & Makro Global (Batch 181 - 188)
+
+181. **⚡ Broker Execution Latency & Ping Logger**
+     - *Konsep*: Catat latensi server broker (ms) saat eksekusi order untuk audit slippage teknis dan transparansi eksekusi order.
+
+182. **🎥 30-Second Video Clip Screen Recording Attachment**
+     - *Konsep*: Rekam dan lampirkan klip video pendek (WebM/MP4) saat proses eksekusi langsung di browser untuk review dinamika price action live.
+
+183. **🤖 RAG-Powered AI Trading Mentor Chatbot**
+     - *Konsep*: Asisten AI interaktif yang membaca riwayat seluruh trade jurnal Anda untuk menjawab pertanyaan spesifik tentang kelemahan psikologi dan peluang optimasi strategi.
+
+184. **📉 Optimal Break-Even Trigger Simulator**
+     - *Konsep*: Simulasi matematis membandingkan performa akun jika SL digeser ke BE di +1R vs +1.5R vs +2R vs tanpa BE untuk menemukan aturan paling optimal.
+
+185. **🪙 Crypto Funding Rate & Open Interest (OI) Context**
+     - *Konsep*: Catat metrik funding rate dan lonjakan volume open interest saat entry kripto perpetual futures untuk memetakan over-leveraged retail positioning.
+
+186. **📜 Prop Firm Verified Payout Certificate Generator**
+     - *Konsep*: Generator dokumen sertifikat kelulusan challenge & bukti payout berdesain resmi dilengkapi QR code verifikasi publik.
+
+187. **🌐 Global Intermarket Flow & Yields Radar**
+     - *Konsep*: Panel korelasi makro real-time (US 10-Year Treasury Yields, DXY, Indeks Saham vs Emas/Forex) untuk konfirmasi bias modal institusional.
+
+188. **🛡️ Max Capital Allocation per Setup Gatekeeper**
+     - *Konsep*: Sistem batas maksimal total alokasi risiko untuk satu SOP strategi guna mencegah over-concentration risk pada strategi tertentu.
+
 ---
 
-*Terakhir diperbarui: 28 Agustus 2026*
+*Terakhir diperbarui: 29 Agustus 2026*
