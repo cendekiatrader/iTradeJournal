@@ -737,6 +737,21 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 214. **⚡ Golden 15-Minute Volatility Radar (Minute-Level Killzone Heatmap)**
      - *Konsep*: Heatmap volatilitas per interval 15 menit di dalam jendela *Killzone* (misal: 19:30–19:45 vs 20:00–20:15 WIB) untuk menemukan jendela waktu eksekusi dengan *floating duration* paling singkat.
 
+215. **🔒 Hard Circuit-Breaker Account Lockout (Anti-Tilt Hard Guard)**
+     - *Konsep*: Fitur kunci otomatis input trade & modal relaksasi wajib saat menyentuh batas limit kerugian harian (misal: 3 loss berturut-turut atau -3% harian) guna memutus rantai *revenge trading* dan *overtrading*.
+
+216. **🧾 Trade Ticket Screenshot OCR Auto-Fill**
+     - *Konsep*: Cukup paste screenshot tiket posisi dari MT4/MT5/cTrader/TradingView, OCR otomatis membaca Pair, Entry, Exit, SL, TP, Lot, dan PnL tanpa perlu mengetik manual.
+
+217. **📊 Theoretical R:R Frontier Optimizer (Curve of Optimal Target)**
+     - *Konsep*: Kurva simulasi yang membandingkan performa saldo riil vs jika seluruh trade menggunakan target rasio tetap (1:1.5, 1:2, 1:2.5, 1:3, 1:4) untuk menemukan sweet spot target R:R paling optimal.
+
+218. **🏛️ CFTC COT (Commitment of Traders) Bias Alignment Matrix**
+     - *Konsep*: Integrasi data mingguan posisi institusi besar (Commercials vs Non-Commercials) untuk mengukur tingkat keselarasan posisi (*Directional Alignment Score*) antara trade retail dengan arah modal institusi.
+
+219. **🎣 Judas Swing & Session Manipulation Accuracy Audit**
+     - *Konsep*: Audit analitik khusus model manipulasi pembukaan sesi (London Open Judas Swing / NY Open Fakeout) untuk mengukur winrate dan keandalan setup saat entry pasca sweep likuiditas Asia.
+
 ---
 
 *Terakhir diperbarui: 1 September 2026*
