@@ -7,7 +7,8 @@ import {
   AssetClass, 
   TradingSession, 
   StrategyType, 
-  EmotionState 
+  EmotionState,
+  TradeExit
 } from '../../types';
 import { 
   X, 
@@ -24,7 +25,9 @@ import {
   Calendar,
   Calculator,
   Zap,
-  Target
+  Target,
+  Percent,
+  Trash2
 } from 'lucide-react';
 import { formatDateTimeDDMMYYYY, formatDuration } from '../../utils/formatters';
 import { RichTextEditor } from '../common/RichTextEditor';
@@ -114,6 +117,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   const [screenshotAfter, setScreenshotAfter] = useState('');
   const [riskPercentPreset, setRiskPercentPreset] = useState<number>(1.0);
   const [showQuickSizer, setShowQuickSizer] = useState<boolean>(false);
+  const [enablePartialExits, setEnablePartialExits] = useState<boolean>(false);
+  const [partialExits, setPartialExits] = useState<TradeExit[]>([]);
 
   useEffect(() => {
     if (initialTrade) {
@@ -141,10 +146,19 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       setLessons(initialTrade.lessons || '');
       setScreenshotBefore(initialTrade.screenshots?.[0] || '');
       setScreenshotAfter(initialTrade.screenshots?.[1] || '');
+      if (initialTrade.exits && initialTrade.exits.length > 0) {
+        setEnablePartialExits(true);
+        setPartialExits(initialTrade.exits);
+      } else {
+        setEnablePartialExits(false);
+        setPartialExits([]);
+      }
     } else {
       setAccountId(activeAccountId === 'all' ? (accounts[0]?.id || '') : activeAccountId);
       setScreenshotBefore('');
       setScreenshotAfter('');
+      setEnablePartialExits(false);
+      setPartialExits([]);
     }
   }, [initialTrade, activeAccountId, accounts, isOpen]);
 
@@ -195,13 +209,94 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
     return Number((reward / risk).toFixed(2));
   }, [entryPrice, stopLoss, takeProfit]);
 
+  // Partial Exits Calculations
+  const totalClosedQuantity = React.useMemo(() => {
+    return partialExits.reduce((acc, item) => acc + (item.quantity || 0), 0);
+  }, [partialExits]);
+
+  const remainingQuantity = Math.max(0, Number((quantity - totalClosedQuantity).toFixed(4)));
+
+  const calculatedWeightedExitPrice = React.useMemo(() => {
+    if (!enablePartialExits || partialExits.length === 0) return exitPrice;
+    const validExits = partialExits.filter(p => (p.quantity || 0) > 0 && (p.exitPrice || 0) > 0);
+    const totalQty = validExits.reduce((acc, p) => acc + p.quantity, 0);
+    if (totalQty <= 0) return exitPrice;
+    const weightedSum = validExits.reduce((acc, p) => acc + (p.exitPrice * p.quantity), 0);
+    return Number((weightedSum / totalQty).toFixed(4));
+  }, [enablePartialExits, partialExits, exitPrice]);
+
   const achievedRR = React.useMemo(() => {
-    if (!entryPrice || !stopLoss || !exitPrice) return 0;
+    const activeExitPrice = enablePartialExits && partialExits.length > 0 ? calculatedWeightedExitPrice : exitPrice;
+    if (!entryPrice || !stopLoss || !activeExitPrice) return 0;
     const risk = Math.abs(entryPrice - stopLoss);
     if (risk <= 0) return 0;
-    const gain = direction === 'LONG' ? exitPrice - entryPrice : entryPrice - exitPrice;
+    const gain = direction === 'LONG' ? activeExitPrice - entryPrice : entryPrice - activeExitPrice;
     return Number((gain / risk).toFixed(2));
-  }, [entryPrice, stopLoss, exitPrice, direction]);
+  }, [entryPrice, stopLoss, exitPrice, direction, enablePartialExits, partialExits, calculatedWeightedExitPrice]);
+
+  const handleAddPartialExit = () => {
+    const nextIdx = partialExits.length + 1;
+    const defaultQty = remainingQuantity > 0 ? remainingQuantity : Number((quantity * 0.5).toFixed(2));
+    const defaultPct = quantity > 0 ? Number(((defaultQty / quantity) * 100).toFixed(0)) : 50;
+    const newExit: TradeExit = {
+      id: 'exit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      label: `TP${nextIdx}`,
+      exitPrice: exitPrice || entryPrice,
+      quantity: defaultQty,
+      percentage: defaultPct
+    };
+    setPartialExits([...partialExits, newExit]);
+  };
+
+  const handleUpdatePartialExit = (id: string, field: keyof TradeExit, value: any) => {
+    setPartialExits(prev => prev.map(item => {
+      if (item.id !== id) return item;
+      const updated = { ...item, [field]: value };
+      
+      // Auto sync quantity & percentage
+      if (field === 'percentage' && quantity > 0) {
+        const pct = parseFloat(value) || 0;
+        updated.quantity = Number(((pct / 100) * quantity).toFixed(4));
+      } else if (field === 'quantity' && quantity > 0) {
+        const qty = parseFloat(value) || 0;
+        updated.percentage = Number(((qty / quantity) * 100).toFixed(1));
+      }
+      return updated;
+    }));
+  };
+
+  const handleRemovePartialExit = (id: string) => {
+    setPartialExits(prev => prev.filter(p => p.id !== id));
+  };
+
+  const applyPartialCalculationToMain = () => {
+    if (partialExits.length === 0) return;
+    const avgPrice = calculatedWeightedExitPrice;
+    setExitPrice(avgPrice);
+
+    // Calculate approx PnL based on asset class & price diff
+    const priceDiff = direction === 'LONG' ? avgPrice - entryPrice : entryPrice - avgPrice;
+    let approxPnl = 0;
+    if (assetClass === 'Commodities') {
+      approxPnl = priceDiff * 100 * totalClosedQuantity;
+    } else if (assetClass === 'Forex') {
+      const isJpy = symbol.includes('JPY');
+      const pipValue = isJpy ? 0.01 : 0.0001;
+      const pipsGain = priceDiff / pipValue;
+      approxPnl = pipsGain * 10 * totalClosedQuantity;
+    } else if (assetClass === 'Crypto') {
+      approxPnl = priceDiff * totalClosedQuantity;
+    } else if (assetClass === 'Indices') {
+      approxPnl = priceDiff * 5 * totalClosedQuantity;
+    } else {
+      approxPnl = priceDiff * 100 * totalClosedQuantity;
+    }
+
+    if (!isNaN(approxPnl) && approxPnl !== 0) {
+      setPnl(Number(approxPnl.toFixed(2)));
+    }
+    showToast(`Average exit price (${avgPrice}) & RR (1:${achievedRR}) diaplikasikan!`, 'success');
+  };
 
   const holdingDuration = React.useMemo(() => {
     if (!entryDate || !exitDate || status === 'OPEN') return null;
@@ -244,10 +339,10 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       assetClass,
       direction,
       entryDate,
-      exitDate: status === 'OPEN' ? undefined : exitDate,
+      exitDate: status === 'OPEN' ? undefined : (enablePartialExits && partialExits.length > 0 ? (partialExits[partialExits.length - 1].exitDate || exitDate) : exitDate),
       timeframe,
       entryPrice: Number(entryPrice),
-      exitPrice: status === 'OPEN' ? undefined : Number(exitPrice),
+      exitPrice: status === 'OPEN' ? undefined : (enablePartialExits && partialExits.length > 0 ? calculatedWeightedExitPrice : Number(exitPrice)),
       stopLoss: stopLoss ? Number(stopLoss) : undefined,
       takeProfit: takeProfit ? Number(takeProfit) : undefined,
       quantity: Number(quantity),
@@ -264,7 +359,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       notes,
       lessons,
       screenshots: [screenshotBefore, screenshotAfter].filter(Boolean),
-      status
+      status,
+      exits: enablePartialExits && partialExits.length > 0 ? partialExits : undefined
     };
 
     if (initialTrade) {
@@ -656,6 +752,168 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </div>
           </div>
 
+          {/* Partial Close / Multi-Exit Section */}
+          <div style={{
+            backgroundColor: '#070c1a',
+            padding: '14px',
+            borderRadius: '10px',
+            border: '1px solid #1c2a44',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: enablePartialExits ? '12px' : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Layers size={16} color="#60a5fa" />
+                <div>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                    Partial Close / Scaling Out (TP1, TP2, Runner)
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>
+                    Input penutupan lot bertahap & hitung otomatis weighted avg exit price & real RR
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextState = !enablePartialExits;
+                  setEnablePartialExits(nextState);
+                  if (nextState && partialExits.length === 0) {
+                    handleAddPartialExit();
+                  }
+                }}
+                className={`btn btn-sm ${enablePartialExits ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ fontSize: '0.75rem', padding: '5px 12px' }}
+              >
+                {enablePartialExits ? 'Enabled' : '+ Enable Partial Close'}
+              </button>
+            </div>
+
+            {enablePartialExits && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                {partialExits.map((exit, idx) => (
+                  <div 
+                    key={exit.id} 
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '80px 1.2fr 1fr 1fr auto',
+                      gap: '8px',
+                      alignItems: 'center',
+                      backgroundColor: '#0a1022',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      border: '1px solid #1e293b'
+                    }}
+                  >
+                    {/* Label (TP1, TP2, etc) */}
+                    <input
+                      type="text"
+                      value={exit.label || `TP${idx + 1}`}
+                      onChange={(e) => handleUpdatePartialExit(exit.id, 'label', e.target.value)}
+                      placeholder="Label"
+                      className="input-control font-mono"
+                      style={{ fontSize: '0.75rem', padding: '6px 8px', textAlign: 'center', fontWeight: 700 }}
+                    />
+
+                    {/* Exit Price */}
+                    <div>
+                      <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>Exit Price</span>
+                      <input
+                        type="number"
+                        step="any"
+                        value={exit.exitPrice || ''}
+                        onChange={(e) => handleUpdatePartialExit(exit.id, 'exitPrice', parseFloat(e.target.value) || 0)}
+                        placeholder="Exit Price"
+                        className="input-control font-mono"
+                        style={{ fontSize: '0.8rem', padding: '6px 8px' }}
+                      />
+                    </div>
+
+                    {/* Quantity (Lot) */}
+                    <div>
+                      <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>
+                        {assetClass === 'Crypto' ? 'Units' : 'Lots'}
+                      </span>
+                      <input
+                        type="number"
+                        step="any"
+                        value={exit.quantity || ''}
+                        onChange={(e) => handleUpdatePartialExit(exit.id, 'quantity', e.target.value)}
+                        placeholder="Lot"
+                        className="input-control font-mono"
+                        style={{ fontSize: '0.8rem', padding: '6px 8px' }}
+                      />
+                    </div>
+
+                    {/* Percentage (%) */}
+                    <div>
+                      <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>Portion (%)</span>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="number"
+                          step="any"
+                          value={exit.percentage || ''}
+                          onChange={(e) => handleUpdatePartialExit(exit.id, 'percentage', e.target.value)}
+                          placeholder="%"
+                          className="input-control font-mono"
+                          style={{ fontSize: '0.8rem', padding: '6px 8px' }}
+                        />
+                        <span style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.7rem', color: '#64748b' }}>%</span>
+                      </div>
+                    </div>
+
+                    {/* Remove button */}
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePartialExit(exit.id)}
+                      className="btn btn-ghost btn-icon text-loss"
+                      style={{ padding: '6px' }}
+                      title="Remove TP"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Sub-actions and Summary Banner */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', paddingTop: '6px' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={handleAddPartialExit}
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Plus size={13} /> Add Exit Step
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={applyPartialCalculationToMain}
+                      className="btn btn-sm"
+                      style={{
+                        fontSize: '0.72rem',
+                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                        color: '#60a5fa',
+                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <Calculator size={13} /> Auto-Sync PnL & Avg Exit
+                    </button>
+                  </div>
+
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'flex', gap: '12px' }}>
+                    <span>Closed: <strong style={{ color: totalClosedQuantity === quantity ? 'var(--profit-green)' : '#f8fafc' }}>{totalClosedQuantity} / {quantity}</strong></span>
+                    <span>Remaining: <strong style={{ color: remainingQuantity > 0 ? '#f59e0b' : '#94a3b8' }}>{remainingQuantity}</strong></span>
+                    <span>Weighted Avg Price: <strong style={{ color: '#60a5fa', fontFamily: 'var(--font-mono)' }}>{calculatedWeightedExitPrice}</strong></span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* R:R Preview Banner */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', backgroundColor: 'rgba(59, 130, 246, 0.08)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.2)', marginBottom: '16px', fontSize: '0.78rem' }}>
             <span style={{ color: '#93c5fd' }}>
@@ -663,6 +921,9 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </span>
             <span style={{ color: '#93c5fd' }}>
               Realized R:R: <strong style={{ color: achievedRR >= 0 ? 'var(--profit-green)' : 'var(--loss-red)', fontFamily: 'var(--font-mono)' }}>1 : {achievedRR}</strong>
+              {enablePartialExits && partialExits.length > 0 && (
+                <span style={{ marginLeft: '6px', fontSize: '0.68rem', color: '#38bdf8' }}>(Weighted)</span>
+              )}
             </span>
           </div>
 

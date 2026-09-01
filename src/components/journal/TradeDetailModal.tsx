@@ -147,7 +147,9 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
             </div>
 
             <div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Exit Price</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                {trade.exits && trade.exits.length > 0 ? 'Avg Exit Price' : 'Exit Price'}
+              </div>
               <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
                 {trade.exitPrice || '-'}
               </div>
@@ -183,6 +185,28 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Partial Exits Breakdown (if exists) */}
+          {trade.exits && trade.exits.length > 0 && (
+            <div style={{ backgroundColor: '#070b1a', padding: '14px', borderRadius: '10px', border: '1px solid #1e293b' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#93c5fd', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>Scaling Out / Partial Exits History</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+                {trade.exits.map((item, idx) => (
+                  <div key={item.id || idx} style={{ backgroundColor: '#0b1328', padding: '8px 12px', borderRadius: '6px', border: '1px solid #1c2b48' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#60a5fa' }}>{item.label || `TP${idx + 1}`}</span>
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{item.percentage ? `${item.percentage}%` : ''}</span>
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+                      Exit: <strong>{item.exitPrice}</strong> ({item.quantity} {trade.assetClass === 'Crypto' ? 'Units' : 'Lots'})
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Setup & Confluences */}
           <div>

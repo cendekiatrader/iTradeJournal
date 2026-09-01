@@ -67,6 +67,18 @@ export type EmotionState =
   | 'Greedy'
   | 'Overtrading';
 
+export interface TradeExit {
+  id: string;
+  exitDate?: string;
+  exitPrice: number;
+  quantity: number; // lots/contracts/units closed
+  percentage?: number; // percentage of total initial quantity (e.g. 50%)
+  pnl?: number; // pnl realized for this portion
+  rrAchieved?: number;
+  label?: string; // e.g. 'TP1', 'TP2', 'Runner / Trailing'
+  notes?: string;
+}
+
 export interface Trade {
   id: string;
   accountId: string;
@@ -96,6 +108,7 @@ export interface Trade {
   lessons?: string;
   screenshots?: string[];
   status: TradeStatus;
+  exits?: TradeExit[];
   createdAt: string;
   updatedAt: string;
 }
