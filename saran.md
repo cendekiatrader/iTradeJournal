@@ -655,6 +655,73 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 188. **🛡️ Max Capital Allocation per Setup Gatekeeper**
      - *Konsep*: Sistem batas maksimal total alokasi risiko untuk satu SOP strategi guna mencegah over-concentration risk pada strategi tertentu.
 
+### Z. Likuiditas Tingkat Lanjut, Audio AI & De-Risking (Batch 189 - 196)
+
+189. **🎯 ICT Judas Swing & Asian Range Sweep Auto-Detector**
+     - *Konsep*: Deteksi otomatis pola manipulasi false breakout level Asian High/Low di pembukaan sesi London/NY untuk validasi arah manipulasi likuiditas.
+
+190. **🌊 Gamma Exposure (GEX) & Dark Pool Volume Radar**
+     - *Konsep*: Pelacak level zero gamma dan transaksi institusi besar untuk indeks (US500/NAS100) dan Bitcoin guna mengantisipasi ledakan volatilitas.
+
+191. **🗂️ Flashcard Chart Pattern Trainer (Spaced Repetition)**
+     - *Konsep*: Mode latihan kuis tebak arah kelanjutan chart dari database jurnal riwayat trade pribadi menggunakan algoritma *spaced repetition* untuk mempertajam intuisi visual.
+
+192. **🎙️ Voice Note Pitch & Anxiety Frequency Analyzer**
+     - *Konsep*: AI penganalisis modulasi frekuensi dan intonasi suara pada rekaman review trade untuk mendeteksi tanda-tanda stres, panik, atau overconfidence tersembunyi.
+
+193. **⚖️ Cross-Broker Spread & Slippage Comparison Matrix**
+     - *Konsep*: Audit perbandingan harga eksekusi dan spread antar beberapa broker pada timestamp yang identik untuk memilih broker dengan biaya transaksi paling efisien.
+
+194. **🎡 Dynamic Daily Risk-Budgeting Wheel**
+     - *Konsep*: Visualisasi interaktif roda alokasi risiko harian (misal: budget harian 3R) yang berkurang secara dinamis seiring pembukaan posisi.
+
+195. **📐 Trade Plan Execution Drift Scorer**
+     - *Konsep*: Skor metrik kuantitatif yang menghitung seberapa jauh realisasi eksekusi trade menyimpang dari SOP ideal di Playbook (skor 0-100%).
+
+196. **🛡️ Prop Firm Final Target Auto-De-Risking Engine**
+     - *Konsep*: Fitur pengurang risiko otomatis (misal: lot dipangkas 50%) ketika profit akun berjarak kurang dari 1% menuju target kelulusan evaluasi prop firm guna menghindari kegagalan di garis finish.
+
+### AA. Volatilitas Lanjut, Karantina Modal & Privasi (Batch 197 - 204)
+
+197. **📊 Option Greeks Implied Volatility (IV) Rank Context**
+     - *Konsep*: Catat level IV Rank & Percentile saat rilis berita besar untuk antisipasi lonjakan *implied volatility* dan fenomena *volatility crush*.
+
+198. **⚡ Multi-Account Tick Latency & B-Book Delay Audit**
+     - *Konsep*: Perbandingan presisi milidetik eksekusi order antar akun/broker untuk mendeteksi tanda-tanda manipulasi latency / *B-book delay routing*.
+
+199. **🎲 Synthetic Equity Stress-Test with Injected Slippage**
+     - *Konsep*: Simulasi Monte Carlo lanjutan dengan injeksi acak lonjakan spread tidak normal & slippage negatif ekstrem untuk menguji batas aman modal.
+
+200. **📈 Post-Earnings Announcement Drift (PEAD) Catalyst Tracker**
+     - *Konsep*: Pelacak momentum lanjutan saham/indeks pasca laporan laba kuartalan (*earnings report*) untuk strategi *catalyst trading*.
+
+201. **🔒 Trading Sabbatical & Forced Capital Lockbox**
+     - *Konsep*: Karantina akun otomatis yang mengunci akses pembukaan trade selama 7-14 hari pasca drawdown berat demi pemulihan psikologis penuh.
+
+202. **🧲 Liquidity Cluster Density Score (0-100)**
+     - *Konsep*: Skor kuantitatif kepadatan *resting liquidity* di sekitar level Take Profit & Stop Loss untuk memastikan limit order tereksekusi tanpa slippage.
+
+203. **🛡️ Social Sharing Auto-Redact (Exif & Account Privacy)**
+     - *Konsep*: Fitur sensor otomatis nomor tiket, nama server broker, nomor login, dan metadata perangkat dari screenshot chart sebelum dibagikan ke publik.
+
+204. **🚨 Floating Position Spread Spike Warning**
+     - *Konsep*: Peringatan waspada seketika saat spread broker mendadak melebar lebih dari 300% menjelang jam rollover harian atau rilis berita NFP/FOMC.
+
+205. **📉 MAE & MFE Analytics (Maximum Adverse / Favorable Excursion)**
+     - *Konsep*: Mencatat titik harga terburuk yang sempat dialami sebelum trade profit (MAE / floating minus terdalam) dan titik harga terbaik yang sempat dicapai sebelum trade di-close (MFE / floating profit tertinggi). Mengukur apakah Stop Loss terlalu lebar atau uang tertinggal di meja (*left money on the table*) karena exit terlalu dini.
+
+206. **🔀 Strategy A/B Rule Variant Split-Testing**
+     - *Konsep*: Membandingkan 2 variasi aturan pada setup yang sama (misal: *SMC FVG Entry Limit 50%* vs *SMC FVG Entry Market on MSS Confirmation*) untuk mengetahui secara empiris aturan mana yang menghasilkan *Expected Value* ($E$) lebih tinggi.
+
+207. **🎯 Dynamic Prop Firm Pass Rate & Buffer Radar**
+     - *Konsep*: Tracker live batas harian (*Daily Drawdown Buffer*) dan *Max Drawdown Buffer* yang otomatis memberi tanda bahaya saat saldo mendekati batas pelanggaran challenge (FTMO, FundedNext, dll.) serta merekomendasikan lot maksimal yang aman.
+
+208. **🏷️ Trade Tagging & Execution Mistake Taxonomy**
+     - *Konsep*: Sistem multi-tag untuk kesalahan eksekusi standar (misal: `#EarlyExit`, `#ChasedPrice`, `#MovedStopLoss`, `#WiderSpreadNews`, `#OverLeveraged`) lengkap dengan kalkulasi akumulasi total kerugian ($ Loss) per jenis kesalahan.
+
+209. **📸 One-Click Chart Card / Story Image Generator (Social Proof Export)**
+     - *Konsep*: Tombol 1-klik untuk meng-generate gambar banner / kartu summary trade berdesain profesional (Dark/Luxury Theme, berisi Pair, PnL, RR, Setup, Chart Before/After) siap share ke Instagram Story, X (Twitter), atau Telegram.
+
 ---
 
-*Terakhir diperbarui: 29 Agustus 2026*
+*Terakhir diperbarui: 1 September 2026*
