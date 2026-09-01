@@ -722,6 +722,21 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 209. **📸 One-Click Chart Card / Story Image Generator (Social Proof Export)**
      - *Konsep*: Tombol 1-klik untuk meng-generate gambar banner / kartu summary trade berdesain profesional (Dark/Luxury Theme, berisi Pair, PnL, RR, Setup, Chart Before/After) siap share ke Instagram Story, X (Twitter), atau Telegram.
 
+210. **🎙️ Voice-to-Journal Audio Memo Transcriber**
+     - *Konsep*: Tombol mikrofon di modal input trade untuk merekam voice note review (15–30 detik) pasca trade yang otomatis ditranskripsi ke teks di kolom *Notes* & *Lessons* via Web Speech API / AI Audio Transcriber.
+
+211. **🔄 Interactive Bar-by-Bar Trade Replay Simulator**
+     - *Konsep*: Mode replay candlestick bar-demi-bar pada chart trade masa lalu untuk melatih eksekusi ulang setup lama secara visual tanpa bias hasil akhir (*hindsight bias*).
+
+212. **⏳ Imbalance & FVG Fill Latency Matrix**
+     - *Konsep*: Pelacak durasi waktu rata-rata (menit/jam) yang dibutuhkan harga untuk memitigasi FVG / Inversion FVG sejak area terbentuk guna menentukan batas kadaluarsa order limit (*Order Expiry SOP*).
+
+213. **💰 Prop Firm Challenge Portfolio ROI & Fee Breakeven**
+     - *Konsep*: Tracker akumulasi biaya pembelian akun evaluasi (Challenge Fees) vs total penarikan profit (*Profit Split Payouts*) untuk menghitung *Net Career Prop Firm ROI* dan rasio biaya evaluasi terhadap nominal penarikan riil.
+
+214. **⚡ Golden 15-Minute Volatility Radar (Minute-Level Killzone Heatmap)**
+     - *Konsep*: Heatmap volatilitas per interval 15 menit di dalam jendela *Killzone* (misal: 19:30–19:45 vs 20:00–20:15 WIB) untuk menemukan jendela waktu eksekusi dengan *floating duration* paling singkat.
+
 ---
 
 *Terakhir diperbarui: 1 September 2026*
