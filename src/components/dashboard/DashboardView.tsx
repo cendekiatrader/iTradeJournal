@@ -82,6 +82,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const { user } = useAuth();
   const currentCurrency = activeAccount?.currency || 'USD';
   const isInitialCloudSyncDone = useRef(false);
+  const lastSyncedCardsRef = useRef('');
 
   const [visibleCards, setVisibleCards] = useState<Record<string, boolean>>(() => {
     try {
@@ -102,7 +103,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
     const cloudCards = user.user_metadata?.dashboard_cards;
     if (cloudCards && typeof cloudCards === 'object') {
-      setVisibleCards(cloudCards);
+      // Compare before set: new object identities would otherwise retrigger the
+      // save effect below on every auth event (-> endless updateUser loop).
+      setVisibleCards(prev => (JSON.stringify(prev) === JSON.stringify(cloudCards) ? prev : cloudCards));
+      lastSyncedCardsRef.current = JSON.stringify(cloudCards);
       localStorage.setItem('itrade_dashboard_cards', JSON.stringify(cloudCards));
     }
     isInitialCloudSyncDone.current = true;
@@ -116,20 +120,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       // ignore
     }
 
-    // Debounce save to database (user metadata)
+    // Debounce save to database (user metadata). Skip when the payload matches
+    // the last successfully synced value so auth events can never loop updateUser.
     if (user && supabase && isInitialCloudSyncDone.current) {
-      const client = supabase;
-      const timer = setTimeout(async () => {
-        try {
-          await client.auth.updateUser({
-            data: { dashboard_cards: visibleCards }
-          });
-        } catch (err) {
-          console.error('Failed to sync card settings to database:', err);
-        }
-      }, 1000);
+      const payload = JSON.stringify(visibleCards);
+      if (payload !== lastSyncedCardsRef.current) {
+        const client = supabase;
+        const timer = setTimeout(async () => {
+          try {
+            await client.auth.updateUser({
+              data: { dashboard_cards: visibleCards }
+            });
+            lastSyncedCardsRef.current = payload;
+          } catch (err) {
+            console.error('Failed to sync card settings to database:', err);
+          }
+        }, 1000);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
     }
   }, [visibleCards, user]);
 

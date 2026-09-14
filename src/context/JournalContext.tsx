@@ -213,7 +213,10 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setWithdrawals([]);
       setPlaybooks([]);
     }
-  }, [user]);
+    // Refetch only on actual sign-in/out — USER_UPDATED metadata events must not
+    // trigger a full cloud reload (it flashes the skeleton on empty dashboards).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Save changes to localStorage as fallback & cache
   useEffect(() => {
@@ -236,7 +239,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const cloudDefs = user?.user_metadata?.custom_fields;
     if (Array.isArray(cloudDefs) && cloudDefs.length > 0) {
-      setCustomFieldDefsState(cloudDefs);
+      setCustomFieldDefsState(prev => (JSON.stringify(prev) === JSON.stringify(cloudDefs) ? prev : cloudDefs));
       saveCustomFieldDefs(cloudDefs);
     }
   }, [user]);

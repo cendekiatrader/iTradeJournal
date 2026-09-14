@@ -48,8 +48,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const nextUser = session?.user ?? null;
+      // Preserve object identity when nothing meaningful changed: USER_UPDATED /
+      // TOKEN_REFRESHED events would otherwise retrigger every [user]-dependent
+      // effect (metadata sync saves + cloud reloads) in an endless loop.
+      setUser(prev => {
+        if (
+          prev &&
+          nextUser &&
+          prev.id === nextUser.id &&
+          prev.email === nextUser.email &&
+          JSON.stringify(prev.user_metadata ?? {}) === JSON.stringify(nextUser.user_metadata ?? {})
+        ) {
+          return prev;
+        }
+        return nextUser;
+      });
       setSession(session);
-      setUser(session?.user ?? null);
       setLoading(false);
 
       if (event === 'PASSWORD_RECOVERY') {

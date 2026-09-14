@@ -84,6 +84,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
   const { user } = useAuth();
   const currentCurrency = activeAccount?.currency || 'USD';
   const isInitialCloudSyncDone = useRef(false);
+  const lastSyncedWorkspaceRef = useRef('');
 
   const [config, setConfig] = useState<WorkspaceConfig>(() => {
     try {
@@ -103,7 +104,9 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
 
     const cloudWorkspace = user.user_metadata?.workspace_config;
     if (cloudWorkspace && typeof cloudWorkspace === 'object') {
-      setConfig(cloudWorkspace);
+      // Identity guard: avoid retriggering the save effect on every auth event.
+      setConfig(prev => (JSON.stringify(prev) === JSON.stringify(cloudWorkspace) ? prev : cloudWorkspace));
+      lastSyncedWorkspaceRef.current = JSON.stringify(cloudWorkspace);
       if (cloudWorkspace.symbolTV) setCustomTvSymbol(cloudWorkspace.symbolTV);
       localStorage.setItem('itrade_workspace_config', JSON.stringify(cloudWorkspace));
     }
@@ -116,20 +119,25 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
       localStorage.setItem('itrade_workspace_config', JSON.stringify(config));
     } catch (e) {}
 
-    // Debounce save to database
+    // Debounce save to database. Skip when the payload is unchanged since the
+    // last successful sync so auth events can never loop updateUser.
     if (user && supabase && isInitialCloudSyncDone.current) {
-      const client = supabase;
-      const timer = setTimeout(async () => {
-        try {
-          await client.auth.updateUser({
-            data: { workspace_config: config }
-          });
-        } catch (err) {
-          console.error('Failed to sync workspace configuration to database:', err);
-        }
-      }, 1000);
+      const payload = JSON.stringify(config);
+      if (payload !== lastSyncedWorkspaceRef.current) {
+        const client = supabase;
+        const timer = setTimeout(async () => {
+          try {
+            await client.auth.updateUser({
+              data: { workspace_config: config }
+            });
+            lastSyncedWorkspaceRef.current = payload;
+          } catch (err) {
+            console.error('Failed to sync workspace configuration to database:', err);
+          }
+        }, 1000);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
     }
   }, [config, user]);
 

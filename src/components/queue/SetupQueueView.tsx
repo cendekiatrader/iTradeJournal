@@ -72,6 +72,7 @@ export const SetupQueueView: React.FC<SetupQueueViewProps> = ({ onExecute }) => 
   const [filter, setFilter] = useState<'ACTIVE' | 'ALL'>('ACTIVE');
   const [showForm, setShowForm] = useState(false);
   const cloudSynced = useRef(false);
+  const lastSyncedQueueRef = useRef('');
 
   // Form state
   const [symbol, setSymbol] = useState('');
@@ -87,25 +88,37 @@ export const SetupQueueView: React.FC<SetupQueueViewProps> = ({ onExecute }) => 
   useEffect(() => {
     if (!user || !isSupabaseConfigured()) return;
     const cloudQueue = user.user_metadata?.setup_queue;
-    if (Array.isArray(cloudQueue) && cloudQueue.length > 0 && items.length === 0) {
-      setItems(cloudQueue as QueueItem[]);
-      saveQueue(cloudQueue as QueueItem[]);
+    if (Array.isArray(cloudQueue)) {
+      lastSyncedQueueRef.current = JSON.stringify(cloudQueue);
+      if (cloudQueue.length > 0 && items.length === 0) {
+        setItems(cloudQueue as QueueItem[]);
+        saveQueue(cloudQueue as QueueItem[]);
+      }
     }
     cloudSynced.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Persist locally + sync to cloud (debounced)
+  // Persist locally + sync to cloud (debounced). Skip unchanged payloads so
+  // auth events can never loop updateUser (blinking dashboard bug).
   useEffect(() => {
     saveQueue(items);
     const sb = user && isSupabaseConfigured() ? supabase : null;
     if (sb && cloudSynced.current) {
-      const timer = setTimeout(() => {
-        sb.auth.updateUser({ data: { setup_queue: items } }).catch(() => {
-          /* non-blocking */
-        });
-      }, 1200);
-      return () => clearTimeout(timer);
+      const payload = JSON.stringify(items);
+      if (payload !== lastSyncedQueueRef.current) {
+        const timer = setTimeout(() => {
+          sb.auth
+            .updateUser({ data: { setup_queue: items } })
+            .then(() => {
+              lastSyncedQueueRef.current = payload;
+            })
+            .catch(() => {
+              /* non-blocking */
+            });
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
     }
   }, [items, user]);
 
