@@ -114,6 +114,7 @@ interface JournalContextType {
   isDemoMode: boolean;
   enterDemoMode: () => void;
   exitDemoMode: () => void;
+  importSampleTrades: () => void;
   customFieldDefs: CustomFieldDef[];
   setCustomFieldDefs: (defs: CustomFieldDef[]) => void;
   triggerCelebration: () => void;
@@ -479,6 +480,34 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  // First-run helper: adds the sample trades to the selected account so new users can explore
+  const importSampleTrades = () => {
+    const target = accounts.find(a => a.id === activeAccountId) || accounts[0];
+    if (!target) {
+      showToast('Create a trading account first.', 'error');
+      return;
+    }
+    const now = Date.now();
+    const stamp = new Date().toISOString();
+    const samples: Trade[] = INITIAL_TRADES.map((t, i) => ({
+      ...t,
+      id: `sample-${now}-${i}`,
+      accountId: target.id,
+      createdAt: stamp,
+      updatedAt: stamp,
+      pnlPercent: target.initialBalance > 0 ? Number(((t.pnl / target.initialBalance) * 100).toFixed(2)) : t.pnlPercent
+    }));
+    setTrades(prev => {
+      const updatedTrades = [...prev, ...samples];
+      setAccounts(accs => recalculateAccountBalances(accs, updatedTrades, withdrawals));
+      return updatedTrades;
+    });
+    if (isSupabaseConfigured()) {
+      samples.forEach(s => syncTradeToCloud(s));
+    }
+    showToast(`${samples.length} sample trades added — explore freely, then replace them with your own.`, 'success');
+  };
+
   const updateTrade = (id: string, updates: Partial<Trade>) => {
     const now = new Date().toISOString();
 
@@ -831,6 +860,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         isDemoMode,
         enterDemoMode,
         exitDemoMode,
+        importSampleTrades,
         customFieldDefs,
         setCustomFieldDefs,
         triggerCelebration

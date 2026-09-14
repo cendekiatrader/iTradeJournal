@@ -9,6 +9,7 @@ import { useModalA11y } from '../../hooks/useModalA11y';
 import { EquityChart } from '../common/EquityChart';
 import { MarketSessionClock } from '../common/MarketSessionClock';
 import { PropFirmGauge } from './PropFirmGauge';
+import { ActivationPanel } from './ActivationPanel';
 import { formatCurrency, formatPercent, formatDateTimeDDMMYYYY } from '../../utils/formatters';
 import { 
   Percent, 
@@ -78,7 +79,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateToJournal,
   onNavigateToNews
 }) => {
-  const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap, isLoadingCloud } = useJournal();
+  const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap, isLoadingCloud, accounts, isDemoMode, importSampleTrades } = useJournal();
   const { user } = useAuth();
   const currentCurrency = activeAccount?.currency || 'USD';
   const isInitialCloudSyncDone = useRef(false);
@@ -96,6 +97,36 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
   const customizeModalRef = useModalA11y(showCustomizeModal, () => setShowCustomizeModal(false));
+
+  // First-run activation state
+  const [activationDismissed, setActivationDismissed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('itrade_activation_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const dismissActivation = () => {
+    setActivationDismissed(true);
+    try {
+      localStorage.setItem('itrade_activation_dismissed', 'true');
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const analyticsDone = (() => {
+    try {
+      return localStorage.getItem('itrade_activation_analytics') === 'true';
+    } catch {
+      return false;
+    }
+  })();
+
+  const isActivationMode =
+    !isDemoMode && !isLoadingCloud && !activationDismissed && accounts.length > 0 && filteredTrades.length === 0;
+  const showFullDashboard = !isActivationMode;
 
   // 1. Fetch user-specific card visibility from database on login
   useEffect(() => {
@@ -208,6 +239,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <StatCardSkeleton key={i} />
           ))}
         </div>
+      ) : isActivationMode ? (
+        <ActivationPanel
+          accountName={activeAccount ? activeAccount.name : undefined}
+          analyticsDone={analyticsDone}
+          onLogTrade={onOpenTradeModal}
+          onStartSample={importSampleTrades}
+          onDismiss={dismissActivation}
+        />
       ) : (
       <div className="grid-stats">
         {/* Row 1: Core Profitability & Edge */}
@@ -363,6 +402,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
       )}
 
+      {showFullDashboard && (
+        <>
       <InsightsCard trades={filteredTrades} />
 
       {/* Main Charts & Breakdown Section */}
@@ -559,6 +600,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         )}
       </div>
+        </>
+      )}
 
       {/* Customize Stat Cards Modal */}
       {showCustomizeModal && (

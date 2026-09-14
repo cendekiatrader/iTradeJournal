@@ -476,7 +476,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenDemo
             backgroundColor: 'var(--bg-card)'
           }}
         >
-          <img src="./landing-hero.png" alt={t.imageCaption} style={{ display: 'block', width: '100%', height: 'auto' }} />
+          <img src="./landing-hero.png" alt={t.imageCaption} fetchPriority="high" style={{ display: 'block', width: '100%', height: 'auto' }} />
         </div>
       </section>
 

@@ -24,6 +24,7 @@ import { CommandPalette } from './components/common/CommandPalette';
 import { ConfirmProvider } from './components/common/ConfirmDialog';
 import { ProductTour } from './components/common/ProductTour';
 import { PWAUpdatePrompt } from './components/common/PWAUpdatePrompt';
+import { Analytics } from '@vercel/analytics/react';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { ThemeSelectorModal } from './components/common/ThemeSelectorModal';
 import { MobileNav } from './components/MobileNav';
@@ -289,6 +290,17 @@ const MainApp: React.FC = () => {
     localStorage.setItem('itrade_tour_done', 'true');
   };
 
+  // First-run checklist: remember once Analytics has been explored
+  useEffect(() => {
+    if (activeTab === 'analytics') {
+      try {
+        localStorage.setItem('itrade_activation_analytics', 'true');
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [activeTab]);
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (reviewToken) {
@@ -545,6 +557,7 @@ export function App() {
         <JournalProvider>
           <ConfirmProvider>
             <MainApp />
+            <Analytics />
           </ConfirmProvider>
         </JournalProvider>
       </AuthProvider>
