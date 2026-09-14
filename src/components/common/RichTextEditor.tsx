@@ -22,6 +22,7 @@ import {
   Trash2,
   UploadCloud
 } from 'lucide-react';
+import { supabase, isSupabaseConfigured, uploadImageToStorage } from '../../utils/supabase';
 
 interface RichTextEditorProps {
   value: string;
@@ -74,15 +75,30 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   // Handle image upload from file picker
-  const handleImageFile = (file: File) => {
+  const handleImageFile = async (file: File) => {
     if (!file.type.startsWith('image/')) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64Url = e.target?.result as string;
-      insertImage(base64Url);
-    };
-    reader.readAsDataURL(file);
+    // Upload to Supabase Storage when possible so notes stay small — inlining
+    // base64 would bloat localStorage and, via user_metadata, the auth JWT.
+    let src: string | null = null;
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const safeName = (file.name || 'image.png').replace(/[^a-zA-Z0-9._-]/g, '_');
+        src = await uploadImageToStorage(file, safeName);
+      } catch {
+        src = null;
+      }
+    }
+
+    if (!src) {
+      src = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve((e.target?.result as string) || '');
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (src) insertImage(src);
   };
 
   const insertImage = (src: string) => {

@@ -7,8 +7,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isConfigured: boolean;
-  signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
-  signUpWithEmail: (email: string, password: string, fullName?: string) => Promise<{ error: any; user: User | null }>;
+  signInWithEmail: (email: string, password: string, captchaToken?: string) => Promise<{ error: any }>;
+  signUpWithEmail: (email: string, password: string, fullName?: string, captchaToken?: string) => Promise<{ error: any; user: User | null }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signInWithDiscord: () => Promise<{ error: any }>;
   resetPasswordEmail: (email: string) => Promise<{ error: any }>;
@@ -77,12 +77,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const signInWithEmail = async (email: string, password: string) => {
+  const signInWithEmail = async (email: string, password: string, captchaToken?: string) => {
     if (!supabase) return { error: { message: 'Supabase is not configured' } };
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
+        options: captchaToken ? { captchaToken } : undefined
       });
       return { error };
     } catch (err: any) {
@@ -90,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUpWithEmail = async (email: string, password: string, fullName?: string) => {
+  const signUpWithEmail = async (email: string, password: string, fullName?: string, captchaToken?: string) => {
     if (!supabase) return { error: { message: 'Supabase is not configured' }, user: null };
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -99,7 +100,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         options: {
           data: {
             full_name: fullName || ''
-          }
+          },
+          ...(captchaToken ? { captchaToken } : {})
         }
       });
       return { error, user: data?.user ?? null };

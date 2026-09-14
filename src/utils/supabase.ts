@@ -554,3 +554,44 @@ export const fetchPublicTraderData = async (username: string): Promise<{
     return null;
   }
 };
+
+// ==========================================
+// User Settings (replaces auth.user_metadata for app settings)
+// ==========================================
+export interface UserSettingsRow {
+  setup_queue?: unknown;
+  dashboard_cards?: unknown;
+  workspace_config?: unknown;
+  custom_fields?: unknown;
+}
+
+export const fetchUserSettings = async (): Promise<UserSettingsRow | null> => {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase.from('user_settings').select('*').maybeSingle();
+    if (error) throw error;
+    return (data as UserSettingsRow) || null;
+  } catch (err) {
+    console.error('Error fetching user settings:', err);
+    return null;
+  }
+};
+
+export const saveUserSettings = async (patch: Partial<UserSettingsRow>): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    const { error } = await supabase.from('user_settings').upsert({
+      user_id: user.id,
+      ...patch,
+      updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Error saving user settings:', err);
+    return false;
+  }
+};
+

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { 
   TradingAccount, 
   Trade, 
@@ -43,7 +43,8 @@ import {
   deleteWithdrawalFromCloud,
   syncPlaybookToCloud,
   deletePlaybookFromCloud,
-  supabase
+  fetchUserSettings,
+  saveUserSettings
 } from '../utils/supabase';
 import { useAuth } from './AuthContext';
 import { calculateAccountMetrics, generateEquityCurve } from '../utils/calculations';
@@ -150,6 +151,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isCloudSync, setIsCloudSync] = useState<boolean>(false);
   const [isLoadingCloud, setIsLoadingCloud] = useState<boolean>(false);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(() => isDemoModeEnabled());
+  const quotaWarnedRef = useRef(false);
   const [isStealthMode, setIsStealthMode] = useState<boolean>(() => {
     try {
       return localStorage.getItem('itrade_stealth_mode') === 'true';
@@ -245,7 +247,11 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [accounts]);
 
   useEffect(() => {
-    saveTrades(trades);
+    if (!saveTrades(trades) && !quotaWarnedRef.current) {
+      quotaWarnedRef.current = true;
+      showToast('Storage is full — some data could not be saved locally. Export a backup or remove old data.', 'error');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trades]);
 
   useEffect(() => {
@@ -256,13 +262,29 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     saveTradeAudit(tradeAudit);
   }, [tradeAudit]);
 
-  // Load custom field definitions from user metadata when signed in
+  // Load custom field definitions from the settings table when signed in
   useEffect(() => {
-    const cloudDefs = user?.user_metadata?.custom_fields;
-    if (Array.isArray(cloudDefs) && cloudDefs.length > 0) {
-      setCustomFieldDefsState(prev => (JSON.stringify(prev) === JSON.stringify(cloudDefs) ? prev : cloudDefs));
-      saveCustomFieldDefs(cloudDefs);
-    }
+    if (!user) return;
+    let alive = true;
+    (async () => {
+      const settings = await fetchUserSettings();
+      if (!alive) return;
+      const cloudDefs = (Array.isArray(settings?.custom_fields) && settings.custom_fields.length > 0
+        ? settings.custom_fields
+        : Array.isArray(user.user_metadata?.custom_fields) && user.user_metadata.custom_fields.length > 0
+          ? user.user_metadata.custom_fields
+          : null) as CustomFieldDef[] | null;
+      if (cloudDefs) {
+        setCustomFieldDefsState(prev => (JSON.stringify(prev) === JSON.stringify(cloudDefs) ? prev : cloudDefs));
+        saveCustomFieldDefs(cloudDefs);
+        if (!Array.isArray(settings?.custom_fields) || settings.custom_fields.length === 0) {
+          saveUserSettings({ custom_fields: cloudDefs });
+        }
+      }
+    })();
+    return () => {
+      alive = false;
+    };
   }, [user]);
 
   const setActiveAccountId = useCallback((id: string) => {
@@ -723,10 +745,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setCustomFieldDefs = useCallback((defs: CustomFieldDef[]) => {
     setCustomFieldDefsState(defs);
     saveCustomFieldDefs(defs);
-    if (user && isSupabaseConfigured() && supabase) {
-      supabase.auth.updateUser({ data: { custom_fields: defs } }).catch(() => {
-        /* non-blocking */
-      });
+    if (user && isSupabaseConfigured()) {
+      saveUserSettings({ custom_fields: defs });
     }
   }, [user]);
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../utils/supabase';
+import { fetchUserSettings, saveUserSettings } from '../../utils/supabase';
 import { MarketSessionClock } from '../common/MarketSessionClock';
 import { EquityChart } from '../common/EquityChart';
 import { EconomicCalendarView } from '../news/EconomicCalendarView';
@@ -98,44 +98,51 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
   const modalRef = useModalA11y(showConfigModal, () => setShowConfigModal(false));
   const [customTvSymbol, setCustomTvSymbol] = useState(config.symbolTV || 'OANDA:XAUUSD');
 
-  // 1. Fetch user-isolated workspace configuration from Supabase on login
+  // 1. Fetch user-isolated workspace configuration from the settings table
   useEffect(() => {
-    if (!user || !supabase) return;
-
-    const cloudWorkspace = user.user_metadata?.workspace_config;
-    if (cloudWorkspace && typeof cloudWorkspace === 'object') {
-      // Identity guard: avoid retriggering the save effect on every auth event.
-      setConfig(prev => (JSON.stringify(prev) === JSON.stringify(cloudWorkspace) ? prev : cloudWorkspace));
-      lastSyncedWorkspaceRef.current = JSON.stringify(cloudWorkspace);
-      if (cloudWorkspace.symbolTV) setCustomTvSymbol(cloudWorkspace.symbolTV);
-      localStorage.setItem('itrade_workspace_config', JSON.stringify(cloudWorkspace));
-    }
-    isInitialCloudSyncDone.current = true;
+    if (!user) return;
+    let alive = true;
+    (async () => {
+      const settings = await fetchUserSettings();
+      if (!alive) return;
+      const cloudWorkspace = (settings && typeof settings.workspace_config === 'object'
+        ? settings.workspace_config
+        : typeof user.user_metadata?.workspace_config === 'object'
+          ? user.user_metadata.workspace_config
+          : null) as any;
+      if (cloudWorkspace) {
+        setConfig(prev => (JSON.stringify(prev) === JSON.stringify(cloudWorkspace) ? prev : cloudWorkspace));
+        lastSyncedWorkspaceRef.current = JSON.stringify(cloudWorkspace);
+        if (cloudWorkspace.symbolTV) setCustomTvSymbol(cloudWorkspace.symbolTV);
+        localStorage.setItem('itrade_workspace_config', JSON.stringify(cloudWorkspace));
+        if (!settings || settings.workspace_config == null) {
+          saveUserSettings({ workspace_config: cloudWorkspace });
+        }
+      }
+      isInitialCloudSyncDone.current = true;
+    })();
+    return () => {
+      alive = false;
+    };
   }, [user]);
 
-  // 2. Persist locally and sync to database for current user
+  // 2. Persist locally and sync to the settings table
   useEffect(() => {
     try {
       localStorage.setItem('itrade_workspace_config', JSON.stringify(config));
     } catch (e) {}
 
-    // Debounce save to database. Skip when the payload is unchanged since the
-    // last successful sync so auth events can never loop updateUser.
-    if (user && supabase && isInitialCloudSyncDone.current) {
+    if (user && isInitialCloudSyncDone.current) {
       const payload = JSON.stringify(config);
       if (payload !== lastSyncedWorkspaceRef.current) {
-        const client = supabase;
         const timer = setTimeout(async () => {
           try {
-            await client.auth.updateUser({
-              data: { workspace_config: config }
-            });
+            await saveUserSettings({ workspace_config: config });
             lastSyncedWorkspaceRef.current = payload;
           } catch (err) {
             console.error('Failed to sync workspace configuration to database:', err);
           }
         }, 1000);
-
         return () => clearTimeout(timer);
       }
     }

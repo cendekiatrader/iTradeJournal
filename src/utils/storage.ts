@@ -132,11 +132,13 @@ export const loadTrades = (): Trade[] => {
   return [];
 };
 
-export const saveTrades = (trades: Trade[]): void => {
+export const saveTrades = (trades: Trade[]): boolean => {
   try {
     localStorage.setItem(TRADES_STORAGE_KEY, JSON.stringify(trades));
+    return true;
   } catch (err) {
     console.error('Error saving trades to localStorage:', err);
+    return false;
   }
 };
 

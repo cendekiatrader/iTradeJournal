@@ -17,7 +17,17 @@ export interface ReviewComment {
   createdAt: string;
 }
 
-const genToken = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+const genToken = () => {
+  const bytes = new Uint8Array(18);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(bytes);
+    return btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}${Math.random().toString(36).slice(2, 10)}`;
+};
 
 /**
  * Creates a review session. The trade snapshot is stored locally (works on this
@@ -120,12 +130,15 @@ export const addReviewComment = async (
   body: string
 ): Promise<boolean> => {
   if (!isSupabaseConfigured() || !supabase) return false;
+  const trimmedBody = String(body || '').trim().slice(0, 2000);
+  const trimmedAuthor = String(author || 'Anonymous').trim().slice(0, 80);
+  if (!trimmedBody) return false;
   try {
     const { error } = await supabase.from('review_comments').insert({
       session_token: token,
       trade_id: tradeId,
-      author,
-      body
+      author: trimmedAuthor,
+      body: trimmedBody
     });
     return !error;
   } catch {

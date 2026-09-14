@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useConfirm } from '../common/ConfirmDialog';
 import { EmptyState } from '../common/EmptyState';
 import { RichTextEditor } from '../common/RichTextEditor';
-import { supabase, isSupabaseConfigured } from '../../utils/supabase';
+import { fetchUserSettings, saveUserSettings, isSupabaseConfigured } from '../../utils/supabase';
 import { TradePrefill } from '../../types';
 import {
   Target,
@@ -84,38 +84,47 @@ export const SetupQueueView: React.FC<SetupQueueViewProps> = ({ onExecute }) => 
   const [targetLevel, setTargetLevel] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Load from cloud once when signed in (cloud wins if local empty)
+  // Load from the settings table once when signed in (cloud wins if local empty)
   useEffect(() => {
     if (!user || !isSupabaseConfigured()) return;
-    const cloudQueue = user.user_metadata?.setup_queue;
-    if (Array.isArray(cloudQueue)) {
-      lastSyncedQueueRef.current = JSON.stringify(cloudQueue);
-      if (cloudQueue.length > 0 && items.length === 0) {
-        setItems(cloudQueue as QueueItem[]);
-        saveQueue(cloudQueue as QueueItem[]);
+    let alive = true;
+    (async () => {
+      const settings = await fetchUserSettings();
+      if (!alive) return;
+      const cloudQueue = (Array.isArray(settings?.setup_queue)
+        ? settings.setup_queue
+        : Array.isArray(user.user_metadata?.setup_queue)
+          ? user.user_metadata.setup_queue
+          : null) as QueueItem[] | null;
+      if (Array.isArray(cloudQueue)) {
+        lastSyncedQueueRef.current = JSON.stringify(cloudQueue);
+        if (cloudQueue.length > 0 && items.length === 0) {
+          setItems(cloudQueue);
+          saveQueue(cloudQueue);
+        }
+        if (!Array.isArray(settings?.setup_queue)) {
+          saveUserSettings({ setup_queue: cloudQueue });
+        }
       }
-    }
-    cloudSynced.current = true;
+      cloudSynced.current = true;
+    })();
+    return () => {
+      alive = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Persist locally + sync to cloud (debounced). Skip unchanged payloads so
-  // auth events can never loop updateUser (blinking dashboard bug).
+  // Persist locally + sync to the settings table (debounced). Skip unchanged
+  // payloads so repeated events never loop the save.
   useEffect(() => {
     saveQueue(items);
-    const sb = user && isSupabaseConfigured() ? supabase : null;
-    if (sb && cloudSynced.current) {
+    if (user && isSupabaseConfigured() && cloudSynced.current) {
       const payload = JSON.stringify(items);
       if (payload !== lastSyncedQueueRef.current) {
         const timer = setTimeout(() => {
-          sb.auth
-            .updateUser({ data: { setup_queue: items } })
-            .then(() => {
-              lastSyncedQueueRef.current = payload;
-            })
-            .catch(() => {
-              /* non-blocking */
-            });
+          saveUserSettings({ setup_queue: items }).then(() => {
+            lastSyncedQueueRef.current = payload;
+          });
         }, 1200);
         return () => clearTimeout(timer);
       }

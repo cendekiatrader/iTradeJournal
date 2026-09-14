@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../utils/supabase';
+import { fetchUserSettings, saveUserSettings } from '../../utils/supabase';
 import { StatCard } from '../common/StatCard';
 import { StatCardSkeleton } from '../common/Skeleton';
 import { InsightsCard } from './InsightsCard';
@@ -128,22 +128,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     !isDemoMode && !isLoadingCloud && !activationDismissed && accounts.length > 0 && filteredTrades.length === 0;
   const showFullDashboard = !isActivationMode;
 
-  // 1. Fetch user-specific card visibility from database on login
+  // 1. Fetch user-specific card visibility from the settings table on login
   useEffect(() => {
-    if (!user || !supabase) return;
-
-    const cloudCards = user.user_metadata?.dashboard_cards;
-    if (cloudCards && typeof cloudCards === 'object') {
-      // Compare before set: new object identities would otherwise retrigger the
-      // save effect below on every auth event (-> endless updateUser loop).
-      setVisibleCards(prev => (JSON.stringify(prev) === JSON.stringify(cloudCards) ? prev : cloudCards));
-      lastSyncedCardsRef.current = JSON.stringify(cloudCards);
-      localStorage.setItem('itrade_dashboard_cards', JSON.stringify(cloudCards));
-    }
-    isInitialCloudSyncDone.current = true;
+    if (!user) return;
+    let alive = true;
+    (async () => {
+      const settings = await fetchUserSettings();
+      if (!alive) return;
+      const cloudCards = (settings && typeof settings.dashboard_cards === 'object'
+        ? settings.dashboard_cards
+        : typeof user.user_metadata?.dashboard_cards === 'object'
+          ? user.user_metadata.dashboard_cards
+          : null) as Record<string, boolean> | null;
+      if (cloudCards) {
+        setVisibleCards(prev => (JSON.stringify(prev) === JSON.stringify(cloudCards) ? prev : cloudCards));
+        lastSyncedCardsRef.current = JSON.stringify(cloudCards);
+        localStorage.setItem('itrade_dashboard_cards', JSON.stringify(cloudCards));
+        if (!settings || settings.dashboard_cards == null) {
+          saveUserSettings({ dashboard_cards: cloudCards });
+        }
+      }
+      isInitialCloudSyncDone.current = true;
+    })();
+    return () => {
+      alive = false;
+    };
   }, [user]);
 
-  // 2. Persist locally and sync to database for current user
+  // 2. Persist locally and sync to the settings table
   useEffect(() => {
     try {
       localStorage.setItem('itrade_dashboard_cards', JSON.stringify(visibleCards));
@@ -151,23 +163,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       // ignore
     }
 
-    // Debounce save to database (user metadata). Skip when the payload matches
-    // the last successfully synced value so auth events can never loop updateUser.
-    if (user && supabase && isInitialCloudSyncDone.current) {
+    if (user && isInitialCloudSyncDone.current) {
       const payload = JSON.stringify(visibleCards);
       if (payload !== lastSyncedCardsRef.current) {
-        const client = supabase;
         const timer = setTimeout(async () => {
           try {
-            await client.auth.updateUser({
-              data: { dashboard_cards: visibleCards }
-            });
+            await saveUserSettings({ dashboard_cards: visibleCards });
             lastSyncedCardsRef.current = payload;
           } catch (err) {
             console.error('Failed to sync card settings to database:', err);
           }
         }, 1000);
-
         return () => clearTimeout(timer);
       }
     }

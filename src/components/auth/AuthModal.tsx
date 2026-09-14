@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useJournal } from '../../context/JournalContext';
 import { 
@@ -39,6 +39,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     isConfigured 
   } = useAuth();
   const { showToast } = useJournal();
+  const turnstileSiteKey = (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY as string | undefined;
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState('');
@@ -51,6 +52,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [successMessage, setSuccessMessage] = useState('');
 
   const modalRef = useModalA11y(isOpen, onClose);
+
+  // Load the Cloudflare Turnstile script once (anti-bot on sign up / sign in)
+  useEffect(() => {
+    if (!turnstileSiteKey) return;
+    if (document.getElementById('cf-turnstile-script')) return;
+    const s = document.createElement('script');
+    s.id = 'cf-turnstile-script';
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    s.async = true;
+    s.defer = true;
+    document.head.appendChild(s);
+  }, [turnstileSiteKey]);
 
   if (!isOpen) return null;
 
@@ -73,6 +86,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
+    const captchaToken = (window as any).turnstile?.getResponse?.() || undefined;
 
     if (!isConfigured) {
       setErrorMessage('Supabase URL & Anon Key belum terpasang di .env / Vercel.');
@@ -90,7 +104,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
 
       setLoading(true);
-      const { error, user } = await signUpWithEmail(email, password, fullName);
+      const { error, user } = await signUpWithEmail(email, password, fullName, captchaToken);
       setLoading(false);
 
       if (error) {
@@ -105,7 +119,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
     } else if (mode === 'signin') {
       setLoading(true);
-      const { error } = await signInWithEmail(email, password);
+      const { error } = await signInWithEmail(email, password, captchaToken);
       setLoading(false);
 
       if (error) {
@@ -382,6 +396,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     required
                   />
                 </div>
+              </div>
+            )}
+
+            {/* Cloudflare Turnstile (anti-bot) — only when configured */}
+            {turnstileSiteKey && mode !== 'forgot' && (
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="dark" />
               </div>
             )}
 
