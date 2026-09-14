@@ -13,7 +13,9 @@ import { TradeDetailModal } from './components/journal/TradeDetailModal';
 import { AccountFormModal } from './components/accounts/AccountFormModal';
 import { OnboardingAccountModal } from './components/accounts/OnboardingAccountModal';
 import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
-import { AuthLockScreen } from './components/auth/AuthLockScreen';
+import { LandingPage } from './components/landing/LandingPage';
+import { DemoModeBanner } from './components/common/DemoModeBanner';
+import { isSupabaseConfigured } from './utils/supabase';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
 import { QuickRiskDock } from './components/calculator/QuickRiskDock';
@@ -53,7 +55,7 @@ const ViewLoading: React.FC = () => (
 );
 
 const MainApp: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     return localStorage.getItem('itrade_sidebar_collapsed') === 'true';
@@ -184,7 +186,7 @@ const MainApp: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const { deleteTrade, accountsMap, accounts, isLoadingCloud, showToast, trades } = useJournal();
+  const { deleteTrade, accountsMap, accounts, isLoadingCloud, showToast, trades, isDemoMode, enterDemoMode, exitDemoMode } = useJournal();
   const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(() => {
     return localStorage.getItem('itrade_onboarding_dismissed') === 'true';
   });
@@ -313,6 +315,29 @@ const MainApp: React.FC = () => {
     );
   }
 
+  // Public landing page for signed-out visitors (Supabase-configured builds)
+  if (isSupabaseConfigured() && !user && !isDemoMode) {
+    if (authLoading) {
+      return null; // wait for auth to settle so signed-in users never see the landing flash
+    }
+    return (
+      <>
+        <LandingPage
+          onOpenAuth={(mode) => {
+            setAuthMode(mode);
+            setAuthModalOpen(true);
+          }}
+          onOpenDemo={enterDemoMode}
+        />
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          initialMode={authMode}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="app-container">
       {/* Sidebar Navigation */}
@@ -327,6 +352,16 @@ const MainApp: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="main-content">
+        {isDemoMode && (
+          <DemoModeBanner
+            onSignUp={() => {
+              setAuthMode('signup');
+              setAuthModalOpen(true);
+            }}
+            onExit={exitDemoMode}
+          />
+        )}
+
         <Navbar
           onOpenTradeModal={handleOpenNewTrade}
           onOpenAccountModal={handleOpenNewAccount}
@@ -447,16 +482,6 @@ const MainApp: React.FC = () => {
 
       {/* Reset Password Modal (Triggered by Email Link) */}
       <ResetPasswordModal />
-
-      {/* Blurred Auth Lockscreen (Active when Supabase is configured and not logged in) */}
-      {!user && import.meta.env.VITE_SUPABASE_URL && (
-        <AuthLockScreen 
-          onOpenAuth={(mode) => {
-            setAuthMode(mode);
-            setAuthModalOpen(true);
-          }} 
-        />
-      )}
 
       {/* Global Auth Modal */}
       <AuthModal

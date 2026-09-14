@@ -50,6 +50,7 @@ import { calculateAccountMetrics, generateEquityCurve } from '../utils/calculati
 import { setStealthModeState } from '../utils/formatters';
 import { isPerformanceMode } from '../utils/uiPrefs';
 import { INITIAL_ACCOUNTS, INITIAL_TRADES, INITIAL_WITHDRAWALS } from '../data/seedData';
+import { isDemoModeEnabled, setDemoModeFlag } from '../utils/demoMode';
 import confetti from 'canvas-confetti';
 
 interface ToastState {
@@ -110,6 +111,9 @@ interface JournalContextType {
   tradeAudit: TradeAuditEntry[];
   getTradeAudit: (tradeId: string) => TradeAuditEntry[];
   revertTradeAuditEntry: (entryId: string) => void;
+  isDemoMode: boolean;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
   customFieldDefs: CustomFieldDef[];
   setCustomFieldDefs: (defs: CustomFieldDef[]) => void;
   triggerCelebration: () => void;
@@ -144,6 +148,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [customFieldDefs, setCustomFieldDefsState] = useState<CustomFieldDef[]>(() => loadCustomFieldDefs());
   const [isCloudSync, setIsCloudSync] = useState<boolean>(false);
   const [isLoadingCloud, setIsLoadingCloud] = useState<boolean>(false);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => isDemoModeEnabled());
   const [isStealthMode, setIsStealthMode] = useState<boolean>(() => {
     try {
       return localStorage.getItem('itrade_stealth_mode') === 'true';
@@ -168,8 +173,23 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   }, []);
 
+  const enterDemoMode = useCallback(() => {
+    setDemoModeFlag(true);
+    setIsDemoMode(true);
+  }, []);
+
+  const exitDemoMode = useCallback(() => {
+    setDemoModeFlag(false);
+    setIsDemoMode(false);
+  }, []);
+
   // Sync with Supabase on mount or user change if configured
   useEffect(() => {
+    // Signing in always leaves the demo sandbox
+    if (user && isDemoModeEnabled()) {
+      setDemoModeFlag(false);
+      setIsDemoMode(false);
+    }
     if (isSupabaseConfigured() && user) {
       setIsLoadingCloud(true);
       Promise.all([fetchCloudAccounts(), fetchCloudTrades(), fetchCloudWithdrawals(), fetchCloudPlaybooks()])
@@ -196,8 +216,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .finally(() => {
           setIsLoadingCloud(false);
         });
-    } else if (!isSupabaseConfigured()) {
-      // Local demo / standalone mode
+    } else if (!isSupabaseConfigured() || isDemoMode) {
+      // Local mode: standalone build or the no-login demo sandbox
       const localAccs = loadAccounts();
       const localTrades = loadTrades();
       const localWds = loadWithdrawals();
@@ -207,16 +227,16 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setWithdrawals(localWds.length > 0 ? localWds : INITIAL_WITHDRAWALS);
       setPlaybooks(localPbs);
     } else if (!user) {
-      // Supabase configured but logged out
+      // Supabase configured but logged out (the public landing page is shown instead)
       setAccounts([]);
       setTrades([]);
       setWithdrawals([]);
       setPlaybooks([]);
     }
-    // Refetch only on actual sign-in/out — USER_UPDATED metadata events must not
-    // trigger a full cloud reload (it flashes the skeleton on empty dashboards).
+    // Refetch only on actual sign-in/out or demo enter/exit — USER_UPDATED
+    // metadata events must not trigger a full cloud reload (skeleton flash).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, isDemoMode]);
 
   // Save changes to localStorage as fallback & cache
   useEffect(() => {
@@ -808,6 +828,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         tradeAudit,
         getTradeAudit,
         revertTradeAuditEntry,
+        isDemoMode,
+        enterDemoMode,
+        exitDemoMode,
         customFieldDefs,
         setCustomFieldDefs,
         triggerCelebration
