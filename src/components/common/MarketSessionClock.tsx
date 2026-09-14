@@ -98,7 +98,7 @@ export const MarketSessionClock: React.FC = () => {
             width: '34px',
             height: '34px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+            background: 'linear-gradient(135deg, var(--theme-secondary-strong), #06b6d4)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -106,7 +106,7 @@ export const MarketSessionClock: React.FC = () => {
             <Globe size={18} color="#ffffff" />
           </div>
           <div>
-            <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Multi-Market Session & Killzone Live Radar</span>
               {isOverlapActive && (
                 <span style={{
@@ -125,7 +125,7 @@ export const MarketSessionClock: React.FC = () => {
                 </span>
               )}
             </h3>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
               Status likuiditas sesi pasar dunia & waktu emas (Killzones) secara real-time
             </span>
           </div>
@@ -152,7 +152,7 @@ export const MarketSessionClock: React.FC = () => {
             border: '1px solid #1e293b',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.8rem',
-            color: '#94a3b8'
+            color: 'var(--text-secondary)'
           }}>
             {utcTimeStr}
           </div>
@@ -179,7 +179,7 @@ export const MarketSessionClock: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '1.1rem' }}>{session.flag}</span>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {session.city}
                   </span>
                 </div>
@@ -211,11 +211,11 @@ export const MarketSessionClock: React.FC = () => {
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
                 {session.name}
               </div>
 
-              <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
                 {String((session.openUtc + 7) % 24).padStart(2, '0')}:00 - {String((session.closeUtc + 7) % 24).padStart(2, '0')}:00 WIB
               </div>
             </div>

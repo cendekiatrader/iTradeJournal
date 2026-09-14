@@ -72,7 +72,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
         borderRadius: '12px',
         border: '1px dashed var(--border-color)'
       }}>
-        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', marginBottom: '4px' }}>
+        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
           No Closed Trades Yet
         </div>
         <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -93,12 +93,12 @@ export const EquityChart: React.FC<EquityChartProps> = ({
         <defs>
           <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
-            <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.12" />
+            <stop offset="50%" stopColor="var(--theme-secondary-strong)" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#020617" stopOpacity="0" />
           </linearGradient>
 
           <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="0%" stopColor="var(--theme-secondary-strong)" />
             <stop offset="100%" stopColor="#10b981" />
           </linearGradient>
         </defs>
@@ -146,7 +146,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
           x="796"
           y={baseLineY - 6}
           textAnchor="end"
-          fill="#94a3b8"
+          fill="var(--text-secondary)"
           fontSize="10"
           fontFamily="var(--font-mono)"
         >
@@ -230,14 +230,14 @@ export const EquityChart: React.FC<EquityChartProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{activePoint.data.displayDate}</div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{activePoint.data.displayDate}</div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
               {formatCurrency(activePoint.data.equity, currency)}
             </div>
           </div>
 
           <div style={{ borderLeft: '1px solid #1e293b', paddingLeft: '12px' }}>
-            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Trade Outcome</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Trade Outcome</div>
             <div style={{
               fontSize: '0.85rem',
               fontWeight: 700,

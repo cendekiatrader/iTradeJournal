@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { AccountType, Currency } from '../../types';
 import { Sparkles, Wallet, ArrowRight, Eye } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface OnboardingAccountModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
   const [currency, setCurrency] = useState<Currency>('USD');
   const [initialBalance, setInitialBalance] = useState<number>(10000);
 
+  const modalRef = useModalA11y(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,7 +35,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
       initialBalance: Number(initialBalance) || 10000,
       currentBalance: Number(initialBalance) || 10000,
       status: 'Active',
-      colorTag: '#3b82f6',
+      colorTag: 'var(--theme-secondary-strong)',
       notes: 'Initial trading account'
     });
     onClose();
@@ -40,7 +43,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
 
   return (
     <div className="modal-backdrop" style={{ zIndex: 1000, backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)' }}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', padding: '28px', borderRadius: '18px', border: '1px solid #25334d', backgroundColor: '#0b1222' }}>
+      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Create First Trading Account" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', padding: '28px', borderRadius: '18px', border: '1px solid #25334d', backgroundColor: '#0b1222' }}>
         
         {/* Header with Icon */}
         <div style={{ textAlign: 'center', marginBottom: '22px' }}>
@@ -48,20 +51,20 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
             width: '54px',
             height: '54px',
             borderRadius: '14px',
-            backgroundColor: 'rgba(59, 130, 246, 0.15)',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
+            backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#60a5fa',
+            color: 'var(--theme-secondary)',
             marginBottom: '12px'
           }}>
             <Sparkles size={28} />
           </div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 6px 0' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px 0' }}>
             Selamat Datang di iTradeJournal!
           </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
             Mari siapkan Akun Trading Utama Anda untuk mulai mencatat riwayat trade, mengukur winrate, dan melacak pertumbuhan modal.
           </p>
         </div>
@@ -116,7 +119,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label" style={{ fontSize: '0.78rem' }}>Saldo Awal (Initial Balance)</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   min="0"
                   step="any"
                   value={initialBalance || ''}
@@ -172,7 +175,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
               style={{
                 width: '100%',
                 fontSize: '0.8rem',
-                color: '#94a3b8',
+                color: 'var(--text-secondary)',
                 padding: '8px',
                 display: 'flex',
                 alignItems: 'center',

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { TradingAccount, AccountType, Currency, AccountStatus } from '../../types';
 import { X, Plus, Wallet, ShieldAlert, Target, Palette } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
+import { PROP_FIRM_PRESETS } from '../../data/propFirmPresets';
 
 interface AccountFormModalProps {
   isOpen: boolean;
@@ -10,7 +12,7 @@ interface AccountFormModalProps {
 }
 
 const COLOR_TAGS = [
-  '#3b82f6', // Electric Blue
+  'var(--theme-secondary-strong)', // Electric Blue
   '#10b981', // Emerald
   '#f59e0b', // Amber
   '#8b5cf6', // Purple
@@ -44,8 +46,9 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
   const [targetProfit, setTargetProfit] = useState<number | undefined>(10000);
   const [maxDrawdownPercent, setMaxDrawdownPercent] = useState<number | undefined>(10);
   const [dailyDrawdownPercent, setDailyDrawdownPercent] = useState<number | undefined>(5);
+  const [presetNote, setPresetNote] = useState('');
   const [status, setStatus] = useState<AccountStatus>('Active');
-  const [colorTag, setColorTag] = useState<string>('#3b82f6');
+  const [colorTag, setColorTag] = useState<string>('var(--theme-secondary-strong)');
   const [commissionPerLot, setCommissionPerLot] = useState<number | undefined>(undefined);
   const [swapPerLot, setSwapPerLot] = useState<number | undefined>(undefined);
   const [taxPercent, setTaxPercent] = useState<number | undefined>(undefined);
@@ -77,13 +80,15 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
       setMaxDrawdownPercent(10);
       setDailyDrawdownPercent(5);
       setStatus('Active');
-      setColorTag('#3b82f6');
+      setColorTag('var(--theme-secondary-strong)');
       setCommissionPerLot(undefined);
       setSwapPerLot(undefined);
       setTaxPercent(undefined);
       setNotes('');
     }
   }, [initialAccount, isOpen]);
+
+  const modalRef = useModalA11y(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -119,17 +124,17 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '620px' }}>
+      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Trading Account Form" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '620px' }}>
         <div className="modal-header">
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               {initialAccount ? 'Edit Trading Account' : 'Add New Trading Account'}
             </h2>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
               Configure broker, starting equity, and prop firm limits
             </span>
           </div>
-          <button onClick={onClose} className="btn btn-ghost btn-icon">
+          <button onClick={onClose} className="btn btn-ghost btn-icon" aria-label="Close dialog">
             <X size={20} />
           </button>
         </div>
@@ -212,7 +217,7 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
           <div className="input-group">
             <label className="input-label">Starting Initial Balance *</label>
             <input
-              type="number"
+              type="number" inputMode="decimal"
               value={initialBalance}
               onChange={(e) => setInitialBalance(parseFloat(e.target.value) || 0)}
               className="input-control font-mono"
@@ -227,11 +232,47 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
               <Target size={14} /> Optional: Prop Challenge & Risk Targets
             </div>
 
+            <div className="input-group" style={{ marginBottom: '12px' }}>
+              <label className="input-label">Vendor Preset (community — verify current rules)</label>
+              <select
+                className="input-control"
+                defaultValue=""
+                onChange={(e) => {
+                  const preset = PROP_FIRM_PRESETS.find((p) => p.id === e.target.value);
+                  if (!preset) {
+                    setPresetNote('');
+                    return;
+                  }
+                  const bal = Number(initialBalance) || 0;
+                  setTargetProfit(Math.round((bal * preset.profitTargetPct) / 100));
+                  setMaxDrawdownPercent(preset.maxDrawdownPct);
+                  setDailyDrawdownPercent(preset.dailyDrawdownPct || undefined);
+                  setPresetNote(
+                    `${preset.notes}${preset.minTradingDays ? ` Min ${preset.minTradingDays} trading days.` : ''}` +
+                      `${preset.consistencyRulePct ? ` Consistency rule: best day ≤ ${preset.consistencyRulePct}%.` : ''}` +
+                      `${preset.trailingDrawdown ? ' Trailing drawdown applies.' : ''} (updated ${preset.updatedAt} — always verify with the vendor)`
+                  );
+                }}
+              >
+                <option value="">— Choose a vendor preset —</option>
+                {PROP_FIRM_PRESETS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.vendor} — {p.profitTargetPct}% target / {p.maxDrawdownPct}% max{p.dailyDrawdownPct ? ` / ${p.dailyDrawdownPct}% daily` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {presetNote && (
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '10px', lineHeight: 1.5 }}>
+                {presetNote}
+              </div>
+            )}
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Profit Target ($)</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   value={targetProfit || ''}
                   onChange={(e) => setTargetProfit(e.target.value ? parseFloat(e.target.value) : undefined)}
                   placeholder="10000"
@@ -242,7 +283,7 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Max Drawdown (%)</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   value={maxDrawdownPercent || ''}
                   onChange={(e) => setMaxDrawdownPercent(e.target.value ? parseFloat(e.target.value) : undefined)}
                   placeholder="10"
@@ -253,7 +294,7 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Daily Loss Limit (%)</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   value={dailyDrawdownPercent || ''}
                   onChange={(e) => setDailyDrawdownPercent(e.target.value ? parseFloat(e.target.value) : undefined)}
                   placeholder="5"
@@ -273,7 +314,7 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Commission / Lot ($)</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   step="0.1"
                   value={commissionPerLot !== undefined ? commissionPerLot : ''}
                   onChange={(e) => setCommissionPerLot(e.target.value ? parseFloat(e.target.value) : undefined)}
@@ -285,7 +326,7 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Avg Swap / Trade ($)</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   step="0.1"
                   value={swapPerLot !== undefined ? swapPerLot : ''}
                   onChange={(e) => setSwapPerLot(e.target.value ? parseFloat(e.target.value) : undefined)}
@@ -297,7 +338,7 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Tax / Split Cut (%)</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   step="0.5"
                   value={taxPercent !== undefined ? taxPercent : ''}
                   onChange={(e) => setTaxPercent(e.target.value ? parseFloat(e.target.value) : undefined)}

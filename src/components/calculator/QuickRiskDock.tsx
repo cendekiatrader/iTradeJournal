@@ -134,7 +134,7 @@ export const QuickRiskDock: React.FC = () => {
         <!-- Asset Selector -->
         <div style="display:flex; gap:4px;">
           ${(['Gold', 'Forex', 'Crypto', 'Indices'] as const).map(ast => `
-            <button id="pip-ast-${ast}" style="flex:1; padding:5px 0; border-radius:6px; font-size:11px; font-weight:600; background:${instrument === ast ? '#1e293b' : 'transparent'}; color:${instrument === ast ? '#60a5fa' : '#64748b'}; border:1px solid ${instrument === ast ? '#3b82f6' : '#1e293b'}; cursor:pointer;">
+            <button id="pip-ast-${ast}" style="flex:1; padding:5px 0; border-radius:6px; font-size:11px; font-weight:600; background:${instrument === ast ? '#1e293b' : 'transparent'}; color:${instrument === ast ? 'var(--theme-secondary)' : 'var(--text-muted)'}; border:1px solid ${instrument === ast ? 'var(--theme-secondary-strong)' : '#1e293b'}; cursor:pointer;">
               ${ast}
             </button>
           `).join('')}
@@ -144,11 +144,11 @@ export const QuickRiskDock: React.FC = () => {
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
           <div style="min-width:0;">
             <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:2px;">Entry Price</label>
-            <input id="pip-entry" type="number" step="any" value="${entryPrice}" style="width:100%; max-width:100%; box-sizing:border-box; background:#060913; border:1px solid #233148; color:#f8fafc; padding:6px 8px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;" />
+            <input id="pip-entry" type="number" inputMode="decimal" step="any" value="${entryPrice}" style="width:100%; max-width:100%; box-sizing:border-box; background:#060913; border:1px solid #233148; color:#f8fafc; padding:6px 8px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;" />
           </div>
           <div style="min-width:0;">
             <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:2px;">Stop Loss</label>
-            <input id="pip-sl" type="number" step="any" value="${stopLossPrice}" style="width:100%; max-width:100%; box-sizing:border-box; background:#060913; border:1px solid #233148; color:#f8fafc; padding:6px 8px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;" />
+            <input id="pip-sl" type="number" inputMode="decimal" step="any" value="${stopLossPrice}" style="width:100%; max-width:100%; box-sizing:border-box; background:#060913; border:1px solid #233148; color:#f8fafc; padding:6px 8px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;" />
           </div>
         </div>
 
@@ -256,8 +256,8 @@ export const QuickRiskDock: React.FC = () => {
       });
 
       // Basic Dark Style for PiP Window Body
-      pipWindow.document.body.style.backgroundColor = '#0c1222';
-      pipWindow.document.body.style.color = '#f8fafc';
+      pipWindow.document.body.style.backgroundColor = 'var(--bg-panel)';
+      pipWindow.document.body.style.color = 'var(--text-primary)';
       pipWindow.document.body.style.margin = '0';
       pipWindow.document.body.style.padding = '14px';
       pipWindow.document.body.style.fontFamily = 'Inter, -apple-system, sans-serif';
@@ -282,6 +282,8 @@ export const QuickRiskDock: React.FC = () => {
       {/* Floating Mini Dock Trigger Bar (Fixed Bottom Right) */}
       <div 
         ref={containerRef}
+        className="quick-risk-dock"
+        data-tour="quick-risk-dock"
         style={{
           position: 'fixed',
           bottom: '18px',
@@ -297,8 +299,8 @@ export const QuickRiskDock: React.FC = () => {
         {isOpen && (
           <div style={{
             width: '320px',
-            backgroundColor: '#0c1222',
-            border: '1px solid #233148',
+            backgroundColor: 'var(--bg-panel)',
+            border: '1px solid var(--border-color)',
             borderRadius: '14px',
             boxShadow: '0 16px 40px rgba(0,0,0,0.85)',
             padding: '14px',
@@ -307,8 +309,8 @@ export const QuickRiskDock: React.FC = () => {
             {/* Dock Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Calculator size={16} color="#3b82f6" />
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f8fafc' }}>
+                <Calculator size={16} color="var(--theme-secondary-strong)" />
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                   Quick-Risk Sizer
                 </span>
               </div>
@@ -320,7 +322,8 @@ export const QuickRiskDock: React.FC = () => {
                   onClick={launchAlwaysOnTopPiP}
                   className="btn btn-ghost btn-icon btn-sm"
                   title="Buka Window Always-on-Top di Desktop (Di atas MT5 / TradingView)"
-                  style={{ color: isPipActive ? '#34d399' : '#60a5fa', padding: '4px' }}
+                  style={{ color: isPipActive ? '#34d399' : 'var(--theme-secondary)', padding: '4px' }}
+                  aria-label="Buka Window Always-on-Top di Desktop (Di atas MT5 / TradingView)"
                 >
                   <ExternalLink size={15} />
                 </button>
@@ -329,7 +332,7 @@ export const QuickRiskDock: React.FC = () => {
                   type="button"
                   onClick={() => setIsOpen(false)}
                   className="btn btn-ghost btn-icon btn-sm"
-                  style={{ color: '#94a3b8', padding: '4px' }}
+                  style={{ color: 'var(--text-secondary)', padding: '4px' }}
                 >
                   <X size={15} />
                 </button>
@@ -342,14 +345,14 @@ export const QuickRiskDock: React.FC = () => {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: '6px 10px',
-              backgroundColor: '#070b17',
+              backgroundColor: 'var(--bg-sidebar)',
               borderRadius: '8px',
               border: '1px solid #1a2538',
               marginBottom: '10px',
               fontSize: '0.74rem'
             }}>
-              <span style={{ color: '#94a3b8' }}>
-                Bal: <strong style={{ color: '#f8fafc' }}>{formatCurrency(currentBalance, currentCurrency, true)}</strong>
+              <span style={{ color: 'var(--text-secondary)' }}>
+                Bal: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(currentBalance, currentCurrency, true)}</strong>
               </span>
               <div style={{ display: 'flex', gap: '4px' }}>
                 {[0.5, 1.0, 2.0].map(r => (
@@ -362,8 +365,8 @@ export const QuickRiskDock: React.FC = () => {
                       borderRadius: '4px',
                       fontSize: '0.7rem',
                       fontWeight: 700,
-                      backgroundColor: riskPercent === r ? '#3b82f6' : '#1e293b',
-                      color: riskPercent === r ? '#ffffff' : '#94a3b8',
+                      backgroundColor: riskPercent === r ? 'var(--theme-secondary-strong)' : '#1e293b',
+                      color: riskPercent === r ? '#ffffff' : 'var(--text-secondary)',
                       border: 'none',
                       cursor: 'pointer'
                     }}
@@ -394,8 +397,8 @@ export const QuickRiskDock: React.FC = () => {
                     fontSize: '0.7rem',
                     fontWeight: 600,
                     backgroundColor: instrument === ast ? '#1e293b' : 'transparent',
-                    color: instrument === ast ? '#60a5fa' : '#64748b',
-                    border: `1px solid ${instrument === ast ? '#3b82f6' : '#1e293b'}`,
+                    color: instrument === ast ? 'var(--theme-secondary)' : 'var(--text-muted)',
+                    border: `1px solid ${instrument === ast ? 'var(--theme-secondary-strong)' : '#1e293b'}`,
                     cursor: 'pointer'
                   }}
                 >
@@ -409,7 +412,7 @@ export const QuickRiskDock: React.FC = () => {
               <div style={{ minWidth: 0 }}>
                 <label className="input-label" style={{ fontSize: '0.7rem', marginBottom: '2px', display: 'block' }}>Entry Price</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   step="any"
                   value={entryPrice}
                   onChange={(e) => setEntryPrice(e.target.value)}
@@ -428,7 +431,7 @@ export const QuickRiskDock: React.FC = () => {
               <div style={{ minWidth: 0 }}>
                 <label className="input-label" style={{ fontSize: '0.7rem', marginBottom: '2px', display: 'block' }}>Stop Loss</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   step="any"
                   value={stopLossPrice}
                   onChange={(e) => setStopLossPrice(e.target.value)}
@@ -448,9 +451,9 @@ export const QuickRiskDock: React.FC = () => {
             {/* Result Box */}
             <div style={{
               padding: '10px',
-              backgroundColor: '#070b17',
+              backgroundColor: 'var(--bg-sidebar)',
               borderRadius: '8px',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
+              border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -477,7 +480,7 @@ export const QuickRiskDock: React.FC = () => {
             </div>
 
             {/* Always on top tip */}
-            <div style={{ fontSize: '0.68rem', color: '#64748b', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textAlign: 'center' }}>
               Klik ikon <ExternalLink size={10} style={{ display: 'inline' }} /> untuk window melayang di atas chart Desktop (Always-On-Top)
             </div>
           </div>
@@ -492,22 +495,22 @@ export const QuickRiskDock: React.FC = () => {
             alignItems: 'center',
             gap: '8px',
             padding: '8px 14px',
-            backgroundColor: '#0c1222',
-            border: '1px solid #233148',
+            backgroundColor: 'var(--bg-panel)',
+            border: '1px solid var(--border-color)',
             borderRadius: '24px',
-            color: '#f8fafc',
+            color: 'var(--text-primary)',
             boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
             cursor: 'pointer',
             fontWeight: 700,
             fontSize: '0.8rem',
             transition: 'all 0.15s ease'
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#233148'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--theme-secondary-strong)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
         >
-          <Zap size={14} color="#3b82f6" />
+          <Zap size={14} color="var(--theme-secondary-strong)" />
           <span>Quick Risk ({formattedLot} {unitLabelSingular})</span>
-          {isOpen ? <ChevronDown size={14} color="#94a3b8" /> : <ChevronUp size={14} color="#94a3b8" />}
+          {isOpen ? <ChevronDown size={14} color="var(--text-secondary)" /> : <ChevronUp size={14} color="var(--text-secondary)" />}
         </button>
       </div>
     </>

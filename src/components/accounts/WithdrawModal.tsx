@@ -13,6 +13,8 @@ import {
   Wallet,
   AlertCircle
 } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
+import { useConfirm } from '../common/ConfirmDialog';
 
 interface WithdrawModalProps {
   isOpen: boolean;
@@ -27,6 +29,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
 }) => {
   const { withdrawals, addWithdrawal, deleteWithdrawal, showToast } = useJournal();
 
+  const { confirm } = useConfirm();
   const [amount, setAmount] = useState<number>(1000);
   const [date, setDate] = useState(() => {
     const now = new Date();
@@ -41,6 +44,8 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
       setNotes(`${account.name} Payout`);
     }
   }, [account, isOpen]);
+
+  const modalRef = useModalA11y(isOpen, onClose);
 
   if (!isOpen || !account) return null;
 
@@ -83,9 +88,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px' }}>
+      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Record Withdrawal" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px' }}>
         {/* Header */}
-        <div className="modal-header" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), #0c101e)' }}>
+        <div className="modal-header" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent), var(--bg-card))' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '36px',
@@ -100,7 +105,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
               <ArrowDownCircle size={20} color="var(--profit-green)" />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc' }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 Account Withdrawal / Payout
               </h2>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
@@ -109,7 +114,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             </div>
           </div>
 
-          <button onClick={onClose} className="btn btn-ghost btn-icon">
+          <button onClick={onClose} className="btn btn-ghost btn-icon" aria-label="Close dialog">
             <X size={18} />
           </button>
         </div>
@@ -120,7 +125,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
           <div style={{ backgroundColor: '#060913', padding: '14px 18px', borderRadius: '12px', border: '1px solid #1c273a', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Available Account Balance</span>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {formatCurrency(account.currentBalance, account.currency)}
               </div>
             </div>
@@ -144,7 +149,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
               )}
             </div>
             <input
-              type="number"
+              type="number" inputMode="decimal"
               step="any"
               value={amount}
               onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
@@ -173,7 +178,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
           <div className="input-group" style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
               <label className="input-label" style={{ margin: 0 }}>Payout Date *</label>
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
                 {formatDateTimeDDMMYYYY(date)}
               </span>
             </div>
@@ -241,14 +246,21 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
 
                     <button
                       type="button"
-                      onClick={() => {
-                        if (window.confirm(`Delete withdrawal record of ${formatCurrency(wd.amount, account.currency)}?`)) {
+                      onClick={async () => {
+                        const confirmed = await confirm({
+                          title: `Delete withdrawal of ${formatCurrency(wd.amount, account.currency)}?`,
+                          message: 'This withdrawal record will be permanently removed.',
+                          confirmText: 'Delete record',
+                          variant: 'danger'
+                        });
+                        if (confirmed) {
                           deleteWithdrawal(wd.id);
                         }
                       }}
                       className="btn btn-ghost btn-icon btn-sm"
                       style={{ color: '#ef4444' }}
                       title="Delete Withdrawal"
+                      aria-label="Delete Withdrawal"
                     >
                       <Trash2 size={14} />
                     </button>

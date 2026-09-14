@@ -14,9 +14,25 @@ import {
   ExternalLink,
   Layers,
   Sparkles,
-  Clock
+  Clock,
+  History,
+  RotateCcw
 } from 'lucide-react';
 import { BeforeAfterSlider } from './BeforeAfterSlider';
+import { useModalA11y } from '../../hooks/useModalA11y';
+import { useConfirm } from '../common/ConfirmDialog';
+import { useJournal } from '../../context/JournalContext';
+
+const prettifyField = (field: string) =>
+  field.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
+
+const formatAuditValue = (value: unknown): string => {
+  if (value === null || value === undefined) return '—';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (Array.isArray(value)) return value.join(', ') || '—';
+  const str = String(value);
+  return str.length > 40 ? `${str.slice(0, 37)}…` : str;
+};
 
 interface TradeDetailModalProps {
   trade: Trade | null;
@@ -33,6 +49,11 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
   onDelete,
   account
 }) => {
+  const { confirm } = useConfirm();
+  const { getTradeAudit, revertTradeAuditEntry, customFieldDefs } = useJournal();
+  const modalRef = useModalA11y(Boolean(trade), onClose);
+  const auditEntries = trade ? getTradeAudit(trade.id) : [];
+
   if (!trade) return null;
 
   const isWin = trade.status === 'WIN';
@@ -50,19 +71,19 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '750px' }}>
+      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Trade Details" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '750px' }}>
         {/* Header with Trade Status Banner */}
         <div style={{
           padding: '20px 24px',
           borderBottom: '1px solid var(--border-color)',
-          background: isWin ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), #0c101e)' : isLoss ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), #0c101e)' : '#0c101e',
+          background: isWin ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), var(--bg-card))' : isLoss ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), var(--bg-card))' : 'var(--bg-card)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {trade.symbol}
               </h2>
               <span className={`badge ${trade.direction === 'LONG' ? 'badge-long' : 'badge-short'}`}>
@@ -78,7 +99,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               <span style={{ fontFamily: 'var(--font-mono)' }}>{formatDateTimeDDMMYYYY(trade.entryDate)}</span>
               <span>•</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: account?.colorTag || '#3b82f6' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: account?.colorTag || 'var(--theme-secondary-strong)' }} />
                 {account?.name}
               </span>
               <span>•</span>
@@ -91,7 +112,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               fontSize: '1.4rem',
               fontWeight: 800,
               fontFamily: 'var(--font-mono)',
-              color: isWin ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : '#94a3b8'
+              color: isWin ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : 'var(--text-secondary)'
             }}>
               {trade.pnl > 0 ? '+' : ''}{formatCurrency(trade.pnl, currency)}
             </div>
@@ -110,7 +131,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Opened At
                 </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', marginTop: '2px' }}>
                   {formatDateTimeDDMMYYYY(trade.entryDate)}
                 </div>
               </div>
@@ -121,16 +142,16 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Closed At
                 </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', marginTop: '2px' }}>
                   {trade.exitDate ? formatDateTimeDDMMYYYY(trade.exitDate) : 'Trade Still Open'}
                 </div>
               </div>
             </div>
 
             {tradeHolding && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(59, 130, 246, 0.15)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                <Clock size={14} color="#60a5fa" />
-                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#60a5fa', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)', padding: '6px 12px', borderRadius: '8px', border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)' }}>
+                <Clock size={14} color="var(--theme-secondary)" />
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--theme-secondary)', fontFamily: 'var(--font-mono)' }}>
                   Holding: {tradeHolding}
                 </span>
               </div>
@@ -141,7 +162,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', backgroundColor: '#060913', padding: '14px', borderRadius: '12px', border: '1px solid #1c273a' }}>
             <div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Entry Price</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {trade.entryPrice}
               </div>
             </div>
@@ -150,7 +171,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
                 {trade.exits && trade.exits.length > 0 ? 'Avg Exit Price' : 'Exit Price'}
               </div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {trade.exitPrice || '-'}
               </div>
             </div>
@@ -173,7 +194,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
                 {trade.assetClass === 'Crypto' ? 'Quantity (Units)' : trade.assetClass === 'Indices' ? 'Contracts' : 'Position Size (Lots)'}
               </div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {trade.quantity} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{trade.assetClass === 'Crypto' ? 'Units' : trade.assetClass === 'Indices' ? 'Ctr' : 'Lots'}</span>
               </div>
             </div>
@@ -196,10 +217,10 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
                 {trade.exits.map((item, idx) => (
                   <div key={item.id || idx} style={{ backgroundColor: '#0b1328', padding: '8px 12px', borderRadius: '6px', border: '1px solid #1c2b48' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#60a5fa' }}>{item.label || `TP${idx + 1}`}</span>
-                      <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{item.percentage ? `${item.percentage}%` : ''}</span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--theme-secondary)' }}>{item.label || `TP${idx + 1}`}</span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{item.percentage ? `${item.percentage}%` : ''}</span>
                     </div>
-                    <div style={{ fontSize: '0.82rem', fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+                    <div style={{ fontSize: '0.82rem', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                       Exit: <strong>{item.exitPrice}</strong> ({item.quantity} {trade.assetClass === 'Crypto' ? 'Units' : 'Lots'})
                     </div>
                   </div>
@@ -214,7 +235,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               Strategy Setup Model
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <span className="badge" style={{ backgroundColor: '#1e293b', color: '#60a5fa', padding: '6px 12px', fontSize: '0.8rem' }}>
+              <span className="badge" style={{ backgroundColor: '#1e293b', color: 'var(--theme-secondary)', padding: '6px 12px', fontSize: '0.8rem' }}>
                 {trade.setup}
               </span>
               <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -240,7 +261,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', backgroundColor: '#070a16', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
             <div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Psychological State</span>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
                 {trade.emotion}
               </div>
             </div>
@@ -262,7 +283,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               </div>
               <div 
                 className="rich-notes-content"
-                style={{ fontSize: '0.875rem', color: '#cbd5e1', lineHeight: 1.6 }}
+                style={{ fontSize: '0.875rem', color: 'var(--text-strong)', lineHeight: 1.6 }}
                 dangerouslySetInnerHTML={{ __html: trade.notes }}
               />
             </div>
@@ -271,7 +292,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
           {trade.lessons && (
             <div style={{ backgroundColor: '#070a16', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#f59e0b', marginBottom: '4px' }}>Lessons & Feedback</div>
-              <p style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-strong)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
                 {trade.lessons}
               </p>
             </div>
@@ -299,13 +320,79 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               </div>
             </div>
           ) : null}
+
+          {/* Edit History / Audit Trail */}
+          {auditEntries.length > 0 && (
+            <div style={{ backgroundColor: '#070a16', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <History size={14} /> Edit History ({auditEntries.length})
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '170px', overflowY: 'auto' }}>
+                {auditEntries.slice(0, 12).map((entry) => (
+                  <div key={entry.id} style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '8px 10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                        {new Date(entry.at).toLocaleString()}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => revertTradeAuditEntry(entry.id)}
+                        title="Restore the values from before this edit"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: 'var(--theme-secondary)', cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, padding: '2px 4px', flexShrink: 0 }}
+                      >
+                        <RotateCcw size={11} /> Revert
+                      </button>
+                    </div>
+                    <div style={{ marginTop: '3px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      {entry.changes.map((c, i) => (
+                        <div key={i}>
+                          <strong style={{ color: 'var(--text-primary)' }}>{prettifyField(c.field)}</strong>:{' '}
+                          <span style={{ textDecoration: 'line-through', opacity: 0.75 }}>{formatAuditValue(c.from)}</span>{' '}
+                          <span style={{ color: 'var(--theme-secondary)' }}>→ {formatAuditValue(c.to)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Custom Fields */}
+          {customFieldDefs.length > 0 && trade.customFields && Object.keys(trade.customFields).length > 0 && (
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Custom Fields
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+                {customFieldDefs
+                  .filter((d) => trade.customFields?.[d.id] !== undefined && trade.customFields?.[d.id] !== '')
+                  .map((d) => (
+                    <div key={d.id} style={{ padding: '8px 10px', borderRadius: '8px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+                      <div style={{ fontSize: '0.64rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                        {d.label}
+                      </div>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', marginTop: '2px' }}>
+                        {String(trade.customFields?.[d.id])}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Actions */}
         <div className="modal-footer" style={{ justifyContent: 'space-between' }}>
           <button
-            onClick={() => {
-              if (window.confirm(`Delete trade ${trade.symbol}?`)) {
+            onClick={async () => {
+              const confirmed = await confirm({
+                title: `Delete trade ${trade.symbol}?`,
+                message: 'This trade will be permanently removed from your journal.',
+                confirmText: 'Delete trade',
+                variant: 'danger'
+              });
+              if (confirmed) {
                 onDelete(trade.id);
                 onClose();
               }

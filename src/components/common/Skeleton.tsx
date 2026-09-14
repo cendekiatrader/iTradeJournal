@@ -8,68 +8,55 @@ interface SkeletonProps {
   count?: number;
 }
 
+const radiusFor = (variant: string): string =>
+  variant === 'circular' ? '50%' : variant === 'card' ? 'var(--radius-lg)' : variant === 'text' ? '6px' : 'var(--radius-md)';
+
+const sizeFor = (value: string | number | undefined): string | undefined =>
+  value === undefined ? undefined : typeof value === 'number' ? `${value}px` : value;
+
 export const Skeleton: React.FC<SkeletonProps> = ({
   className = '',
   variant = 'rectangular',
   width,
   height,
   count = 1
-}) => {
-  const getVariantClass = () => {
-    switch (variant) {
-      case 'circular':
-        return 'rounded-full';
-      case 'text':
-        return 'rounded h-4 my-1';
-      case 'card':
-        return 'rounded-xl h-36';
-      case 'rectangular':
-      default:
-        return 'rounded-lg';
-    }
-  };
+}) => (
+  <>
+    {Array.from({ length: count }).map((_, idx) => (
+      <div
+        key={idx}
+        className={className}
+        aria-hidden="true"
+        style={{
+          background: 'var(--bg-surface-elevated)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: radiusFor(variant),
+          animation: 'pulseGlow 1.6s ease-in-out infinite',
+          width: sizeFor(width),
+          height: sizeFor(height) ?? (variant === 'card' ? '144px' : variant === 'text' ? '14px' : undefined)
+        }}
+      />
+    ))}
+  </>
+);
 
-  const items = Array.from({ length: count });
-
-  return (
-    <>
-      {items.map((_, idx) => (
-        <div
-          key={idx}
-          className={`animate-pulse bg-surface-base/80 dark:bg-slate-800/60 border border-border-subtle ${getVariantClass()} ${className}`}
-          style={{
-            width: width ? (typeof width === 'number' ? `${width}px` : width) : undefined,
-            height: height ? (typeof height === 'number' ? `${height}px` : height) : undefined,
-          }}
-        />
-      ))}
-    </>
-  );
-};
-
-export const StatCardSkeleton: React.FC = () => {
-  return (
-    <div className="bg-surface-card border border-border-subtle rounded-xl p-4 flex flex-col gap-3 animate-pulse shadow-card">
-      <div className="flex justify-between items-center">
-        <Skeleton variant="text" width="40%" height={14} />
-        <Skeleton variant="circular" width={28} height={28} />
-      </div>
-      <Skeleton variant="text" width="65%" height={24} />
-      <div className="flex items-center gap-2 mt-1">
-        <Skeleton variant="text" width="30%" height={12} />
-      </div>
+export const StatCardSkeleton: React.FC = () => (
+  <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '118px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Skeleton variant="text" width="45%" />
+      <Skeleton variant="circular" width={28} height={28} />
     </div>
-  );
-};
+    <Skeleton variant="text" width="65%" height={26} />
+    <Skeleton variant="text" width="35%" />
+  </div>
+);
 
-export const TableRowSkeleton: React.FC<{ cols?: number }> = ({ cols = 5 }) => {
-  return (
-    <tr className="border-b border-border-subtle animate-pulse">
-      {Array.from({ length: cols }).map((_, i) => (
-        <td key={i} className="p-4">
-          <Skeleton variant="text" width={i === 0 ? '70%' : '50%'} height={16} />
-        </td>
-      ))}
-    </tr>
-  );
-};
+export const TableRowSkeleton: React.FC<{ cols?: number }> = ({ cols = 5 }) => (
+  <tr style={{ borderBottom: '1px solid var(--border-subtle)' }} aria-hidden="true">
+    {Array.from({ length: cols }).map((_, i) => (
+      <td key={i} style={{ padding: '12px 14px' }}>
+        <Skeleton variant="text" width={i === 0 ? '70%' : '50%'} />
+      </td>
+    ))}
+  </tr>
+);

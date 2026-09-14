@@ -3,6 +3,9 @@ import { useJournal } from '../../context/JournalContext';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../utils/supabase';
 import { StatCard } from '../common/StatCard';
+import { StatCardSkeleton } from '../common/Skeleton';
+import { InsightsCard } from './InsightsCard';
+import { useModalA11y } from '../../hooks/useModalA11y';
 import { EquityChart } from '../common/EquityChart';
 import { MarketSessionClock } from '../common/MarketSessionClock';
 import { PropFirmGauge } from './PropFirmGauge';
@@ -75,7 +78,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateToJournal,
   onNavigateToNews
 }) => {
-  const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap } = useJournal();
+  const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap, isLoadingCloud } = useJournal();
   const { user } = useAuth();
   const currentCurrency = activeAccount?.currency || 'USD';
   const isInitialCloudSyncDone = useRef(false);
@@ -91,6 +94,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   });
 
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
+  const customizeModalRef = useModalA11y(showCustomizeModal, () => setShowCustomizeModal(false));
 
   // 1. Fetch user-specific card visibility from database on login
   useEffect(() => {
@@ -156,7 +160,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Top Welcome & Summary Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Performance Dashboard
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -189,6 +193,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {activeAccount && <PropFirmGauge account={activeAccount} metrics={metrics} />}
 
       {/* Key Metric Stats Grid */}
+      {isLoadingCloud && filteredTrades.length === 0 ? (
+        <div className="grid-stats">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <StatCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : (
       <div className="grid-stats">
         {/* Row 1: Core Profitability & Edge */}
         {visibleCards.netPnl && (
@@ -210,8 +221,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             subValue={`${metrics.winningTrades} Wins / ${metrics.losingTrades} Losses`}
             subValueType={metrics.winRate >= 50 ? 'positive' : 'negative'}
             icon={Percent}
-            iconColor="#3b82f6"
-            iconBg="rgba(59, 130, 246, 0.12)"
+            iconColor="var(--theme-secondary-strong)"
+            iconBg="color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent)"
             progress={metrics.winRate}
             progressColor={metrics.winRate >= 50 ? 'var(--profit-green)' : 'var(--loss-red)'}
           />
@@ -312,7 +323,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             subValue={`${metrics.longTradesCount} Longs / ${metrics.shortTradesCount} Shorts`}
             subValueType={metrics.longWinRate >= 50 && metrics.shortWinRate >= 50 ? 'positive' : 'accent'}
             icon={Compass}
-            iconColor="#60a5fa"
+            iconColor="var(--theme-secondary)"
             iconBg="rgba(96, 165, 250, 0.12)"
           />
         )}
@@ -341,6 +352,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           />
         )}
       </div>
+      )}
+
+      <InsightsCard trades={filteredTrades} />
 
       {/* Main Charts & Breakdown Section */}
       <div className="grid-2col">
@@ -357,7 +371,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </p>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <span className="badge" style={{ backgroundColor: '#131e33', color: '#60a5fa' }}>
+              <span className="badge" style={{ backgroundColor: '#131e33', color: 'var(--theme-secondary)' }}>
                 {equityCurve.length - 1} Closed Points
               </span>
             </div>
@@ -412,7 +426,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {/* Win/Loss Ratio */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Win / Loss Payout Ratio</span>
-                <span style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                   {metrics.winLossRatio.toFixed(2)}x
                 </span>
               </div>
@@ -439,10 +453,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="card">
         <div className="card-header">
           <div className="card-title">
-            <Clock size={18} color="#60a5fa" />
+            <Clock size={18} color="var(--theme-secondary)" />
             <span>Recent Executions</span>
           </div>
-          <button onClick={onNavigateToJournal} className="btn btn-ghost btn-sm" style={{ color: '#60a5fa' }}>
+          <button onClick={onNavigateToJournal} className="btn btn-ghost btn-sm" style={{ color: 'var(--theme-secondary)' }}>
             View Full Journal ({filteredTrades.length} trades) →
           </button>
         </div>
@@ -489,12 +503,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         {formatDateTimeDDMMYYYY(trade.entryDate)}
                       </td>
                       <td style={{ padding: '12px' }}>
-                        <span style={{ fontSize: '0.78rem', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: account?.colorTag || '#3b82f6' }} />
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-strong)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: account?.colorTag || 'var(--theme-secondary-strong)' }} />
                           {account?.name || 'Account'}
                         </span>
                       </td>
-                      <td style={{ padding: '12px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+                      <td style={{ padding: '12px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                         {trade.symbol}
                       </td>
                       <td style={{ padding: '12px' }}>
@@ -503,7 +517,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           {trade.direction}
                         </span>
                       </td>
-                      <td style={{ padding: '12px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                      <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
                         {trade.setup}
                       </td>
                       <td style={{ padding: '12px' }}>
@@ -511,7 +525,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           {trade.session}
                         </span>
                       </td>
-                      <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', color: '#cbd5e1' }}>
+                      <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                         {trade.rrAchieved ? `1:${trade.rrAchieved.toFixed(1)}` : (trade.rrPlanned ? `1:${trade.rrPlanned.toFixed(1)}` : '-')}
                       </td>
                       <td style={{
@@ -519,7 +533,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         textAlign: 'right',
                         fontWeight: 700,
                         fontFamily: 'var(--font-mono)',
-                        color: isWin ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : '#94a3b8'
+                        color: isWin ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : 'var(--text-secondary)'
                       }}>
                         {trade.pnl > 0 ? '+' : ''}{formatCurrency(trade.pnl, account?.currency || 'USD')}
                       </td>
@@ -553,7 +567,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           justifyContent: 'center',
           padding: '20px'
         }}>
-          <div style={{
+          <div
+            ref={customizeModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Customize Dashboard Cards"
+            tabIndex={-1}
+            style={{
             backgroundColor: '#0c1322',
             border: '1px solid #1e293b',
             borderRadius: '16px',
@@ -567,28 +587,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {/* Modal Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <SlidersHorizontal size={20} color="#3b82f6" />
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                <SlidersHorizontal size={20} color="var(--theme-secondary-strong)" />
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                   Customize Dashboard Cards
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCustomizeModal(false)}
-                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                aria-label="Close dialog"
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '20px', lineHeight: 1.5 }}>
-              Pilih metrik yang ingin Anda tampilkan atau sembunyikan di dashboard utama. Preferensi akan otomatis tersimpan di browser Anda.
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>
+              Choose which metrics to show or hide on the main dashboard. Preferences are saved automatically and synced to your account.
             </p>
 
             {/* Quick Actions */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #1a2538' }}>
-              <span style={{ fontSize: '0.78rem', color: '#60a5fa', fontWeight: 700 }}>
-                {activeCount} dari 12 Kartu Aktif
+              <span style={{ fontSize: '0.78rem', color: 'var(--theme-secondary)', fontWeight: 700 }}>
+                {activeCount} of 12 cards active
               </span>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
@@ -598,14 +619,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     fontSize: '0.72rem',
                     padding: '4px 10px',
                     borderRadius: '6px',
-                    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                    color: '#60a5fa',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)',
+                    color: 'var(--theme-secondary)',
+                    border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)',
                     cursor: 'pointer',
                     fontWeight: 600
                   }}
                 >
-                  Tampilkan Semua
+                  Select All
                 </button>
                 <button
                   type="button"
@@ -615,7 +636,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     padding: '4px 10px',
                     borderRadius: '6px',
                     backgroundColor: '#131b2e',
-                    color: '#94a3b8',
+                    color: 'var(--text-secondary)',
                     border: '1px solid #23304a',
                     cursor: 'pointer',
                     display: 'flex',
@@ -634,7 +655,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 const catCards = CARD_CONFIG.filter(c => c.category === cat);
                 return (
                   <div key={cat}>
-                    <div style={{ fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '8px' }}>
                       {cat}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -651,9 +672,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               justifyContent: 'space-between',
                               padding: '10px 12px',
                               borderRadius: '8px',
-                              backgroundColor: isChecked ? 'rgba(59, 130, 246, 0.12)' : '#070b16',
-                              border: isChecked ? '1px solid #3b82f6' : '1px solid #1a2538',
-                              color: isChecked ? '#f8fafc' : '#64748b',
+                              backgroundColor: isChecked ? 'color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent)' : '#070b16',
+                              border: isChecked ? '1px solid var(--theme-secondary-strong)' : '1px solid #1a2538',
+                              color: isChecked ? 'var(--text-primary)' : 'var(--text-muted)',
                               cursor: 'pointer',
                               textAlign: 'left',
                               transition: 'all 0.15s ease'
@@ -666,7 +687,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               width: '18px',
                               height: '18px',
                               borderRadius: '4px',
-                              backgroundColor: isChecked ? '#3b82f6' : '#141d2e',
+                              backgroundColor: isChecked ? 'var(--theme-secondary-strong)' : '#141d2e',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',

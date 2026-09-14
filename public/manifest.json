@@ -5,7 +5,11 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#070b14",
   "theme_color": "#0b1120",
   "orientation": "any",
@@ -23,21 +27,56 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["finance", "productivity", "business"],
+  "categories": [
+    "finance",
+    "productivity",
+    "business"
+  ],
   "shortcuts": [
     {
       "name": "Log Trade",
       "short_name": "New Trade",
       "description": "Quickly record a new trade entry",
       "url": "./#new-trade",
-      "icons": [{ "src": "./icon.svg", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "./icon.svg",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Risk Calculator",
       "short_name": "Calculator",
       "description": "Calculate exact lot & position sizing",
       "url": "./#calculator",
-      "icons": [{ "src": "./icon.svg", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "./icon.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Setup Queue",
+      "short_name": "Queue",
+      "description": "Review your planned setups and trade ideas",
+      "url": "./#queue",
+      "icons": [
+        {
+          "src": "./icon.svg",
+          "sizes": "192x192"
+        }
+      ]
     }
-  ]
+  ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": {
+      "title": "share_title",
+      "text": "share_text",
+      "url": "share_url"
+    }
+  }
 }

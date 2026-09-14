@@ -49,9 +49,9 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
           width: '100%',
           maxWidth: '460px',
           backgroundColor: '#0b1120',
-          border: '1px solid rgba(59, 130, 246, 0.25)',
+          border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 25%, transparent)',
           borderRadius: '24px',
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(59, 130, 246, 0.12)',
+          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent)',
           padding: '36px 32px',
           textAlign: 'center',
           position: 'relative',
@@ -67,7 +67,7 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
             transform: 'translateX(-50%)',
             width: '200px',
             height: '100px',
-            background: 'radial-gradient(ellipse, rgba(59, 130, 246, 0.35) 0%, rgba(16, 185, 129, 0.1) 60%, transparent 80%)',
+            background: 'radial-gradient(ellipse, color-mix(in srgb, var(--theme-secondary-strong) 35%, transparent) 0%, rgba(16, 185, 129, 0.1) 60%, transparent 80%)',
             filter: 'blur(30px)',
             pointerEvents: 'none'
           }}
@@ -82,7 +82,7 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
               width: '84px',
               height: '84px',
               borderRadius: '50%',
-              backgroundColor: 'rgba(59, 130, 246, 0.15)',
+              backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)',
               animation: 'pulseRing 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite'
             }}
           />
@@ -94,14 +94,14 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
               borderRadius: '20px',
               background: 'linear-gradient(135deg, #1e3a8a, #0f172a)',
               border: '1px solid rgba(96, 165, 250, 0.4)',
-              boxShadow: '0 0 25px rgba(59, 130, 246, 0.45)',
+              boxShadow: '0 0 25px color-mix(in srgb, var(--theme-secondary-strong) 45%, transparent)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               animation: 'floatLock 3.2s ease-in-out infinite'
             }}
           >
-            <Lock size={30} color="#60a5fa" strokeWidth={2.2} />
+            <Lock size={30} color="var(--theme-secondary)" strokeWidth={2.2} />
           </div>
         </div>
 
@@ -128,7 +128,7 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
         <h2 style={{
           fontSize: '1.45rem',
           fontWeight: 800,
-          color: '#f8fafc',
+          color: 'var(--text-primary)',
           marginBottom: '10px',
           letterSpacing: '-0.02em',
           lineHeight: 1.3
@@ -139,7 +139,7 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
         {/* Subtitle */}
         <p style={{
           fontSize: '0.84rem',
-          color: '#94a3b8',
+          color: 'var(--text-secondary)',
           lineHeight: 1.55,
           marginBottom: '26px',
           padding: '0 8px'
@@ -163,7 +163,7 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)'
+              boxShadow: '0 4px 20px color-mix(in srgb, var(--theme-secondary-strong) 40%, transparent)'
             }}
           >
             <LogIn size={17} strokeWidth={2.5} />
@@ -209,7 +209,7 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
-              color: '#94a3b8'
+              color: 'var(--text-secondary)'
             }}
           >
             <UserPlus size={15} />
@@ -227,7 +227,7 @@ export const AuthLockScreen: React.FC<AuthLockScreenProps> = ({ onOpenAuth }) =>
           paddingTop: '16px',
           borderTop: '1px solid rgba(255, 255, 255, 0.06)',
           fontSize: '0.72rem',
-          color: '#64748b'
+          color: 'var(--text-muted)'
         }}>
           <ShieldCheck size={14} color="#10b981" />
           <span>Cloud Encrypted Multi-Tenant Journal</span>

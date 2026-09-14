@@ -53,7 +53,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
   const riskHeightPercent = 100 - rewardHeightPercent;
 
   return (
-    <div className="card" style={{ padding: '20px', marginTop: '20px', background: 'linear-gradient(135deg, #070b16, #0c1222)' }}>
+    <div className="card" style={{ padding: '20px', marginTop: '20px', background: 'linear-gradient(135deg, #070b16, var(--bg-panel))' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -61,7 +61,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
             width: '34px',
             height: '34px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #10b981, #3b82f6)',
+            background: 'linear-gradient(135deg, var(--theme-primary), var(--theme-secondary-strong))',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -69,7 +69,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
             <Scale size={18} color="#ffffff" />
           </div>
           <div>
-            <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Interactive Visual Risk-to-Reward Scale</span>
               <span style={{
                 fontSize: '0.68rem',
@@ -93,7 +93,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
                 )}
               </span>
             </h3>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
               Visualisasi proporsi area resiko vs target profit & batas impas matematis
             </span>
           </div>
@@ -103,16 +103,16 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
         <div style={{
           padding: '6px 14px',
           borderRadius: '10px',
-          backgroundColor: rrRatio >= 3.0 ? 'rgba(16, 185, 129, 0.15)' : rrRatio >= 2.0 ? 'rgba(59, 130, 246, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-          border: rrRatio >= 3.0 ? '1px solid rgba(16, 185, 129, 0.4)' : rrRatio >= 2.0 ? '1px solid rgba(59, 130, 246, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
+          backgroundColor: rrRatio >= 3.0 ? 'rgba(16, 185, 129, 0.15)' : rrRatio >= 2.0 ? 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)' : 'rgba(245, 158, 11, 0.15)',
+          border: rrRatio >= 3.0 ? '1px solid rgba(16, 185, 129, 0.4)' : rrRatio >= 2.0 ? '1px solid color-mix(in srgb, var(--theme-secondary-strong) 40%, transparent)' : '1px solid rgba(245, 158, 11, 0.4)',
           textAlign: 'right'
         }}>
-          <div style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>R-Multiple Ratio</div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>R-Multiple Ratio</div>
           <div style={{
             fontSize: '1.25rem',
-            fontWeight: 900,
+            fontWeight: 800,
             fontFamily: 'var(--font-mono)',
-            color: rrRatio >= 3.0 ? '#34d399' : rrRatio >= 2.0 ? '#60a5fa' : '#fbbf24'
+            color: rrRatio >= 3.0 ? '#34d399' : rrRatio >= 2.0 ? 'var(--theme-secondary)' : '#fbbf24'
           }}>
             1 : {rrRatio.toFixed(2)}
           </div>
@@ -161,7 +161,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
             right: 0,
             transform: 'translateY(-50%)',
             height: '3px',
-            backgroundColor: '#f8fafc',
+            backgroundColor: 'var(--text-primary)',
             boxShadow: '0 0 8px #ffffff',
             zIndex: 10
           }} />
@@ -202,13 +202,13 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
               <span style={{ fontSize: '0.7rem', color: '#34d399', textTransform: 'uppercase', fontWeight: 700 }}>
                 Take Profit Target Level
               </span>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {takeProfitPrice.toFixed(2)}
               </div>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Potensi Laba</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Potensi Laba</span>
               <div style={{ fontSize: '1.05rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#10b981' }}>
                 +{formatCurrency(potentialReward, currency)}
               </div>
@@ -226,7 +226,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
             alignItems: 'center'
           }}>
             <div>
-              <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 700 }}>
                 Entry Pivot Price
               </span>
               <div style={{ fontSize: '1rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>
@@ -235,8 +235,8 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Jarak SL / TP</span>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#cbd5e1' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Jarak SL / TP</span>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                 {stopDistance.toFixed(2)} / {rewardDistance.toFixed(2)} pts
               </div>
             </div>
@@ -256,13 +256,13 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
               <span style={{ fontSize: '0.7rem', color: '#f87171', textTransform: 'uppercase', fontWeight: 700 }}>
                 Stop Loss Risk Level
               </span>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {stopLossPrice.toFixed(2)}
               </div>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Maksimal Resiko</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Maksimal Resiko</span>
               <div style={{ fontSize: '1.05rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#ef4444' }}>
                 -{formatCurrency(riskAmount, currency)}
               </div>
@@ -286,7 +286,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Sparkles size={16} color="#38bdf8" />
-          <span style={{ fontSize: '0.76rem', color: '#cbd5e1' }}>
+          <span style={{ fontSize: '0.76rem', color: 'var(--text-strong)' }}>
             Batas Winrate Minimal untuk Impas (Break-Even):
           </span>
         </div>
@@ -300,7 +300,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
           }}>
             Cukup {breakEvenWinRate.toFixed(1)}% Win Rate
           </span>
-          <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
             (Dengan rasio 1:{rrRatio}, Anda tetap profit meski 60%+ trade Anda rugi!)
           </span>
         </div>

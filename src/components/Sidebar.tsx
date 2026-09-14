@@ -13,11 +13,12 @@ import {
   TrendingUp,
   Flame,
   BookMarked,
-  LayoutGrid
+  LayoutGrid,
+  Target
 } from 'lucide-react';
 import { useJournal } from '../context/JournalContext';
 
-export type NavTab = 'dashboard' | 'workspace' | 'calendar' | 'journal' | 'analytics' | 'playbook' | 'news' | 'accounts' | 'calculator';
+export type NavTab = 'dashboard' | 'workspace' | 'calendar' | 'journal' | 'analytics' | 'playbook' | 'queue' | 'news' | 'accounts' | 'calculator';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -45,6 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'journal', label: 'Trade Log', icon: BookOpen, badge: trades.length },
     { id: 'analytics', label: 'Analytics & Setups', icon: BarChart3, badge: null },
     { id: 'playbook', label: 'Playbook', icon: BookMarked, badge: playbooks.length },
+    { id: 'queue', label: 'Setup Queue', icon: Target, badge: null },
     { id: 'news', label: 'Economic Calendar', icon: Flame, badge: null },
     { id: 'accounts', label: 'Account Manager', icon: WalletCards, badge: null },
     { id: 'calculator', label: 'Position Size Calc', icon: Calculator, badge: null }
@@ -77,14 +79,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
-                background: 'linear-gradient(135deg, #10b981, #3b82f6)',
+                background: 'linear-gradient(135deg, var(--theme-primary), var(--theme-secondary-strong))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <TrendingUp size={18} color="#ffffff" strokeWidth={2.5} />
               </div>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 iTrade<span style={{ color: 'var(--profit-green)' }}>Journal</span>
               </span>
             </div>
@@ -93,7 +95,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               type="button"
               onClick={onCloseMobile}
               className="btn btn-ghost btn-icon btn-sm"
-              style={{ color: '#94a3b8' }}
+              style={{ color: 'var(--text-secondary)' }}
+              aria-label="Close navigation menu"
             >
               <X size={20} />
             </button>
@@ -125,12 +128,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onClick={onToggleCollapse}
               className="btn btn-ghost btn-icon btn-sm"
               title={isCollapsed ? 'Expand Navigation Menu' : 'Collapse / Hide Navigation Menu'}
+              aria-label={isCollapsed ? 'Expand navigation menu' : 'Collapse navigation menu'}
+              aria-expanded={!isCollapsed}
               style={{
                 padding: '6px',
                 borderRadius: '8px',
                 backgroundColor: '#0e1627',
                 border: '1px solid #1c2a3f',
-                color: isCollapsed ? '#60a5fa' : '#94a3b8',
+                color: isCollapsed ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                 cursor: 'pointer'
               }}
             >
@@ -148,7 +153,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelect(item.id as NavTab)}
+                  data-tour={`nav-${item.id}`}
                   title={isCollapsed ? `${item.label} ${item.badge ? `(${item.badge})` : ''}` : undefined}
+                  aria-current={isActive ? 'page' : undefined}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -157,8 +164,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     padding: isCollapsed ? '10px 0' : '10px 12px',
                     borderRadius: '10px',
                     backgroundColor: isActive ? '#131b2e' : 'transparent',
-                    border: isActive ? '1px solid #233148' : '1px solid transparent',
-                    color: isActive ? '#60a5fa' : '#94a3b8',
+                    border: isActive ? '1px solid var(--border-color)' : '1px solid transparent',
+                    color: isActive ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                     fontSize: '0.875rem',
                     fontWeight: isActive ? 600 : 500,
                     cursor: 'pointer',
@@ -168,7 +175,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Icon size={19} color={isActive ? '#3b82f6' : '#64748b'} />
+                    <Icon size={19} color={isActive ? 'var(--theme-secondary-strong)' : 'var(--text-muted)'} />
                     <span className="sidebar-label" style={{ whiteSpace: 'nowrap' }}>{item.label}</span>
                   </div>
 
@@ -177,8 +184,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="sidebar-badge" style={{
                       fontSize: '0.68rem',
                       fontFamily: 'var(--font-mono)',
-                      backgroundColor: isActive ? 'rgba(59, 130, 246, 0.2)' : '#1e293b',
-                      color: isActive ? '#60a5fa' : '#94a3b8',
+                      backgroundColor: isActive ? 'color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)' : '#1e293b',
+                      color: isActive ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                       padding: '2px 6px',
                       borderRadius: '4px',
                       fontWeight: 700
@@ -196,7 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       width: '6px',
                       height: '6px',
                       borderRadius: '50%',
-                      backgroundColor: '#3b82f6'
+                      backgroundColor: 'var(--theme-secondary-strong)'
                     }} />
                   )}
                 </button>
@@ -231,7 +238,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   boxShadow: `0 0 8px ${activeAccount.colorTag}`
                 }} />
                 {!isCollapsed && (
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {activeAccount.name}
                   </span>
                 )}
@@ -241,7 +248,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
                     <span>Type</span>
-                    <span style={{ color: '#cbd5e1' }}>{activeAccount.type}</span>
+                    <span style={{ color: 'var(--text-strong)' }}>{activeAccount.type}</span>
                   </div>
                   {activeAccount.targetProfit && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>

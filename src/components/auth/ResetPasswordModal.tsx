@@ -10,6 +10,7 @@ import {
   EyeOff, 
   X 
 } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export const ResetPasswordModal: React.FC = () => {
   const { isPasswordRecovery, setIsPasswordRecovery, updateUserPassword } = useAuth();
@@ -21,6 +22,8 @@ export const ResetPasswordModal: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [success, setSuccess] = useState(false);
+
+  const modalRef = useModalA11y(isPasswordRecovery, () => setIsPasswordRecovery(false));
 
   if (!isPasswordRecovery) return null;
 
@@ -56,24 +59,25 @@ export const ResetPasswordModal: React.FC = () => {
 
   return (
     <div className="modal-backdrop">
-      <div className="modal-container" style={{ maxWidth: '420px' }}>
+      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Reset Password" tabIndex={-1} style={{ maxWidth: '420px' }}>
         <div style={{
           padding: '20px 24px',
           borderBottom: '1px solid var(--border-color)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: '#0c101e'
+          background: 'var(--bg-card)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <KeyRound size={20} color="#3b82f6" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+            <KeyRound size={20} color="var(--theme-secondary-strong)" />
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               Set New Password
             </h3>
           </div>
           <button 
             onClick={() => setIsPasswordRecovery(false)} 
             className="btn btn-ghost btn-icon btn-sm"
+            aria-label="Close dialog"
           >
             <X size={18} />
           </button>
@@ -108,7 +112,7 @@ export const ResetPasswordModal: React.FC = () => {
               gap: '12px'
             }}>
               <CheckCircle2 size={40} color="#10b981" />
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Password Berhasil Diperbarui!
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -120,7 +124,7 @@ export const ResetPasswordModal: React.FC = () => {
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Password Baru (min. 6 karakter)</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
@@ -140,7 +144,7 @@ export const ResetPasswordModal: React.FC = () => {
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
-                      color: '#64748b',
+                      color: 'var(--text-muted)',
                       cursor: 'pointer'
                     }}
                   >
@@ -152,7 +156,7 @@ export const ResetPasswordModal: React.FC = () => {
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Konfirmasi Password Baru</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"

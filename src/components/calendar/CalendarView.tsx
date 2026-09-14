@@ -12,6 +12,7 @@ import {
   Layers,
   X
 } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface CalendarViewProps {
   onViewTradeDetail: (trade: Trade) => void;
@@ -23,6 +24,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onViewTradeDetail })
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDayTrades, setSelectedDayTrades] = useState<{ date: string; trades: Trade[] } | null>(null);
+  const modalRef = useModalA11y(Boolean(selectedDayTrades), () => setSelectedDayTrades(null));
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth(); // 0-11
@@ -206,8 +208,8 @@ const formatRMultiple = (r: number): string => {
       {/* Calendar Header & Month Switcher */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <CalendarIcon size={24} color="#3b82f6" />
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CalendarIcon size={24} color="var(--theme-secondary-strong)" />
             <span>Trading Calendar & Heatmap</span>
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -217,13 +219,13 @@ const formatRMultiple = (r: number): string => {
 
         {/* Month Navigation */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#0b1020', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '4px 8px' }}>
-          <button onClick={prevMonth} className="btn btn-ghost btn-icon btn-sm">
+          <button onClick={prevMonth} className="btn btn-ghost btn-icon btn-sm" aria-label="Previous month">
             <ChevronLeft size={16} />
           </button>
-          <span style={{ fontSize: '0.95rem', fontWeight: 700, minWidth: '150px', textAlign: 'center', color: '#f8fafc' }}>
+          <span style={{ fontSize: '0.95rem', fontWeight: 700, minWidth: '150px', textAlign: 'center', color: 'var(--text-primary)' }}>
             {monthName}
           </span>
-          <button onClick={nextMonth} className="btn btn-ghost btn-icon btn-sm">
+          <button onClick={nextMonth} className="btn btn-ghost btn-icon btn-sm" aria-label="Next month">
             <ChevronRight size={16} />
           </button>
         </div>
@@ -262,7 +264,7 @@ const formatRMultiple = (r: number): string => {
 
         <div className="card" style={{ padding: '14px 18px' }}>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Day Win Rate</span>
-          <div style={{ fontSize: '1.3rem', fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: '2px', color: '#60a5fa' }}>
+          <div style={{ fontSize: '1.3rem', fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: '2px', color: 'var(--theme-secondary)' }}>
             {monthlyStats.dayWinRate.toFixed(1)}%
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
@@ -272,7 +274,7 @@ const formatRMultiple = (r: number): string => {
 
         <div className="card" style={{ padding: '14px 18px' }}>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Total Month Trades</span>
-          <div style={{ fontSize: '1.3rem', fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: '2px', color: '#f8fafc' }}>
+          <div style={{ fontSize: '1.3rem', fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: '2px', color: 'var(--text-primary)' }}>
             {monthlyStats.totalMonthTrades} Executions
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
@@ -293,7 +295,7 @@ const formatRMultiple = (r: number): string => {
                 padding: '8px',
                 fontSize: '0.78rem',
                 fontWeight: 700,
-                color: idx >= 5 ? '#64748b' : '#94a3b8',
+                color: idx >= 5 ? 'var(--text-muted)' : 'var(--text-secondary)',
                 backgroundColor: '#070a16',
                 borderRadius: '6px'
               }}
@@ -352,7 +354,7 @@ const formatRMultiple = (r: number): string => {
                   <span style={{
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    color: cell.isCurrentMonth ? '#cbd5e1' : '#475569'
+                    color: cell.isCurrentMonth ? 'var(--text-strong)' : '#475569'
                   }}>
                     {cell.dayNumber}
                   </span>
@@ -362,7 +364,7 @@ const formatRMultiple = (r: number): string => {
                       fontSize: '0.68rem',
                       fontFamily: 'var(--font-mono)',
                       backgroundColor: '#1e293b',
-                      color: '#cbd5e1',
+                      color: 'var(--text-strong)',
                       padding: '1px 5px',
                       borderRadius: '4px'
                     }}>
@@ -378,7 +380,7 @@ const formatRMultiple = (r: number): string => {
                       fontSize: '0.95rem',
                       fontWeight: 800,
                       fontFamily: 'var(--font-mono)',
-                      color: isProfitable ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : '#94a3b8'
+                      color: isProfitable ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : 'var(--text-secondary)'
                     }}>
                       {cell.netPnL > 0 ? '+' : ''}{formatCurrency(cell.netPnL, currentCurrency, true)}
                     </div>
@@ -424,17 +426,17 @@ const formatRMultiple = (r: number): string => {
 
         return (
           <div className="modal-backdrop" onClick={() => setSelectedDayTrades(null)}>
-            <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '660px' }}>
+            <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Trades of the Day" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '660px' }}>
               <div className="modal-header">
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     Trades on {formatDate(selectedDayTrades.date)}
                   </h3>
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                     {selectedDayTrades.trades.length} Executions Logged
                   </span>
                 </div>
-                <button onClick={() => setSelectedDayTrades(null)} className="btn btn-ghost btn-icon">
+                <button onClick={() => setSelectedDayTrades(null)} className="btn btn-ghost btn-icon" aria-label="Close dialog">
                   <X size={18} />
                 </button>
               </div>
@@ -467,7 +469,7 @@ const formatRMultiple = (r: number): string => {
 
                   <div style={{ textAlign: 'center' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Win / Loss</span>
-                    <div style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>
+                    <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                       {dayWins}W • {dayLosses}L
                     </div>
                   </div>
@@ -516,7 +518,7 @@ const formatRMultiple = (r: number): string => {
                       >
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '0.95rem', color: '#f8fafc' }}>
+                            <span style={{ fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '0.95rem', color: 'var(--text-primary)' }}>
                               {trade.symbol}
                             </span>
                             <span className={`badge ${trade.direction === 'LONG' ? 'badge-long' : 'badge-short'}`}>
@@ -536,7 +538,7 @@ const formatRMultiple = (r: number): string => {
                             fontSize: '1rem',
                             fontWeight: 700,
                             fontFamily: 'var(--font-mono)',
-                            color: isWin ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : '#94a3b8'
+                            color: isWin ? 'var(--profit-green)' : isLoss ? 'var(--loss-red)' : 'var(--text-secondary)'
                           }}>
                             {trade.pnl > 0 ? '+' : ''}{formatCurrency(trade.pnl, account?.currency || 'USD')}
                           </div>

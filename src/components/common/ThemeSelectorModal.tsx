@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme, THEMES, ThemeId } from '../../context/ThemeContext';
 import { X, Palette, Check, Sparkles } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface ThemeSelectorModalProps {
   isOpen: boolean;
@@ -10,6 +11,8 @@ interface ThemeSelectorModalProps {
 export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, onClose }) => {
   const { theme, setTheme } = useTheme();
 
+  const modalRef = useModalA11y(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const handleSelectTheme = (themeId: ThemeId) => {
@@ -18,8 +21,8 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div 
-        className="modal-container" 
+      <div ref={modalRef} 
+        className="modal-container" role="dialog" aria-modal="true" aria-label="Theme Selector" tabIndex={-1} 
         onClick={(e) => e.stopPropagation()} 
         style={{ maxWidth: '560px' }}
       >
@@ -30,7 +33,7 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #a855f7, #3b82f6)',
+              background: 'linear-gradient(135deg, #a855f7, var(--theme-secondary-strong))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -38,7 +41,7 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
               <Palette size={20} color="#ffffff" />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc' }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 Institutional Accent Themes
               </h2>
               <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
@@ -47,7 +50,7 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
             </div>
           </div>
 
-          <button onClick={onClose} className="btn btn-ghost btn-icon btn-sm">
+          <button onClick={onClose} className="btn btn-ghost btn-icon btn-sm" aria-label="Close dialog">
             <X size={18} />
           </button>
         </div>
@@ -94,7 +97,7 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
 
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.94rem', fontWeight: 800, color: '#f8fafc' }}>
+                        <span style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                           {item.name}
                         </span>
                         <span style={{
@@ -109,7 +112,7 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
                           {item.badge}
                         </span>
                       </div>
-                      <span style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px', display: 'block' }}>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '2px', display: 'block' }}>
                         {item.subtitle}
                       </span>
                     </div>

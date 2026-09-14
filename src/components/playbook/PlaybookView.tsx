@@ -21,15 +21,19 @@ import {
   X
 } from 'lucide-react';
 import { PlaybookModal } from './PlaybookModal';
+import { useModalA11y } from '../../hooks/useModalA11y';
+import { useConfirm } from '../common/ConfirmDialog';
 
 export const PlaybookView: React.FC = () => {
   const { playbooks, deletePlaybook, showToast } = useJournal();
 
+  const { confirm } = useConfirm();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlaybook, setEditingPlaybook] = useState<PlaybookModel | null>(null);
   const [selectedDetail, setSelectedDetail] = useState<PlaybookModel | null>(null);
+  const modalRef = useModalA11y(Boolean(selectedDetail), () => setSelectedDetail(null));
 
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -56,9 +60,15 @@ export const PlaybookView: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (pb: PlaybookModel, e?: React.MouseEvent) => {
+  const handleDelete = async (pb: PlaybookModel, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (window.confirm(`Hapus playbook "${pb.title}" dari galeri?`)) {
+    const confirmed = await confirm({
+      title: `Delete playbook "${pb.title}"?`,
+      message: 'The playbook will be removed from your gallery.',
+      confirmText: 'Delete playbook',
+      variant: 'danger'
+    });
+    if (confirmed) {
       deletePlaybook(pb.id);
       if (selectedDetail?.id === pb.id) setSelectedDetail(null);
     }
@@ -74,7 +84,7 @@ export const PlaybookView: React.FC = () => {
         flexWrap: 'wrap',
         gap: '16px',
         padding: '20px 24px',
-        backgroundColor: '#0c1222',
+        backgroundColor: 'var(--bg-panel)',
         borderRadius: '16px',
         border: '1px solid #1e293b'
       }}>
@@ -92,7 +102,7 @@ export const PlaybookView: React.FC = () => {
             }}>
               <BookMarked size={20} color="#ffffff" strokeWidth={2.5} />
             </div>
-            <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               Setup Playbook Gallery
             </h1>
           </div>
@@ -124,7 +134,7 @@ export const PlaybookView: React.FC = () => {
       }}>
         {/* Search */}
         <div style={{ position: 'relative', width: '300px' }}>
-          <Search size={15} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+          <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
             placeholder="Cari SOP setup, rules, atau kata kunci..."
@@ -144,9 +154,9 @@ export const PlaybookView: React.FC = () => {
               borderRadius: '20px',
               fontSize: '0.75rem',
               fontWeight: 600,
-              backgroundColor: selectedCategory === 'all' ? '#3b82f6' : '#0c1222',
-              color: selectedCategory === 'all' ? '#ffffff' : '#94a3b8',
-              border: `1px solid ${selectedCategory === 'all' ? '#3b82f6' : '#1e293b'}`,
+              backgroundColor: selectedCategory === 'all' ? 'var(--theme-secondary-strong)' : 'var(--bg-panel)',
+              color: selectedCategory === 'all' ? '#ffffff' : 'var(--text-secondary)',
+              border: `1px solid ${selectedCategory === 'all' ? 'var(--theme-secondary-strong)' : '#1e293b'}`,
               cursor: 'pointer'
             }}
           >
@@ -161,9 +171,9 @@ export const PlaybookView: React.FC = () => {
                 borderRadius: '20px',
                 fontSize: '0.75rem',
                 fontWeight: 600,
-                backgroundColor: selectedCategory === cat ? '#3b82f6' : '#0c1222',
-                color: selectedCategory === cat ? '#ffffff' : '#94a3b8',
-                border: `1px solid ${selectedCategory === cat ? '#3b82f6' : '#1e293b'}`,
+                backgroundColor: selectedCategory === cat ? 'var(--theme-secondary-strong)' : 'var(--bg-panel)',
+                color: selectedCategory === cat ? '#ffffff' : 'var(--text-secondary)',
+                border: `1px solid ${selectedCategory === cat ? 'var(--theme-secondary-strong)' : '#1e293b'}`,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap'
               }}
@@ -179,12 +189,12 @@ export const PlaybookView: React.FC = () => {
         <div style={{
           textAlign: 'center',
           padding: '60px 20px',
-          backgroundColor: '#0c1222',
+          backgroundColor: 'var(--bg-panel)',
           borderRadius: '16px',
           border: '1px dashed #1e293b'
         }}>
           <BookMarked size={40} color="#475569" style={{ marginBottom: '12px' }} />
-          <h3 style={{ fontSize: '1.1rem', color: '#f8fafc', marginBottom: '6px' }}>Belum ada Setup Playbook</h3>
+          <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginBottom: '6px' }}>Belum ada Setup Playbook</h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
             Mulai arsipkan setup trading A+ Anda dengan aturan baku yang terbukti konsisten.
           </p>
@@ -209,7 +219,7 @@ export const PlaybookView: React.FC = () => {
               key={pb.id}
               onClick={() => setSelectedDetail(pb)}
               style={{
-                backgroundColor: '#0c1222',
+                backgroundColor: 'var(--bg-panel)',
                 borderRadius: '14px',
                 border: '1px solid #1e293b',
                 padding: '18px',
@@ -221,7 +231,7 @@ export const PlaybookView: React.FC = () => {
                 boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#3b82f6';
+                e.currentTarget.style.borderColor = 'var(--theme-secondary-strong)';
                 e.currentTarget.style.transform = 'translateY(-2px)';
               }}
               onMouseLeave={(e) => {
@@ -237,9 +247,9 @@ export const PlaybookView: React.FC = () => {
                     fontWeight: 700,
                     padding: '3px 8px',
                     borderRadius: '6px',
-                    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                    color: '#60a5fa',
-                    border: '1px solid rgba(59, 130, 246, 0.3)'
+                    backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)',
+                    color: 'var(--theme-secondary)',
+                    border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)'
                   }}>
                     {pb.category}
                   </span>
@@ -257,7 +267,7 @@ export const PlaybookView: React.FC = () => {
                 </div>
 
                 {/* Title */}
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px', lineHeight: 1.4 }}>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px', lineHeight: 1.4 }}>
                   {pb.title}
                 </h3>
 
@@ -282,38 +292,38 @@ export const PlaybookView: React.FC = () => {
                   gap: '8px',
                   marginBottom: '14px',
                   padding: '8px 12px',
-                  backgroundColor: '#070b17',
+                  backgroundColor: 'var(--bg-sidebar)',
                   borderRadius: '8px',
                   border: '1px solid #1a2538'
                 }}>
                   <div style={{ flex: 1, textAlign: 'center', borderRight: '1px solid #1e293b' }}>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase' }}>Timeframe</div>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#f8fafc' }}>{pb.timeframe || '-'}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Timeframe</div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>{pb.timeframe || '-'}</div>
                   </div>
                   <div style={{ flex: 1, textAlign: 'center', borderRight: '1px solid #1e293b' }}>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase' }}>Winrate Target</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Winrate Target</div>
                     <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--profit-green)' }}>{pb.winrateTarget ? `${pb.winrateTarget}%` : '-'}</div>
                   </div>
                   <div style={{ flex: 1, textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase' }}>Target R:R</div>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#60a5fa' }}>{pb.rrTarget ? `1 : ${pb.rrTarget}` : '-'}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Target R:R</div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--theme-secondary)' }}>{pb.rrTarget ? `1 : ${pb.rrTarget}` : '-'}</div>
                   </div>
                 </div>
 
                 {/* Quick Rules Preview */}
                 <div style={{ marginBottom: '14px' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
                     SOP Checklist ({pb.rules.length} Rules)
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {pb.rules.slice(0, 3).map((r, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#cbd5e1' }}>
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: 'var(--text-strong)' }}>
                         <CheckCircle2 size={12} color="#10b981" style={{ flexShrink: 0 }} />
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r}</span>
                       </div>
                     ))}
                     {pb.rules.length > 3 && (
-                      <span style={{ fontSize: '0.68rem', color: '#60a5fa', fontWeight: 600 }}>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--theme-secondary)', fontWeight: 600 }}>
                         +{pb.rules.length - 3} rules lainnya...
                       </span>
                     )}
@@ -329,7 +339,7 @@ export const PlaybookView: React.FC = () => {
                 paddingTop: '12px',
                 borderTop: '1px solid #1e293b'
               }}>
-                <span style={{ fontSize: '0.72rem', color: '#60a5fa', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--theme-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
                   Lihat Blueprint <ChevronRight size={13} />
                 </span>
 
@@ -338,7 +348,8 @@ export const PlaybookView: React.FC = () => {
                     onClick={(e) => handleEdit(pb, e)}
                     className="btn btn-ghost btn-icon btn-sm"
                     title="Edit Playbook"
-                    style={{ color: '#94a3b8' }}
+                    style={{ color: 'var(--text-secondary)' }}
+                    aria-label="Edit Playbook"
                   >
                     <Edit size={14} />
                   </button>
@@ -347,6 +358,7 @@ export const PlaybookView: React.FC = () => {
                     className="btn btn-ghost btn-icon btn-sm"
                     title="Hapus Playbook"
                     style={{ color: '#ef4444' }}
+                    aria-label="Hapus Playbook"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -360,7 +372,7 @@ export const PlaybookView: React.FC = () => {
       {/* Playbook Detail Modal Popup */}
       {selectedDetail && (
         <div className="modal-backdrop" onClick={() => setSelectedDetail(null)}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '820px' }}>
+          <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Playbook Details" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '820px' }}>
             <div className="modal-header">
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -369,8 +381,8 @@ export const PlaybookView: React.FC = () => {
                     fontWeight: 700,
                     padding: '2px 8px',
                     borderRadius: '6px',
-                    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                    color: '#60a5fa'
+                    backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)',
+                    color: 'var(--theme-secondary)'
                   }}>
                     {selectedDetail.category}
                   </span>
@@ -385,7 +397,7 @@ export const PlaybookView: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                   {selectedDetail.title}
                 </h2>
               </div>
@@ -400,7 +412,7 @@ export const PlaybookView: React.FC = () => {
                 >
                   <Edit size={14} /> Edit
                 </button>
-                <button onClick={() => setSelectedDetail(null)} className="btn btn-ghost btn-icon">
+                <button onClick={() => setSelectedDetail(null)} className="btn btn-ghost btn-icon" aria-label="Close dialog">
                   <X size={20} />
                 </button>
               </div>
@@ -413,23 +425,23 @@ export const PlaybookView: React.FC = () => {
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '12px',
                 padding: '12px 16px',
-                backgroundColor: '#070b17',
+                backgroundColor: 'var(--bg-sidebar)',
                 borderRadius: '10px',
                 border: '1px solid #1e293b'
               }}>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase' }}>Timeframe Eksekusi</div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc' }}>{selectedDetail.timeframe || '-'}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Timeframe Eksekusi</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>{selectedDetail.timeframe || '-'}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase' }}>Target Winrate</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Target Winrate</div>
                   <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--profit-green)' }}>
                     {selectedDetail.winrateTarget ? `${selectedDetail.winrateTarget}%` : '-'}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase' }}>Target Risk:Reward</div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#60a5fa' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Target Risk:Reward</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--theme-secondary)' }}>
                     {selectedDetail.rrTarget ? `1 : ${selectedDetail.rrTarget}` : '-'}
                   </div>
                 </div>
@@ -438,10 +450,10 @@ export const PlaybookView: React.FC = () => {
               {/* Narrative */}
               {selectedDetail.description && (
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
                     Narasi Filosofi & Logika Setup
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.6, margin: 0, backgroundColor: '#070b17', padding: '12px 14px', borderRadius: '8px', border: '1px solid #1a2538' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-strong)', lineHeight: 1.6, margin: 0, backgroundColor: 'var(--bg-sidebar)', padding: '12px 14px', borderRadius: '8px', border: '1px solid #1a2538' }}>
                     {selectedDetail.description}
                   </p>
                 </div>
@@ -449,13 +461,13 @@ export const PlaybookView: React.FC = () => {
 
               {/* Rules & Confluences */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div style={{ backgroundColor: '#070b17', padding: '14px', borderRadius: '10px', border: '1px solid #1e293b' }}>
+                <div style={{ backgroundColor: 'var(--bg-sidebar)', padding: '14px', borderRadius: '10px', border: '1px solid #1e293b' }}>
                   <div style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 700, textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <CheckCircle2 size={15} /> Syarat Wajib Masuk Posisi (Rules)
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {selectedDetail.rules.map((r, i) => (
-                      <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', color: '#f8fafc' }}>
+                      <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
                         <span style={{ color: '#34d399', fontWeight: 700 }}>{i + 1}.</span>
                         <span>{r}</span>
                       </div>
@@ -463,14 +475,14 @@ export const PlaybookView: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: '#070b17', padding: '14px', borderRadius: '10px', border: '1px solid #1e293b' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#60a5fa', fontWeight: 700, textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ backgroundColor: 'var(--bg-sidebar)', padding: '14px', borderRadius: '10px', border: '1px solid #1e293b' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--theme-secondary)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Sparkles size={15} /> Konfluensi Pendukung (Confluences)
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {selectedDetail.confluences.map((c, i) => (
-                      <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', color: '#f8fafc' }}>
-                        <span style={{ color: '#60a5fa', fontWeight: 700 }}>•</span>
+                      <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
+                        <span style={{ color: 'var(--theme-secondary)', fontWeight: 700 }}>•</span>
                         <span>{c}</span>
                       </div>
                     ))}
@@ -498,7 +510,7 @@ export const PlaybookView: React.FC = () => {
               {/* Chart Blueprints */}
               {(selectedDetail.chartBeforeUrl || selectedDetail.chartAfterUrl) && (
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
                     Chart Blueprints (Visual Setup)
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: selectedDetail.chartBeforeUrl && selectedDetail.chartAfterUrl ? '1fr 1fr' : '1fr', gap: '12px' }}>
@@ -508,7 +520,7 @@ export const PlaybookView: React.FC = () => {
                           Setup Blueprint (Before)
                         </span>
                         <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #1e293b' }}>
-                          <img src={selectedDetail.chartBeforeUrl} alt="Before blueprint" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', backgroundColor: '#070b17' }} />
+                          <img src={selectedDetail.chartBeforeUrl} alt="Before blueprint" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', backgroundColor: 'var(--bg-sidebar)' }} />
                         </div>
                       </div>
                     )}
@@ -518,7 +530,7 @@ export const PlaybookView: React.FC = () => {
                           Outcome Blueprint (After)
                         </span>
                         <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #1e293b' }}>
-                          <img src={selectedDetail.chartAfterUrl} alt="After blueprint" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', backgroundColor: '#070b17' }} />
+                          <img src={selectedDetail.chartAfterUrl} alt="After blueprint" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', backgroundColor: 'var(--bg-sidebar)' }} />
                         </div>
                       </div>
                     )}

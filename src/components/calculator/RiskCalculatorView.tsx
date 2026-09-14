@@ -89,8 +89,8 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Calculator size={24} color="#3b82f6" />
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Calculator size={24} color="var(--theme-secondary-strong)" />
             <span>Position Size & Growth Calculator</span>
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -109,8 +109,8 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               fontWeight: 700,
               borderRadius: '8px',
               backgroundColor: activeSubTab === 'lot' ? '#1e3a8a' : 'transparent',
-              borderColor: activeSubTab === 'lot' ? '#3b82f6' : 'transparent',
-              color: activeSubTab === 'lot' ? '#93c5fd' : '#94a3b8'
+              borderColor: activeSubTab === 'lot' ? 'var(--theme-secondary-strong)' : 'transparent',
+              color: activeSubTab === 'lot' ? '#93c5fd' : 'var(--text-secondary)'
             }}
           >
             <Target size={14} /> Position Size & Lot
@@ -124,8 +124,8 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               fontWeight: 700,
               borderRadius: '8px',
               backgroundColor: activeSubTab === 'compounding' ? '#1e3a8a' : 'transparent',
-              borderColor: activeSubTab === 'compounding' ? '#3b82f6' : 'transparent',
-              color: activeSubTab === 'compounding' ? '#93c5fd' : '#94a3b8'
+              borderColor: activeSubTab === 'compounding' ? 'var(--theme-secondary-strong)' : 'transparent',
+              color: activeSubTab === 'compounding' ? '#93c5fd' : 'var(--text-secondary)'
             }}
           >
             <TrendingUp size={14} /> Compounding Planner
@@ -139,8 +139,8 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               fontWeight: 700,
               borderRadius: '8px',
               backgroundColor: activeSubTab === 'kelly' ? '#1e3a8a' : 'transparent',
-              borderColor: activeSubTab === 'kelly' ? '#3b82f6' : 'transparent',
-              color: activeSubTab === 'kelly' ? '#93c5fd' : '#94a3b8'
+              borderColor: activeSubTab === 'kelly' ? 'var(--theme-secondary-strong)' : 'transparent',
+              color: activeSubTab === 'kelly' ? '#93c5fd' : 'var(--text-secondary)'
             }}
           >
             <Calculator size={14} /> Kelly Criterion Sizing
@@ -164,7 +164,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
         <div className="card">
           <div className="card-header">
             <div className="card-title">
-              <ShieldAlert size={18} color="#3b82f6" />
+              <ShieldAlert size={18} color="var(--theme-secondary-strong)" />
               <span>Risk Inputs & Parameters</span>
             </div>
           </div>
@@ -220,9 +220,9 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
                       fontSize: '0.78rem',
                       fontWeight: 600,
                       border: '1px solid',
-                      borderColor: instrument === inst ? '#3b82f6' : '#1e293b',
-                      backgroundColor: instrument === inst ? '#1e293b' : '#080c18',
-                      color: instrument === inst ? '#60a5fa' : '#94a3b8',
+                      borderColor: instrument === inst ? 'var(--theme-secondary-strong)' : '#1e293b',
+                      backgroundColor: instrument === inst ? '#1e293b' : 'var(--bg-sidebar)',
+                      color: instrument === inst ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                       cursor: 'pointer'
                     }}
                   >
@@ -236,7 +236,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Account Balance ($)</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 value={balance}
                 onChange={(e) => setBalance(parseFloat(e.target.value) || 0)}
                 className="input-control font-mono"
@@ -264,8 +264,8 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
                       fontWeight: 700,
                       border: '1px solid',
                       borderColor: riskPercent === pct ? '#ef4444' : '#1e293b',
-                      backgroundColor: riskPercent === pct ? 'rgba(239, 68, 68, 0.15)' : '#080c18',
-                      color: riskPercent === pct ? 'var(--loss-red)' : '#94a3b8',
+                      backgroundColor: riskPercent === pct ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-sidebar)',
+                      color: riskPercent === pct ? 'var(--loss-red)' : 'var(--text-secondary)',
                       cursor: 'pointer'
                     }}
                   >
@@ -280,7 +280,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Entry Price</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   step="any"
                   value={entryPrice}
                   onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
@@ -291,7 +291,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Stop Loss</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   step="any"
                   value={stopLossPrice}
                   onChange={(e) => setStopLossPrice(parseFloat(e.target.value) || 0)}
@@ -303,7 +303,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Take Profit</label>
                 <input
-                  type="number"
+                  type="number" inputMode="decimal"
                   step="any"
                   value={takeProfitPrice}
                   onChange={(e) => setTakeProfitPrice(parseFloat(e.target.value) || 0)}
@@ -332,9 +332,9 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
               </span>
               <div style={{
                 fontSize: '2.5rem',
-                fontWeight: 900,
+                fontWeight: 800,
                 fontFamily: 'var(--font-mono)',
-                color: '#60a5fa',
+                color: 'var(--theme-secondary)',
                 letterSpacing: '-0.02em',
                 margin: '6px 0'
               }}>

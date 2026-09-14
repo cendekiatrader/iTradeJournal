@@ -18,6 +18,7 @@ import {
   Lock,
   Globe
 } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface ExecutiveReportModalProps {
   isOpen: boolean;
@@ -82,6 +83,8 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
     };
   }, [reportTrades]);
 
+  const modalRef = useModalA11y(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const currentCurrency = activeAccount?.currency || 'USD';
@@ -95,8 +98,8 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div 
-        className="modal-container" 
+      <div ref={modalRef} 
+        className="modal-container" role="dialog" aria-modal="true" aria-label="Executive Audit Report" tabIndex={-1} 
         onClick={(e) => e.stopPropagation()} 
         style={{ maxWidth: '900px', maxHeight: '92vh', overflowY: 'auto' }}
       >
@@ -128,7 +131,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             <button onClick={handlePrint} className="btn btn-primary btn-sm" style={{ padding: '7px 14px' }}>
               <Printer size={15} /> Cetak / Save PDF
             </button>
-            <button onClick={onClose} className="btn btn-ghost btn-icon btn-sm">
+            <button onClick={onClose} className="btn btn-ghost btn-icon btn-sm" aria-label="Close dialog">
               <X size={18} />
             </button>
           </div>
@@ -193,7 +196,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <span style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#38bdf8' }}>
+                <span style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: '#38bdf8' }}>
                   iTrade<span style={{ color: '#10b981' }}>Journal</span>
                 </span>
                 <span style={{

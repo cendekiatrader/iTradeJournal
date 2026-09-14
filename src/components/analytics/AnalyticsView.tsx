@@ -158,8 +158,8 @@ export const AnalyticsView: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <BarChart3 size={24} color="#3b82f6" />
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <BarChart3 size={24} color="var(--theme-secondary-strong)" />
             <span>Strategy & Edge Analytics</span>
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -189,7 +189,7 @@ export const AnalyticsView: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Win Rate</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {directionStats.longs.winRate.toFixed(1)}%
               </div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
@@ -222,7 +222,7 @@ export const AnalyticsView: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Win Rate</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {directionStats.shorts.winRate.toFixed(1)}%
               </div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
@@ -249,7 +249,7 @@ export const AnalyticsView: React.FC = () => {
       <div className="card" style={{ marginBottom: '24px' }}>
         <div className="card-header">
           <div className="card-title">
-            <Zap size={18} color="#3b82f6" />
+            <Zap size={18} color="var(--theme-secondary-strong)" />
             <span>Setup & Strategy Performance Matrix</span>
           </div>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Ranked by Net PnL</span>
@@ -258,7 +258,7 @@ export const AnalyticsView: React.FC = () => {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
             <thead>
-              <tr style={{ backgroundColor: '#070b17', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+              <tr style={{ backgroundColor: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                 <th style={{ padding: '12px 14px' }}>Setup Model</th>
                 <th style={{ padding: '12px 14px', textAlign: 'center' }}>Trades</th>
                 <th style={{ padding: '12px 14px', textAlign: 'center' }}>Win Rate</th>
@@ -271,7 +271,7 @@ export const AnalyticsView: React.FC = () => {
             <tbody>
               {strategyStats.map((strat, idx) => (
                 <tr key={idx} style={{ borderBottom: '1px solid #141d2d' }}>
-                  <td style={{ padding: '12px 14px', fontWeight: 600, color: '#f8fafc' }}>
+                  <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>
                     {strat.setup}
                   </td>
                   <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>
@@ -286,10 +286,10 @@ export const AnalyticsView: React.FC = () => {
                       {strat.winRate.toFixed(1)}%
                     </span>
                   </td>
-                  <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', color: '#cbd5e1' }}>
+                  <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                     {strat.profitFactor > 99 ? '99.0+' : strat.profitFactor.toFixed(2)}
                   </td>
-                  <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', color: '#cbd5e1' }}>
+                  <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                     {strat.avgRR > 0 ? `1:${strat.avgRR.toFixed(2)}` : '-'}
                   </td>
                   <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>
@@ -339,7 +339,7 @@ export const AnalyticsView: React.FC = () => {
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                       {item.emotion}
                     </div>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
@@ -385,7 +385,7 @@ export const AnalyticsView: React.FC = () => {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                     {item.session}
                   </div>
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>

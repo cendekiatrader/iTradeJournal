@@ -1,4 +1,4 @@
-import { TradingAccount, Trade, WithdrawalRecord, PlaybookModel } from '../types';
+import { TradingAccount, Trade, WithdrawalRecord, PlaybookModel , TradeAuditEntry, CustomFieldDef } from '../types';
 import { INITIAL_ACCOUNTS, INITIAL_TRADES, INITIAL_WITHDRAWALS } from '../data/seedData';
 
 const ACCOUNTS_STORAGE_KEY = 'itrade_accounts_v1';
@@ -219,7 +219,11 @@ export const exportDatabaseToJSON = (
   URL.revokeObjectURL(url);
 };
 
-export const exportTradesToCSV = (trades: Trade[], accountsMap: Record<string, TradingAccount>): void => {
+export const exportTradesToCSV = (
+  trades: Trade[],
+  accountsMap: Record<string, TradingAccount>,
+  customFieldDefs: CustomFieldDef[] = []
+): void => {
   const headers = [
     'Trade ID',
     'Account Name',
@@ -243,18 +247,22 @@ export const exportTradesToCSV = (trades: Trade[], accountsMap: Record<string, T
     'Strategy/Setup',
     'Emotion',
     'Rules Followed',
-    'Notes'
+    ...customFieldDefs.map(d => d.label),
+    'Notes',
+    'Lessons'
   ];
 
+  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+
   const rows = trades.map(t => [
-    `"${t.id}"`,
-    `"${accountsMap[t.accountId]?.name || t.accountId}"`,
-    `"${t.symbol}"`,
-    `"${t.assetClass}"`,
-    `"${t.direction}"`,
-    `"${t.status}"`,
-    `"${t.entryDate}"`,
-    `"${t.exitDate || ''}"`,
+    esc(t.id),
+    esc(accountsMap[t.accountId]?.name || t.accountId),
+    esc(t.symbol),
+    esc(t.assetClass),
+    esc(t.direction),
+    esc(t.status),
+    esc(t.entryDate),
+    esc(t.exitDate || ''),
     t.entryPrice,
     t.exitPrice ?? '',
     t.stopLoss ?? '',
@@ -265,21 +273,64 @@ export const exportTradesToCSV = (trades: Trade[], accountsMap: Record<string, T
     t.pips ?? '',
     t.rrPlanned ?? '',
     t.rrAchieved ?? '',
-    `"${t.session}"`,
-    `"${t.setup}"`,
-    `"${t.emotion}"`,
+    esc(t.session),
+    esc(t.setup),
+    esc(t.emotion),
     t.rulesFollowed ? 'YES' : 'NO',
-    `"${(t.notes || '').replace(/"/g, '""')}"`
-  ]);
+    ...customFieldDefs.map(d => esc((t.customFields || {})[d.id] ?? '')),
+    esc(t.notes || ''),
+    esc(t.lessons || '')
+  ].join(','));
 
-  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const csvContent = [headers.join(','), ...rows].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `iTradeJournal_Trades_${new Date().toISOString().split('T')[0]}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `itrade-journal-trades-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+/* ---------- Trade Audit Log (local device cache) ---------- */
+const AUDIT_KEY = 'itrade_trade_audit';
+
+export const loadTradeAudit = (): TradeAuditEntry[] => {
+  try {
+    const raw = localStorage.getItem(AUDIT_KEY);
+    return raw ? (JSON.parse(raw) as TradeAuditEntry[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveTradeAudit = (entries: TradeAuditEntry[]): void => {
+  try {
+    localStorage.setItem(AUDIT_KEY, JSON.stringify(entries.slice(0, 800)));
+  } catch {
+    /* ignore quota errors */
+  }
+};
+
+/* ---------- Custom field definitions ---------- */
+const CUSTOM_FIELDS_KEY = 'itrade_custom_fields';
+
+export const loadCustomFieldDefs = (): CustomFieldDef[] => {
+  try {
+    const raw = localStorage.getItem(CUSTOM_FIELDS_KEY);
+    return raw ? (JSON.parse(raw) as CustomFieldDef[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveCustomFieldDefs = (defs: CustomFieldDef[]): void => {
+  try {
+    localStorage.setItem(CUSTOM_FIELDS_KEY, JSON.stringify(defs));
+  } catch {
+    /* ignore quota errors */
+  }
+};
+

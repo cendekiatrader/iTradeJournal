@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export type AuthMode = 'signin' | 'signup' | 'forgot';
 
@@ -48,6 +49,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  const modalRef = useModalA11y(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -142,8 +145,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div 
-        className="modal-container" 
+      <div ref={modalRef} 
+        className="modal-container" role="dialog" aria-modal="true" aria-label="Account Authentication" tabIndex={-1} 
         onClick={(e) => e.stopPropagation()} 
         style={{ maxWidth: '440px' }}
       >
@@ -154,14 +157,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: 'linear-gradient(180deg, #0f172a, #0c101e)'
+          background: 'linear-gradient(180deg, #0f172a, var(--bg-card))'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #10b981, #3b82f6)',
+              background: 'linear-gradient(135deg, var(--theme-primary), var(--theme-secondary-strong))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -170,7 +173,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <TrendingUp size={20} color="#ffffff" strokeWidth={2.5} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc' }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 iTrade<span style={{ color: 'var(--profit-green)' }}>Journal</span>
               </h2>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
@@ -181,7 +184,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          <button onClick={onClose} className="btn btn-ghost btn-icon btn-sm" style={{ color: '#94a3b8' }}>
+          <button onClick={onClose} className="btn btn-ghost btn-icon btn-sm" style={{ color: 'var(--text-secondary)' }} aria-label="Close dialog">
             <X size={18} />
           </button>
         </div>
@@ -203,7 +206,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 borderRadius: '8px',
                 border: 'none',
                 backgroundColor: mode === 'signin' ? '#1e293b' : 'transparent',
-                color: mode === 'signin' ? '#60a5fa' : '#94a3b8',
+                color: mode === 'signin' ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                 fontWeight: mode === 'signin' ? 700 : 500,
                 fontSize: '0.85rem',
                 cursor: 'pointer',
@@ -220,7 +223,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 borderRadius: '8px',
                 border: 'none',
                 backgroundColor: mode === 'signup' ? '#1e293b' : 'transparent',
-                color: mode === 'signup' ? '#60a5fa' : '#94a3b8',
+                color: mode === 'signup' ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                 fontWeight: mode === 'signup' ? 700 : 500,
                 fontSize: '0.85rem',
                 cursor: 'pointer',
@@ -277,7 +280,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Full Name / Trader Handle</label>
                 <div style={{ position: 'relative' }}>
-                  <UserIcon size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <UserIcon size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type="text"
                     placeholder="e.g. Alex Rivera"
@@ -295,7 +298,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Email Address</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <Mail size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="email"
                   placeholder="trader@example.com"
@@ -320,7 +323,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: '#60a5fa',
+                        color: 'var(--theme-secondary)',
                         fontSize: '0.75rem',
                         cursor: 'pointer',
                         padding: 0
@@ -331,7 +334,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
                 </div>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
@@ -351,7 +354,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
-                      color: '#64748b',
+                      color: 'var(--text-muted)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center'
@@ -368,7 +371,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Confirm Password</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
@@ -425,7 +428,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#94a3b8',
+                  color: 'var(--text-secondary)',
                   fontSize: '0.8rem',
                   cursor: 'pointer'
                 }}
@@ -440,7 +443,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <>
               <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: '10px' }}>
                 <div style={{ flex: 1, height: '1px', backgroundColor: '#1e293b' }} />
-                <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase' }}>Atau</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Atau</span>
                 <div style={{ flex: 1, height: '1px', backgroundColor: '#1e293b' }} />
               </div>
 
@@ -476,7 +479,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div style={{
           padding: '14px 28px',
           borderTop: '1px solid var(--border-color)',
-          backgroundColor: '#080c18',
+          backgroundColor: 'var(--bg-sidebar)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

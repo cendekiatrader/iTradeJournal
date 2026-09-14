@@ -22,23 +22,31 @@ import {
   Keyboard,
   Menu,
   Eye,
-  EyeOff
+  EyeOff,
+  Search,
+  Moon,
+  Zap
 } from 'lucide-react';
 import { AuthModal, AuthMode } from './auth/AuthModal';
 import { ThemeSelectorModal } from './common/ThemeSelectorModal';
 import { ProfileSettingsModal } from './profile/ProfileSettingsModal';
 import { KeyboardShortcutsModal } from './common/KeyboardShortcutsModal';
+import { useConfirm } from './common/ConfirmDialog';
+import { NotificationCenter } from './common/NotificationCenter';
+import { getUiPrefs, setUiPref } from '../utils/uiPrefs';
 
 interface NavbarProps {
   onOpenTradeModal: () => void;
   onOpenAccountModal: () => void;
   onOpenMobileMenu?: () => void;
+  onOpenCommandPalette?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   onOpenTradeModal, 
   onOpenAccountModal,
-  onOpenMobileMenu 
+  onOpenMobileMenu,
+  onOpenCommandPalette
 }) => {
   const { 
     accounts, 
@@ -52,12 +60,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     resetAllData,
     isStealthMode,
     toggleStealthMode,
-    showToast
+    showToast,
+    customFieldDefs
   } = useJournal();
 
   const { user, signOut } = useAuth();
   const { theme, activeThemeOption } = useTheme();
 
+  const { confirm } = useConfirm();
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -86,6 +96,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const [uiPrefsState, setUiPrefsState] = useState(getUiPrefs());
+
+  useEffect(() => {
+    const handler = () => setUiPrefsState(getUiPrefs());
+    window.addEventListener('itrade-uiprefs-changed', handler);
+    return () => window.removeEventListener('itrade-uiprefs-changed', handler);
+  }, []);
+
   const handleExportCSV = () => {
     if (filteredTrades.length === 0) {
       showToast('No trades to export', 'error');
@@ -97,6 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       'Entry Date', 'Exit Date', 'Timeframe', 'Entry Price', 'Exit Price',
       'Stop Loss', 'Take Profit', 'Quantity', 'PnL ($)', 'PnL (%)', 'Pips',
       'R:R Planned', 'R:R Achieved', 'Session', 'Setup', 'Emotion', 'Rules Followed',
+      ...customFieldDefs.map((d) => d.label),
       'Confluences', 'Notes', 'Lessons'
     ];
 
@@ -126,6 +145,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         `"${(t.setup || '').replace(/"/g, '""')}"`,
         t.emotion,
         t.rulesFollowed ? 'YES' : 'NO',
+        ...customFieldDefs.map((d) => `"${String((t.customFields || {})[d.id] ?? '').replace(/"/g, '""')}"`),
         `"${(t.confluences || []).join('; ').replace(/"/g, '""')}"`,
         `"${(t.notes || '').replace(/"/g, '""')}"`,
         `"${(t.lessons || '').replace(/"/g, '""')}"`
@@ -161,7 +181,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     link.click();
     URL.revokeObjectURL(url);
     setUserDropdownOpen(false);
-    showToast('Data backup JSON berhasil diunduh!', 'success');
+    showToast('Backup file downloaded successfully.', 'success');
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +205,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="app-navbar" style={{
       height: '64px',
-      backgroundColor: '#080c1b',
+      backgroundColor: 'var(--bg-nav)',
       borderBottom: '1px solid var(--border-color)',
       padding: '0 24px',
       display: 'flex',
@@ -204,12 +224,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={onOpenMobileMenu}
             className="mobile-only-btn btn btn-ghost btn-icon btn-sm"
             title="Open Menu Navigation"
+            aria-label="Open navigation menu"
             style={{
               padding: '8px',
               borderRadius: '8px',
               backgroundColor: '#0d1527',
               border: '1px solid #1e2c44',
-              color: '#94a3b8',
+              color: 'var(--text-secondary)',
               cursor: 'pointer'
             }}
           >
@@ -222,7 +243,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             width: '34px',
             height: '34px',
             borderRadius: '9px',
-            background: 'linear-gradient(135deg, #10b981, #3b82f6)',
+            background: 'linear-gradient(135deg, var(--theme-primary), var(--theme-secondary-strong))',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -232,7 +253,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <TrendingUp size={20} color="#ffffff" strokeWidth={2.5} />
           </div>
           <div className="navbar-logo-text">
-            <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '-0.02em', color: '#f8fafc', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
               iTrade<span style={{ color: 'var(--profit-green)' }}>Journal</span>
             </span>
           </div>
@@ -244,15 +265,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div ref={accountRef} className="navbar-account-switcher" style={{ position: 'relative' }}>
           <button
             onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+            aria-haspopup="menu"
+            aria-expanded={accountDropdownOpen}
+            aria-label={`Select trading account (current: ${activeAccount ? activeAccount.name : 'All Accounts'})`}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              backgroundColor: '#0c1222',
+              backgroundColor: 'var(--bg-panel)',
               border: '1px solid #1e293b',
               padding: '6px 12px',
               borderRadius: '8px',
-              color: '#f8fafc',
+              color: 'var(--text-primary)',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
@@ -261,21 +285,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               width: '8px',
               height: '8px',
               borderRadius: '50%',
-              backgroundColor: activeAccount?.colorTag || '#3b82f6',
-              boxShadow: `0 0 6px ${activeAccount?.colorTag || '#3b82f6'}`
+              backgroundColor: activeAccount?.colorTag || 'var(--theme-secondary-strong)',
+              boxShadow: `0 0 6px ${activeAccount?.colorTag || 'var(--theme-secondary-strong)'}`
             }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
               <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {activeAccount ? activeAccount.name : 'All Accounts'}
               </span>
-              <span style={{ color: '#64748b' }}>•</span>
+              <span style={{ color: 'var(--text-muted)' }}>•</span>
               <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--profit-green)', fontWeight: 700 }}>
                 {activeAccount 
                   ? formatCurrency(activeAccount.currentBalance, activeAccount.currency, true)
                   : formatCurrency(totalPortfolioBalance, 'USD', true)}
               </span>
             </div>
-            <ChevronDown size={14} color="#94a3b8" />
+            <ChevronDown size={14} color="var(--text-secondary)" />
           </button>
 
           {/* Account Dropdown Menu */}
@@ -285,8 +309,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               top: 'calc(100% + 6px)',
               left: 0,
               width: '300px',
-              backgroundColor: '#0c1222',
-              border: '1px solid #233148',
+              backgroundColor: 'var(--bg-panel)',
+              border: '1px solid var(--border-color)',
               borderRadius: '12px',
               boxShadow: '0 12px 30px rgba(0,0,0,0.7)',
               padding: '8px',
@@ -312,20 +336,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                   borderRadius: '8px',
                   backgroundColor: activeAccountId === 'all' ? '#1e293b' : 'transparent',
                   border: 'none',
-                  color: '#f8fafc',
+                  color: 'var(--text-primary)',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'background 0.15s'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Layers size={16} color="#3b82f6" />
+                  <Layers size={16} color="var(--theme-secondary-strong)" />
                   <div>
                     <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>All Accounts (Portfolio)</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Combined analytics & metrics</div>
                   </div>
                 </div>
-                {activeAccountId === 'all' && <Check size={14} color="#3b82f6" />}
+                {activeAccountId === 'all' && <Check size={14} color="var(--theme-secondary-strong)" />}
               </button>
 
               <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '4px 0' }} />
@@ -348,7 +372,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       borderRadius: '8px',
                       backgroundColor: activeAccountId === acc.id ? '#1a2336' : 'transparent',
                       border: 'none',
-                      color: '#f8fafc',
+                      color: 'var(--text-primary)',
                       cursor: 'pointer',
                       textAlign: 'left',
                       marginBottom: '2px',
@@ -394,9 +418,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   gap: '6px',
                   padding: '7px 10px',
                   borderRadius: '6px',
-                  backgroundColor: 'rgba(59, 130, 246, 0.12)',
-                  color: '#60a5fa',
-                  border: '1px dashed #3b82f6',
+                  backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent)',
+                  color: 'var(--theme-secondary)',
+                  border: '1px dashed var(--theme-secondary-strong)',
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   cursor: 'pointer'
@@ -417,6 +441,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div ref={userRef} style={{ position: 'relative' }}>
             <button
               onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+              aria-haspopup="menu"
+              aria-expanded={userDropdownOpen}
+              aria-label="User menu"
               className="btn btn-secondary btn-sm"
               style={{
                 display: 'flex',
@@ -424,7 +451,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 gap: '8px',
                 padding: '5px 10px',
                 borderRadius: '8px',
-                backgroundColor: '#0c1222',
+                backgroundColor: 'var(--bg-panel)',
                 borderColor: '#1e293b'
               }}
             >
@@ -432,7 +459,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 width: '24px',
                 height: '24px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                background: 'linear-gradient(135deg, var(--theme-secondary-strong), #8b5cf6)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -443,10 +470,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}>
                 {(user.user_metadata?.full_name || user.email || 'U')[0].toUpperCase()}
               </div>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f8fafc', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user.user_metadata?.full_name || user.email?.split('@')[0]}
               </span>
-              <ChevronDown size={12} color="#94a3b8" />
+              <ChevronDown size={12} color="var(--text-secondary)" />
             </button>
 
             {userDropdownOpen && (
@@ -455,8 +482,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 top: 'calc(100% + 6px)',
                 right: 0,
                 width: '260px',
-                backgroundColor: '#0c1222',
-                border: '1px solid #233148',
+                backgroundColor: 'var(--bg-panel)',
+                border: '1px solid var(--border-color)',
                 borderRadius: '12px',
                 boxShadow: '0 12px 30px rgba(0,0,0,0.7)',
                 padding: '8px',
@@ -464,7 +491,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 animation: 'fadeIn 0.15s ease'
               }}>
                 <div style={{ padding: '6px 8px', borderBottom: '1px solid #1e293b', marginBottom: '6px' }}>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {user.user_metadata?.full_name || 'Trader'}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -479,9 +506,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setProfileModalOpen(true);
                   }}
                   className="btn btn-ghost btn-sm"
-                  style={{ width: '100%', justifyContent: 'flex-start', color: '#60a5fa', fontWeight: 600, fontSize: '0.78rem' }}
+                  style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--theme-secondary)', fontWeight: 600, fontSize: '0.78rem' }}
                 >
-                  <Globe size={14} color="#3b82f6" /> Public Portfolio Link
+                  <Globe size={14} color="var(--theme-secondary-strong)" /> Public Portfolio Link
                 </button>
 
                 <button
@@ -501,22 +528,46 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setShortcutsModalOpen(true);
                   }}
                   className="btn btn-ghost btn-sm"
-                  style={{ width: '100%', justifyContent: 'flex-start', color: '#cbd5e1', fontSize: '0.78rem' }}
+                  style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--text-strong)', fontSize: '0.78rem' }}
                 >
-                  <Keyboard size={14} color="#94a3b8" /> Keyboard Shortcuts (?)
+                  <Keyboard size={14} color="var(--text-secondary)" /> Keyboard Shortcuts (?)
+                </button>
+
+                <button
+                  onClick={() => {
+                    const prefs = setUiPref('dim', !uiPrefsState.dim);
+                    setUiPrefsState(prefs);
+                    showToast(prefs.dim ? 'Dim mode ON — brightness reduced for long sessions.' : 'Dim mode OFF.', 'info');
+                  }}
+                  className="btn btn-ghost btn-sm"
+                  style={{ width: '100%', justifyContent: 'flex-start', color: uiPrefsState.dim ? 'var(--theme-secondary)' : 'var(--text-strong)', fontWeight: uiPrefsState.dim ? 700 : 500, fontSize: '0.78rem' }}
+                >
+                  <Moon size={14} /> Dim Mode{uiPrefsState.dim ? ' · ON' : ''}
+                </button>
+
+                <button
+                  onClick={() => {
+                    const prefs = setUiPref('performance', !uiPrefsState.performance);
+                    setUiPrefsState(prefs);
+                    showToast(prefs.performance ? 'Performance mode ON — animations & confetti disabled.' : 'Performance mode OFF.', 'info');
+                  }}
+                  className="btn btn-ghost btn-sm"
+                  style={{ width: '100%', justifyContent: 'flex-start', color: uiPrefsState.performance ? 'var(--theme-secondary)' : 'var(--text-strong)', fontWeight: uiPrefsState.performance ? 700 : 500, fontSize: '0.78rem' }}
+                >
+                  <Zap size={14} /> Performance Mode{uiPrefsState.performance ? ' · ON' : ''}
                 </button>
 
                 <div style={{ height: '1px', backgroundColor: '#1e293b', margin: '6px 0' }} />
 
                 {/* Data & Backup Tools */}
-                <div style={{ padding: '2px 8px', fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                <div style={{ padding: '2px 8px', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
                   Data & Backup
                 </div>
 
                 <button
                   onClick={handleExportCSV}
                   className="btn btn-ghost btn-sm"
-                  style={{ width: '100%', justifyContent: 'flex-start', color: '#cbd5e1', fontSize: '0.78rem' }}
+                  style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--text-strong)', fontSize: '0.78rem' }}
                 >
                   <FileSpreadsheet size={14} color="#10b981" /> Export CSV ({filteredTrades.length} Trades)
                 </button>
@@ -524,15 +575,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   onClick={handleExportJSON}
                   className="btn btn-ghost btn-sm"
-                  style={{ width: '100%', justifyContent: 'flex-start', color: '#cbd5e1', fontSize: '0.78rem' }}
+                  style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--text-strong)', fontSize: '0.78rem' }}
                 >
-                  <FileJson size={14} color="#3b82f6" /> Backup Data (JSON)
+                  <FileJson size={14} color="var(--theme-secondary-strong)" /> Backup Data (JSON)
                 </button>
 
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="btn btn-ghost btn-sm"
-                  style={{ width: '100%', justifyContent: 'flex-start', color: '#cbd5e1', fontSize: '0.78rem' }}
+                  style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--text-strong)', fontSize: '0.78rem' }}
                 >
                   <Upload size={14} color="#f59e0b" /> Import JSON Backup
                 </button>
@@ -545,8 +596,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 />
 
                 <button
-                  onClick={() => {
-                    if (window.confirm('PERINGATAN: Apakah Anda yakin ingin MENGHAPUS SEMUA DATA?\n\nTindakan ini tidak dapat dibatalkan.')) {
+                  onClick={async () => {
+                    const confirmed = await confirm({
+                      title: 'Reset all data?',
+                      message: 'All trading accounts, trades and withdrawal records will be permanently deleted. This action cannot be undone.',
+                      confirmText: 'Reset everything',
+                      variant: 'danger',
+                      typeToConfirm: 'RESET'
+                    });
+                    if (confirmed) {
                       resetAllData();
                       setUserDropdownOpen(false);
                     }
@@ -564,7 +622,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => {
                     signOut();
                     setUserDropdownOpen(false);
-                    showToast('Berhasil keluar dari akun.', 'info');
+                    showToast('Signed out successfully.', 'info');
                   }}
                   className="btn btn-ghost btn-sm"
                   style={{ width: '100%', justifyContent: 'flex-start', color: '#ef4444', fontWeight: 600, fontSize: '0.78rem' }}
@@ -587,7 +645,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               gap: '6px',
               backgroundColor: '#0e1628',
               borderColor: '#243750',
-              color: '#60a5fa',
+              color: 'var(--theme-secondary)',
               fontWeight: 600
             }}
           >
@@ -596,16 +654,36 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         )}
 
+        {/* Command Palette Trigger (Ctrl+K) */}
+        {onOpenCommandPalette && (
+          <button
+            type="button"
+            onClick={onOpenCommandPalette}
+            className="btn btn-secondary btn-sm hide-on-mobile"
+            aria-label="Open command palette"
+            title="Command palette (Ctrl+K)"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', padding: '7px 10px' }}
+          >
+            <Search size={15} />
+            <kbd className="kbd-hint">ctrl K</kbd>
+          </button>
+        )}
+
+        {/* Notification Center (risk alerts + mentor feedback) */}
+        <NotificationCenter />
+
         {/* Stealth / Privacy Toggle Button */}
         <button
           type="button"
           onClick={toggleStealthMode}
           className="btn btn-secondary btn-icon btn-sm"
           title={isStealthMode ? 'Tampilkan Saldo (Stealth Mode Aktif)' : 'Sembunyikan Saldo (Stealth Mode)'}
+          aria-label={isStealthMode ? 'Show balances (stealth mode is on)' : 'Hide balances (stealth mode)'}
+          aria-pressed={isStealthMode}
           style={{
-            backgroundColor: isStealthMode ? 'rgba(239, 68, 68, 0.15)' : '#0c1222',
+            backgroundColor: isStealthMode ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-panel)',
             borderColor: isStealthMode ? '#ef4444' : '#1e293b',
-            color: isStealthMode ? '#f87171' : '#94a3b8',
+            color: isStealthMode ? '#f87171' : 'var(--text-secondary)',
             padding: '7px 10px'
           }}
         >
@@ -615,11 +693,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Primary Action: Log Trade Button */}
         <button
           onClick={onOpenTradeModal}
+          data-tour="log-trade"
           className="btn btn-primary"
           style={{ padding: '7px 14px', fontWeight: 700, fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}
         >
           <Plus size={16} strokeWidth={2.5} />
           <span className="hide-on-mobile">Log Trade</span>
+          <kbd className="kbd-hint hide-on-mobile" style={{ backgroundColor: 'rgba(255,255,255,0.16)', borderColor: 'rgba(255,255,255,0.25)', color: '#ffffff' }}>N</kbd>
         </button>
       </div>
 

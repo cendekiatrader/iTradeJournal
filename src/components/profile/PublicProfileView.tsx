@@ -90,14 +90,14 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
         alignItems: 'center',
         justifyContent: 'center',
         gap: '16px',
-        color: '#94a3b8'
+        color: 'var(--text-secondary)'
       }}>
         <div style={{
           width: '40px',
           height: '40px',
           borderRadius: '50%',
-          border: '3px solid rgba(59, 130, 246, 0.2)',
-          borderTopColor: '#3b82f6',
+          border: '3px solid color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)',
+          borderTopColor: 'var(--theme-secondary-strong)',
           animation: 'spin 0.8s linear infinite'
         }} />
         <p style={{ fontSize: '0.9rem' }}>Memuat profil terverifikasi @{username}...</p>
@@ -130,10 +130,10 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
         }}>
           <Lock size={28} color="#ef4444" />
         </div>
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', marginBottom: '8px' }}>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
           Profil Tidak Ditemukan / Privat
         </h2>
-        <p style={{ fontSize: '0.88rem', color: '#94a3b8', maxWidth: '420px', marginBottom: '24px' }}>
+        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', maxWidth: '420px', marginBottom: '24px' }}>
           {error || 'Trader ini belum mengaktifkan profil publik mereka.'}
         </p>
         <button onClick={onBackToApp} className="btn btn-primary">
@@ -145,7 +145,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#070b14', color: '#f8fafc', paddingBottom: '60px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#070b14', color: 'var(--text-primary)', paddingBottom: '60px' }}>
       {/* Top Navbar */}
       <header style={{
         borderBottom: '1px solid #1a2333',
@@ -160,7 +160,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
             width: '32px',
             height: '32px',
             borderRadius: '8px',
-            background: 'linear-gradient(135deg, #10b981, #3b82f6)',
+            background: 'linear-gradient(135deg, var(--theme-primary), var(--theme-secondary-strong))',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -190,8 +190,8 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
         padding: '32px 20px 20px 20px'
       }}>
         <div style={{
-          backgroundColor: '#0c1222',
-          border: '1px solid #233148',
+          backgroundColor: 'var(--bg-panel)',
+          border: '1px solid var(--border-color)',
           borderRadius: '20px',
           padding: '28px',
           boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6)',
@@ -206,7 +206,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
             width: '240px',
             height: '240px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent) 0%, transparent 70%)',
             pointerEvents: 'none'
           }} />
 
@@ -232,7 +232,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+                  <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                     {profile.displayName}
                   </h1>
                   <span style={{
@@ -252,12 +252,12 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                   </span>
                 </div>
 
-                <div style={{ fontSize: '0.84rem', color: '#60a5fa', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.84rem', color: 'var(--theme-secondary)', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
                   @{profile.username}
                 </div>
 
                 {profile.bio && (
-                  <p style={{ fontSize: '0.86rem', color: '#94a3b8', marginTop: '8px', maxWidth: '560px', lineHeight: 1.5 }}>
+                  <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', marginTop: '8px', maxWidth: '560px', lineHeight: 1.5 }}>
                     {profile.bio}
                   </p>
                 )}
@@ -295,55 +295,55 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
           marginTop: '20px'
         }}>
           <div className="card" style={{ padding: '16px' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Win Rate</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Win Rate</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: metrics.winRate >= 50 ? '#10b981' : '#f87171', marginTop: '4px' }}>
               {metrics.winRate.toFixed(1)}%
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
               {metrics.winningTrades}W / {metrics.losingTrades}L
             </div>
           </div>
 
           <div className="card" style={{ padding: '16px' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Profit Factor</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: metrics.profitFactor >= 1.5 ? '#10b981' : '#60a5fa', marginTop: '4px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Profit Factor</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: metrics.profitFactor >= 1.5 ? '#10b981' : 'var(--theme-secondary)', marginTop: '4px' }}>
               {metrics.profitFactor.toFixed(2)}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
               Gross Edge
             </div>
           </div>
 
           <div className="card" style={{ padding: '16px' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Total Return</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Return</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: metrics.totalPnL >= 0 ? '#10b981' : '#ef4444', marginTop: '4px' }}>
               {profile.hideDollarAmounts 
                 ? `${metrics.totalPnlPercent >= 0 ? '+' : ''}${metrics.totalPnlPercent.toFixed(2)}%`
                 : formatCurrency(metrics.totalPnL, 'USD')}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
               {filteredTrades.length} Total Trades
             </div>
           </div>
 
           <div className="card" style={{ padding: '16px' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Avg RR Ratio</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Avg RR Ratio</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#38bdf8', marginTop: '4px' }}>
               1 : {metrics.avgRR.toFixed(2)}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
               Risk:Reward
             </div>
           </div>
 
           <div className="card" style={{ padding: '16px' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Best Trade</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Best Trade</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>
               {profile.hideDollarAmounts 
                 ? `+${Math.max(...filteredTrades.map(t => t.pnlPercent), 0).toFixed(2)}%` 
                 : formatCurrency(metrics.bestTrade, 'USD')}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
               Peak Win
             </div>
           </div>
@@ -354,10 +354,10 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
           <div className="card" style={{ marginTop: '24px', padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
               <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   Verified Performance & Equity Growth
                 </h3>
-                <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                   Track record pertumbuhan portofolio secara berurutan
                 </p>
               </div>
@@ -372,10 +372,10 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
           <div className="card" style={{ marginTop: '24px', padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   Verified Trade Records ({filteredTrades.length})
                 </h3>
-                <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                   Catatan eksekusi posisi yang terverifikasi di sistem iTradeJournal
                 </p>
               </div>
@@ -392,8 +392,8 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                       fontSize: '0.75rem',
                       borderRadius: '8px',
                       backgroundColor: selectedAsset === asset ? '#1e3a8a' : '#0c1326',
-                      borderColor: selectedAsset === asset ? '#3b82f6' : '#233148',
-                      color: selectedAsset === asset ? '#93c5fd' : '#94a3b8'
+                      borderColor: selectedAsset === asset ? 'var(--theme-secondary-strong)' : 'var(--border-color)',
+                      color: selectedAsset === asset ? '#93c5fd' : 'var(--text-secondary)'
                     }}
                   >
                     {asset === 'all' ? 'All Assets' : asset}
@@ -406,7 +406,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #1e293b', color: '#94a3b8', textAlign: 'left' }}>
+                  <tr style={{ borderBottom: '1px solid #1e293b', color: 'var(--text-secondary)', textAlign: 'left' }}>
                     <th style={{ padding: '10px 8px' }}>Symbol</th>
                     <th style={{ padding: '10px 8px' }}>Side</th>
                     <th style={{ padding: '10px 8px' }}>Setup</th>
@@ -421,9 +421,9 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                     const isLoss = t.status === 'LOSS';
                     return (
                       <tr key={t.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                        <td style={{ padding: '12px 8px', fontWeight: 700, color: '#f8fafc' }}>
+                        <td style={{ padding: '12px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>
                           <div>{t.symbol}</div>
-                          <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 400 }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 }}>
                             {new Date(t.entryDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </div>
                         </td>
@@ -441,9 +441,9 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                           </span>
                         </td>
 
-                        <td style={{ padding: '12px 8px', color: '#cbd5e1' }}>
+                        <td style={{ padding: '12px 8px', color: 'var(--text-strong)' }}>
                           <div>{t.setup}</div>
-                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{t.session} Session</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.session} Session</div>
                         </td>
 
                         <td style={{ padding: '12px 8px' }}>
@@ -453,7 +453,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                             fontSize: '0.72rem',
                             fontWeight: 700,
                             backgroundColor: isWin ? 'rgba(16, 185, 129, 0.15)' : isLoss ? 'rgba(239, 68, 68, 0.15)' : 'rgba(100, 116, 139, 0.15)',
-                            color: isWin ? '#34d399' : isLoss ? '#f87171' : '#94a3b8'
+                            color: isWin ? '#34d399' : isLoss ? '#f87171' : 'var(--text-secondary)'
                           }}>
                             {t.status}
                           </span>
@@ -468,7 +468,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                           textAlign: 'right',
                           fontFamily: 'var(--font-mono)',
                           fontWeight: 700,
-                          color: isWin ? '#10b981' : isLoss ? '#ef4444' : '#94a3b8'
+                          color: isWin ? '#10b981' : isLoss ? '#ef4444' : 'var(--text-secondary)'
                         }}>
                           {profile.hideDollarAmounts ? (
                             <span>{t.pnlPercent >= 0 ? `+${t.pnlPercent.toFixed(2)}%` : `${t.pnlPercent.toFixed(2)}%`}</span>
@@ -490,14 +490,14 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
           marginTop: '36px',
           padding: '28px',
           borderRadius: '20px',
-          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(16, 185, 129, 0.08))',
-          border: '1px solid rgba(59, 130, 246, 0.3)',
+          background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent), rgba(16, 185, 129, 0.08))',
+          border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)',
           textAlign: 'center'
         }}>
-          <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
+          <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '6px' }}>
             Ingin Memiliki Trading Journal & Link Portofolio Seperti Ini?
           </h4>
-          <p style={{ fontSize: '0.84rem', color: '#94a3b8', maxWidth: '480px', margin: '0 auto 16px auto' }}>
+          <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 16px auto' }}>
             Catat trading Anda, pantau analitik multi-akun, dan bagikan track record terverifikasi secara gratis.
           </p>
           <button onClick={onBackToApp} className="btn btn-primary" style={{ padding: '10px 24px', fontWeight: 700 }}>

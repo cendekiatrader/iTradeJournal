@@ -29,11 +29,11 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
   const isDrawdownRisk = ddBufferPercent < 40;
 
   return (
-    <div className="card" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, #0d1424, #080c18)', borderColor: '#23334d' }}>
+    <div className="card" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, #0d1424, var(--bg-sidebar))', borderColor: '#23334d' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Award size={18} color="#f59e0b" />
-          <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f8fafc' }}>
+          <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             Prop Firm Objective Tracker ({account.name})
           </span>
         </div>
@@ -53,7 +53,7 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
         <div style={{ backgroundColor: '#060913', padding: '16px', borderRadius: '10px', border: '1px solid #1a2538' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-              <Target size={14} color="#3b82f6" />
+              <Target size={14} color="var(--theme-secondary-strong)" />
               <span>Profit Target Progress</span>
             </div>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--profit-green)' }}>
@@ -65,15 +65,15 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
             <div style={{
               width: `${targetProgress}%`,
               height: '100%',
-              background: 'linear-gradient(90deg, #3b82f6, #10b981)',
+              background: 'linear-gradient(90deg, var(--theme-secondary-strong), #10b981)',
               borderRadius: '4px',
               transition: 'width 0.4s ease'
             }} />
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            <span>Made: <strong style={{ color: '#f8fafc' }}>{formatCurrency(currentProfit, account.currency)}</strong></span>
-            <span>Goal: <strong style={{ color: '#f8fafc' }}>{formatCurrency(targetProfit, account.currency)}</strong></span>
+            <span>Made: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(currentProfit, account.currency)}</strong></span>
+            <span>Goal: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(targetProfit, account.currency)}</strong></span>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
             <div style={{
               width: `${Math.max(0, ddBufferPercent)}%`,
               height: '100%',
-              background: isDrawdownRisk ? 'linear-gradient(90deg, #ef4444, #f59e0b)' : 'linear-gradient(90deg, #10b981, #3b82f6)',
+              background: isDrawdownRisk ? 'linear-gradient(90deg, #ef4444, #f59e0b)' : 'linear-gradient(90deg, #10b981, var(--theme-secondary-strong))',
               borderRadius: '4px',
               transition: 'width 0.4s ease'
             }} />

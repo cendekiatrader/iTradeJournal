@@ -18,6 +18,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { WithdrawModal } from './WithdrawModal';
+import { useConfirm } from '../common/ConfirmDialog';
 
 interface AccountsViewProps {
   onOpenAccountModal: () => void;
@@ -37,6 +38,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
     withdrawals 
   } = useJournal();
 
+  const { confirm } = useConfirm();
   const [withdrawAccount, setWithdrawAccount] = useState<TradingAccount | null>(null);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
@@ -51,8 +53,8 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <WalletCards size={24} color="#3b82f6" />
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <WalletCards size={24} color="var(--theme-secondary-strong)" />
             <span>Multi-Account Portfolio Manager</span>
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -72,7 +74,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
               Combined Portfolio Total Equity
             </span>
-            <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc', marginTop: '4px' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', marginTop: '4px' }}>
               {formatCurrency(totalPortfolioEquity, 'USD')}
             </div>
             <div style={{ fontSize: '0.85rem', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -125,8 +127,8 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
               key={acc.id}
               className="card"
               style={{
-                borderColor: isActive ? '#3b82f6' : 'var(--border-color)',
-                boxShadow: isActive ? '0 0 20px rgba(59, 130, 246, 0.2)' : 'var(--shadow-card)',
+                borderColor: isActive ? 'var(--theme-secondary-strong)' : 'var(--border-color)',
+                boxShadow: isActive ? '0 0 20px color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)' : 'var(--shadow-card)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between'
@@ -144,7 +146,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                       boxShadow: `0 0 10px ${acc.colorTag}`
                     }} />
                     <div>
-                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc' }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                         {acc.name}
                       </h3>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
@@ -170,7 +172,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <div>
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Current Balance</span>
-                      <div style={{ fontSize: '1.35rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+                      <div style={{ fontSize: '1.35rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                         {formatCurrency(acc.currentBalance, acc.currency)}
                       </div>
                     </div>
@@ -196,21 +198,21 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px', textAlign: 'center' }}>
                   <div style={{ padding: '8px', backgroundColor: '#070a16', borderRadius: '8px', border: '1px solid #141e2e' }}>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Trades</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f8fafc' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                       {accTrades.length}
                     </div>
                   </div>
 
                   <div style={{ padding: '8px', backgroundColor: '#070a16', borderRadius: '8px', border: '1px solid #141e2e' }}>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Win Rate</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: winRate >= 50 ? 'var(--profit-green)' : '#94a3b8' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: winRate >= 50 ? 'var(--profit-green)' : 'var(--text-secondary)' }}>
                       {winRate.toFixed(0)}%
                     </div>
                   </div>
 
                   <div style={{ padding: '8px', backgroundColor: '#070a16', borderRadius: '8px', border: '1px solid #141e2e' }}>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Initial</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#cbd5e1' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                       {formatCurrency(acc.initialBalance, acc.currency, true)}
                     </div>
                   </div>
@@ -235,13 +237,13 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                       marginBottom: '12px',
                       fontSize: '0.72rem'
                     }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                         <span>Deductions (Comm/Swap/Tax):</span>
                         <span style={{ color: '#f87171', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
                           -{formatCurrency(totalDeductions, acc.currency)}
                         </span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#f8fafc', fontWeight: 700 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-primary)', fontWeight: 700 }}>
                         <span>Net Take-Home Gain:</span>
                         <span style={{ color: estimatedNetProfit >= 0 ? 'var(--profit-green)' : 'var(--loss-red)', fontFamily: 'var(--font-mono)' }}>
                           {estimatedNetProfit >= 0 ? '+' : ''}{formatCurrency(estimatedNetProfit, acc.currency)}
@@ -294,19 +296,27 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                   onClick={() => onEditAccount(acc)}
                   className="btn btn-secondary btn-icon btn-sm"
                   title="Edit Account"
+                  aria-label="Edit Account"
                 >
                   <Edit3 size={14} />
                 </button>
 
                 <button
-                  onClick={() => {
-                    if (window.confirm(`Delete account "${acc.name}" and all its logged trades?`)) {
+                  onClick={async () => {
+                    const confirmed = await confirm({
+                      title: `Delete account "${acc.name}"?`,
+                      message: 'The account and all of its logged trades will be permanently deleted.',
+                      confirmText: 'Delete account',
+                      variant: 'danger'
+                    });
+                    if (confirmed) {
                       deleteAccount(acc.id);
                     }
                   }}
                   className="btn btn-ghost btn-icon btn-sm"
                   style={{ color: '#ef4444' }}
                   title="Delete Account"
+                  aria-label="Delete Account"
                 >
                   <Trash2 size={14} />
                 </button>

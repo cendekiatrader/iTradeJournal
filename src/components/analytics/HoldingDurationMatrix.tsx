@@ -129,11 +129,11 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
         <div>
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Clock size={20} color="#38bdf8" />
             <span>Trade Holding Duration & Time Edge Matrix</span>
           </h3>
-          <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
             Temukan durasi tahan posisi yang menghasilkan win rate & profitabilitas tertinggi bagi Anda
           </p>
         </div>
@@ -191,10 +191,10 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
                       <Icon size={16} color={bracket.color} />
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#f8fafc' }}>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                         {bracket.name}
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                         {bracket.timeframeLabel}
                       </div>
                     </div>
@@ -206,7 +206,7 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
                     padding: '2px 8px',
                     borderRadius: '6px',
                     backgroundColor: bracket.trades > 0 ? '#1e293b' : 'rgba(255,255,255,0.04)',
-                    color: bracket.trades > 0 ? '#cbd5e1' : '#64748b'
+                    color: bracket.trades > 0 ? 'var(--text-strong)' : 'var(--text-muted)'
                   }}>
                     {bracket.trades} Trades
                   </span>
@@ -214,12 +214,12 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
 
                 {/* Net PnL */}
                 <div style={{ marginTop: '12px', marginBottom: '10px' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Net Return</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Net Return</div>
                   <div style={{
                     fontSize: '1.25rem',
                     fontWeight: 800,
                     fontFamily: 'var(--font-mono)',
-                    color: bracket.trades === 0 ? '#64748b' : isProfitable ? '#10b981' : '#ef4444',
+                    color: bracket.trades === 0 ? 'var(--text-muted)' : isProfitable ? '#10b981' : '#ef4444',
                     marginTop: '2px'
                   }}>
                     {bracket.trades === 0 ? '-' : `${bracket.pnl >= 0 ? '+' : ''}${formatCurrency(bracket.pnl, currency)}`}
@@ -229,14 +229,14 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
                 {/* Metrics Breakdown */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                   <div>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b', display: 'block' }}>Win Rate</span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Win Rate</span>
                     <span style={{ fontSize: '0.82rem', fontWeight: 700, color: bracket.winRate >= 50 ? '#34d399' : '#f87171' }}>
                       {bracket.trades > 0 ? `${bracket.winRate.toFixed(0)}%` : '-'}
                     </span>
                   </div>
 
                   <div>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b', display: 'block' }}>Profit Factor</span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Profit Factor</span>
                     <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#38bdf8' }}>
                       {bracket.trades > 0 ? bracket.profitFactor.toFixed(2) : '-'}
                     </span>
@@ -247,7 +247,7 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
               {/* Edge Status Badge */}
               <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                 {bracket.trades === 0 ? (
-                  <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Belum ada data eksekusi</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Belum ada data eksekusi</span>
                 ) : bracket.pnl > 0 && bracket.winRate >= 55 ? (
                   <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <ShieldCheck size={13} color="#10b981" /> High-Performing Edge
@@ -257,8 +257,8 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
                     <AlertTriangle size={13} color="#f87171" /> Potential Drag / Negative Edge
                   </span>
                 ) : (
-                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Scale size={13} color="#94a3b8" /> Moderate Performance
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Scale size={13} color="var(--text-secondary)" /> Moderate Performance
                   </span>
                 )}
               </div>

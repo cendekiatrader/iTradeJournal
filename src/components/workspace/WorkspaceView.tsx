@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { Trade } from '../../types';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export type WorkspacePreset = 'split-2' | 'split-3' | 'quad-4' | 'custom';
 
@@ -79,7 +80,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
   onOpenTradeModal,
   onViewTradeDetail
 }) => {
-  const { filteredTrades, equityCurve, activeAccount, metrics } = useJournal();
+  const { filteredTrades, equityCurve, activeAccount, metrics, showToast } = useJournal();
   const { user } = useAuth();
   const currentCurrency = activeAccount?.currency || 'USD';
   const isInitialCloudSyncDone = useRef(false);
@@ -93,6 +94,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
   });
 
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const modalRef = useModalA11y(showConfigModal, () => setShowConfigModal(false));
   const [customTvSymbol, setCustomTvSymbol] = useState(config.symbolTV || 'OANDA:XAUUSD');
 
   // 1. Fetch user-isolated workspace configuration from Supabase on login
@@ -164,13 +166,13 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
     );
 
     if (!win) {
-      alert('Popup diblokir browser. Izinkan popup untuk menggunakan fitur Multi-Monitor.');
+      showToast('Popup blocked by your browser. Please allow popups to use the Multi-Monitor feature.', 'error');
       return;
     }
 
     win.document.title = `iTrade Multi-Monitor — ${title}`;
-    win.document.body.style.backgroundColor = '#080c1b';
-    win.document.body.style.color = '#f8fafc';
+    win.document.body.style.backgroundColor = 'var(--bg-nav)';
+    win.document.body.style.color = 'var(--text-primary)';
     win.document.body.style.margin = '0';
     win.document.body.style.padding = '16px';
     win.document.body.style.fontFamily = 'Inter, -apple-system, sans-serif';
@@ -248,7 +250,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {recent.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '0.82rem' }}>
+              <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                 Belum ada trade yang dicatat.
               </div>
             ) : (
@@ -258,7 +260,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                   onClick={() => onViewTradeDetail(t)}
                   style={{
                     padding: '8px 12px',
-                    backgroundColor: '#070b17',
+                    backgroundColor: 'var(--bg-sidebar)',
                     borderRadius: '8px',
                     border: '1px solid #1a2538',
                     display: 'flex',
@@ -267,7 +269,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                     cursor: 'pointer',
                     transition: 'border-color 0.15s ease'
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--theme-secondary-strong)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1a2538'; }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -281,8 +283,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                     }}>
                       {t.direction}
                     </span>
-                    <strong style={{ fontSize: '0.85rem', color: '#f8fafc' }}>{t.symbol}</strong>
-                    <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{t.timeframe}</span>
+                    <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{t.symbol}</strong>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{t.timeframe}</span>
                   </div>
 
                   <div style={{ textAlign: 'right' }}>
@@ -372,7 +374,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', margin: 0 }}>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
               Multi-Screen Workspace Hub
             </h1>
             <span style={{
@@ -394,7 +396,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {/* Preset Layout Switcher */}
-          <div style={{ display: 'flex', backgroundColor: '#070b17', padding: '3px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+          <div style={{ display: 'flex', backgroundColor: 'var(--bg-sidebar)', padding: '3px', borderRadius: '8px', border: '1px solid #1e293b' }}>
             {[
               { id: 'split-2', label: 'Dual Split' },
               { id: 'split-3', label: 'Triple Screen' },
@@ -410,8 +412,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   border: 'none',
-                  backgroundColor: config.layout === l.id ? '#3b82f6' : 'transparent',
-                  color: config.layout === l.id ? '#ffffff' : '#94a3b8',
+                  backgroundColor: config.layout === l.id ? 'var(--theme-secondary-strong)' : 'transparent',
+                  color: config.layout === l.id ? '#ffffff' : 'var(--text-secondary)',
                   cursor: 'pointer'
                 }}
               >
@@ -446,15 +448,15 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
         <div style={{
           textAlign: 'center',
           padding: '60px 20px',
-          backgroundColor: '#0c1222',
+          backgroundColor: 'var(--bg-panel)',
           borderRadius: '14px',
-          border: '1px dashed #233148'
+          border: '1px dashed var(--border-color)'
         }}>
-          <Layout size={40} color="#60a5fa" style={{ marginBottom: '12px', opacity: 0.8 }} />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '6px' }}>
+          <Layout size={40} color="var(--theme-secondary)" style={{ marginBottom: '12px', opacity: 0.8 }} />
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>
             Workspace Belum Memiliki Modul Aktif
           </h3>
-          <p style={{ fontSize: '0.85rem', color: '#94a3b8', maxWidth: '460px', margin: '0 auto 16px' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '460px', margin: '0 auto 16px' }}>
             Klik tombol customize di atas untuk memilih modul yang ingin Anda tampilkan pada layar workspace ini.
           </p>
           <button
@@ -476,9 +478,9 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
               <div
                 key={modId}
                 style={{
-                  backgroundColor: '#0c1222',
+                  backgroundColor: 'var(--bg-panel)',
                   borderRadius: '14px',
-                  border: '1px solid #233148',
+                  border: '1px solid var(--border-color)',
                   padding: '16px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -493,15 +495,15 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                       width: '28px',
                       height: '28px',
                       borderRadius: '6px',
-                      backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                      backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#60a5fa'
+                      color: 'var(--theme-secondary)'
                     }}>
                       <Icon size={15} />
                     </div>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                       {modInfo.title}
                     </span>
                   </div>
@@ -512,7 +514,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                       onClick={() => popOutMultiMonitorWindow(modId, modInfo.title)}
                       className="btn btn-ghost btn-icon btn-sm"
                       title="Buka modul ini di Jendela Terpisah untuk Layar / Monitor 2 atau 3"
-                      style={{ color: '#94a3b8', padding: '4px' }}
+                      style={{ color: 'var(--text-secondary)', padding: '4px' }}
+                      aria-label="Buka modul ini di Jendela Terpisah untuk Layar / Monitor 2 atau 3"
                     >
                       <ExternalLink size={14} />
                     </button>
@@ -522,7 +525,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                       onClick={() => toggleModule(modId)}
                       className="btn btn-ghost btn-icon btn-sm"
                       title="Sembunyikan modul ini"
-                      style={{ color: '#94a3b8', padding: '4px' }}
+                      style={{ color: 'var(--text-secondary)', padding: '4px' }}
                     >
                       <X size={14} />
                     </button>
@@ -542,24 +545,24 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
       {/* Customize Workspace Modal */}
       {showConfigModal && (
         <div className="modal-backdrop" onClick={() => setShowConfigModal(false)}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px' }}>
+          <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Customize Workspace" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px' }}>
             <div className="modal-header">
               <div>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                   Customize Workspace Modules & Presets
                 </h2>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                   Pilih modul yang ingin diaktifkan. Pengaturan tersimpan permanen per akun di cloud.
                 </span>
               </div>
-              <button onClick={() => setShowConfigModal(false)} className="btn btn-ghost btn-icon">
+              <button onClick={() => setShowConfigModal(false)} className="btn btn-ghost btn-icon" aria-label="Close dialog">
                 <X size={18} />
               </button>
             </div>
 
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* TradingView Symbol Input */}
-              <div style={{ padding: '12px', backgroundColor: '#070b17', borderRadius: '10px', border: '1px solid #1e293b' }}>
+              <div style={{ padding: '12px', backgroundColor: 'var(--bg-sidebar)', borderRadius: '10px', border: '1px solid #1e293b' }}>
                 <label className="input-label" style={{ fontSize: '0.78rem', marginBottom: '6px', display: 'block' }}>
                   Default TradingView Symbol / Pair
                 </label>
@@ -601,8 +604,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                         style={{
                           padding: '10px 12px',
                           borderRadius: '8px',
-                          border: `1px solid ${isActive ? '#3b82f6' : '#1e293b'}`,
-                          backgroundColor: isActive ? 'rgba(59, 130, 246, 0.1)' : '#070b17',
+                          border: `1px solid ${isActive ? 'var(--theme-secondary-strong)' : '#1e293b'}`,
+                          backgroundColor: isActive ? 'color-mix(in srgb, var(--theme-secondary-strong) 10%, transparent)' : 'var(--bg-sidebar)',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
@@ -611,12 +614,12 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Icon size={16} color={isActive ? '#60a5fa' : '#64748b'} />
+                          <Icon size={16} color={isActive ? 'var(--theme-secondary)' : 'var(--text-muted)'} />
                           <div>
-                            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isActive ? '#f8fafc' : '#94a3b8' }}>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                               {m.title}
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                               {m.desc}
                             </div>
                           </div>
@@ -626,8 +629,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                           width: '18px',
                           height: '18px',
                           borderRadius: '4px',
-                          border: `1px solid ${isActive ? '#3b82f6' : '#334155'}`,
-                          backgroundColor: isActive ? '#3b82f6' : 'transparent',
+                          border: `1px solid ${isActive ? 'var(--theme-secondary-strong)' : '#334155'}`,
+                          backgroundColor: isActive ? 'var(--theme-secondary-strong)' : 'transparent',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center'
@@ -646,7 +649,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                 type="button"
                 onClick={handleResetDefault}
                 className="btn btn-ghost btn-sm"
-                style={{ color: '#94a3b8', gap: '6px' }}
+                style={{ color: 'var(--text-secondary)', gap: '6px' }}
               >
                 <RotateCcw size={14} />
                 <span>Reset Default</span>

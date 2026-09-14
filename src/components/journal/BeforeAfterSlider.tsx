@@ -49,8 +49,8 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     <div style={{ marginTop: '16px' }}>
       {/* Mode Switcher */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-        <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <SplitSquareVertical size={16} color="#3b82f6" />
+        <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <SplitSquareVertical size={16} color="var(--theme-secondary-strong)" />
           <span>Dual Chart Before vs After Execution</span>
         </div>
 
@@ -62,9 +62,9 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
             style={{
               fontSize: '0.72rem',
               borderRadius: '6px',
-              backgroundColor: viewMode === 'slider' ? '#1e3a8a' : '#0c1222',
-              borderColor: viewMode === 'slider' ? '#3b82f6' : '#233148',
-              color: viewMode === 'slider' ? '#93c5fd' : '#94a3b8'
+              backgroundColor: viewMode === 'slider' ? '#1e3a8a' : 'var(--bg-panel)',
+              borderColor: viewMode === 'slider' ? 'var(--theme-secondary-strong)' : 'var(--border-color)',
+              color: viewMode === 'slider' ? '#93c5fd' : 'var(--text-secondary)'
             }}
           >
             <SplitSquareVertical size={13} /> Interactive Slider
@@ -76,9 +76,9 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
             style={{
               fontSize: '0.72rem',
               borderRadius: '6px',
-              backgroundColor: viewMode === 'side-by-side' ? '#1e3a8a' : '#0c1222',
-              borderColor: viewMode === 'side-by-side' ? '#3b82f6' : '#233148',
-              color: viewMode === 'side-by-side' ? '#93c5fd' : '#94a3b8'
+              backgroundColor: viewMode === 'side-by-side' ? '#1e3a8a' : 'var(--bg-panel)',
+              borderColor: viewMode === 'side-by-side' ? 'var(--theme-secondary-strong)' : 'var(--border-color)',
+              color: viewMode === 'side-by-side' ? '#93c5fd' : 'var(--text-secondary)'
             }}
           >
             <Columns size={13} /> Side-by-Side
@@ -103,7 +103,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
             overflow: 'hidden',
             cursor: 'ew-resize',
             userSelect: 'none',
-            border: '1px solid #233148',
+            border: '1px solid var(--border-color)',
             backgroundColor: '#070b14'
           }}
         >
@@ -194,7 +194,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
               padding: '4px 10px',
               borderRadius: '6px',
               backgroundColor: 'rgba(15, 23, 42, 0.85)',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
+              border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 40%, transparent)',
               color: '#93c5fd',
               fontSize: '0.72rem',
               fontWeight: 700,
@@ -230,8 +230,8 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
       ) : (
         /* Side-by-Side Mode */
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #233148', backgroundColor: '#070b14' }}>
-            <div style={{ padding: '8px 12px', backgroundColor: '#0c1222', borderBottom: '1px solid #1e293b', fontSize: '0.74rem', fontWeight: 700, color: '#93c5fd' }}>
+          <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', backgroundColor: '#070b14' }}>
+            <div style={{ padding: '8px 12px', backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid #1e293b', fontSize: '0.74rem', fontWeight: 700, color: '#93c5fd' }}>
               {beforeLabel}
             </div>
             <img 
@@ -242,8 +242,8 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
             />
           </div>
 
-          <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #233148', backgroundColor: '#070b14' }}>
-            <div style={{ padding: '8px 12px', backgroundColor: '#0c1222', borderBottom: '1px solid #1e293b', fontSize: '0.74rem', fontWeight: 700, color: '#34d399' }}>
+          <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', backgroundColor: '#070b14' }}>
+            <div style={{ padding: '8px 12px', backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid #1e293b', fontSize: '0.74rem', fontWeight: 700, color: '#34d399' }}>
               {afterLabel}
             </div>
             <img 

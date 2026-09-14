@@ -109,8 +109,39 @@ export interface Trade {
   screenshots?: string[];
   status: TradeStatus;
   exits?: TradeExit[];
+  customFields?: Record<string, string | number>;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TradePrefill {
+  symbol?: string;
+  direction?: TradeDirection;
+  setup?: string;
+  entryPrice?: number;
+  stopLoss?: number;
+  takeProfit?: number;
+  notes?: string;
+}
+
+export interface TradeAuditChange {
+  field: string;
+  from: unknown;
+  to: unknown;
+}
+
+export interface TradeAuditEntry {
+  id: string;
+  tradeId: string;
+  at: string;
+  changes: TradeAuditChange[];
+}
+
+export interface CustomFieldDef {
+  id: string;
+  label: string;
+  type: 'text' | 'number' | 'select';
+  options?: string[];
 }
 
 export interface TradeFilter {

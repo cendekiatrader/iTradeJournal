@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Command, Keyboard, Zap, Sparkles } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -13,29 +14,36 @@ interface ShortcutItem {
 }
 
 const SHORTCUTS: ShortcutItem[] = [
-  { key: 'N', description: 'Buka form Log New Trade (Catat Posisi Baru)', category: 'Actions' },
-  { key: 'Ctrl + Enter', description: 'Simpan / Submit form trade langsung', category: 'Actions' },
-  { key: 'Esc', description: 'Tutup modal / popup / fullscreen', category: 'General' },
-  { key: '?', description: 'Buka panduan Keyboard Shortcuts ini', category: 'General' },
-  { key: 'D', description: 'Pindah ke tab Performance Dashboard', category: 'Navigation' },
-  { key: 'W', description: 'Pindah ke tab Multi-Screen Workspace', category: 'Navigation' },
-  { key: 'J', description: 'Pindah ke tab Trade Log (Journal)', category: 'Navigation' },
-  { key: 'P', description: 'Pindah ke tab Playbook', category: 'Navigation' },
-  { key: 'A', description: 'Pindah ke tab Analytics & Setups', category: 'Navigation' },
-  { key: 'E', description: 'Pindah ke tab Economic Calendar & News', category: 'Navigation' },
-  { key: 'C', description: 'Pindah ke tab Position Size & Calculator', category: 'Navigation' },
-  { key: 'M', description: 'Pindah ke tab Account Manager', category: 'Navigation' }
+  { key: 'Ctrl + K', description: 'Open the command palette (pages, trades, actions)', category: 'General' },
+  { key: 'N', description: 'Log a new trade', category: 'Actions' },
+  { key: 'Ctrl + Enter', description: 'Submit the active form instantly', category: 'Actions' },
+  { key: 'J / K', description: 'Move between rows in the Trade Log table', category: 'Actions' },
+  { key: 'Enter', description: 'Open the focused trade row', category: 'Actions' },
+  { key: 'X', description: 'Select / deselect the focused trade row', category: 'Actions' },
+  { key: 'Esc', description: 'Close modal / popup / command palette', category: 'General' },
+  { key: '?', description: 'Open this keyboard shortcuts guide', category: 'General' },
+  { key: 'D', description: 'Go to the Performance Dashboard', category: 'Navigation' },
+  { key: 'W', description: 'Go to the Multi-Screen Workspace', category: 'Navigation' },
+  { key: 'J', description: 'Go to the Trade Log (Journal)', category: 'Navigation' },
+  { key: 'P', description: 'Go to the Playbook', category: 'Navigation' },
+  { key: 'Q', description: 'Go to the Setup Queue', category: 'Navigation' },
+  { key: 'A', description: 'Go to Analytics & Setups', category: 'Navigation' },
+  { key: 'E', description: 'Go to the Economic Calendar & News', category: 'Navigation' },
+  { key: 'C', description: 'Go to the Position Size Calculator', category: 'Navigation' },
+  { key: 'M', description: 'Go to the Account Manager', category: 'Navigation' }
 ];
 
 export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen, onClose }) => {
+  const modalRef = useModalA11y(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const categories = ['Actions', 'Navigation', 'General'] as const;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div 
-        className="modal-container" 
+      <div ref={modalRef} 
+        className="modal-container" role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts" tabIndex={-1} 
         onClick={(e) => e.stopPropagation()} 
         style={{ maxWidth: '540px' }}
       >
@@ -46,7 +54,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+              background: 'linear-gradient(135deg, var(--theme-secondary-strong), #6366f1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -54,7 +62,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
               <Keyboard size={20} color="#ffffff" />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 Pro Trader Keyboard Shortcuts
               </h2>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
@@ -63,7 +71,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
             </div>
           </div>
 
-          <button onClick={onClose} className="btn btn-ghost btn-icon btn-sm">
+          <button onClick={onClose} className="btn btn-ghost btn-icon btn-sm" aria-label="Close dialog">
             <X size={18} />
           </button>
         </div>
@@ -106,7 +114,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                           borderBottom: idx === items.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)'
                         }}
                       >
-                        <span style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-strong)' }}>
                           {item.description}
                         </span>
 

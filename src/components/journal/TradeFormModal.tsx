@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { 
   Trade, 
@@ -8,7 +8,8 @@ import {
   TradingSession, 
   StrategyType, 
   EmotionState,
-  TradeExit
+  TradeExit,
+  TradePrefill
 } from '../../types';
 import { 
   X, 
@@ -31,12 +32,16 @@ import {
 } from 'lucide-react';
 import { formatDateTimeDDMMYYYY, formatDuration } from '../../utils/formatters';
 import { RichTextEditor } from '../common/RichTextEditor';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface TradeFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialTrade?: Trade | null;
+  prefill?: TradePrefill | null;
 }
+
+const DRAFT_KEY = 'itrade_trade_draft_v1';
 
 const COMMON_SYMBOLS = ['XAUUSD', 'EURUSD', 'BTCUSDT', 'ETHUSDT', 'US30', 'NAS100', 'GBPJPY', 'SOLUSDT', 'NVDA'];
 
@@ -80,9 +85,10 @@ const EMOTIONS: EmotionState[] = [
 export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   isOpen,
   onClose,
-  initialTrade
+  initialTrade,
+  prefill
 }) => {
-  const { accounts, activeAccountId, playbooks, addTrade, updateTrade, showToast } = useJournal();
+  const { accounts, activeAccountId, playbooks, trades, addTrade, updateTrade, showToast, customFieldDefs } = useJournal();
 
   const [accountId, setAccountId] = useState(activeAccountId === 'all' ? (accounts[0]?.id || '') : activeAccountId);
   const [symbol, setSymbol] = useState('XAUUSD');
@@ -119,6 +125,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
   const [showQuickSizer, setShowQuickSizer] = useState<boolean>(false);
   const [enablePartialExits, setEnablePartialExits] = useState<boolean>(false);
   const [partialExits, setPartialExits] = useState<TradeExit[]>([]);
+  const [customFields, setCustomFields] = useState<Record<string, string | number>>({});
+  const [hasDraft, setHasDraft] = useState(false);
 
   useEffect(() => {
     if (initialTrade) {
@@ -144,6 +152,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       setConfluences(initialTrade.confluences || []);
       setNotes(initialTrade.notes || '');
       setLessons(initialTrade.lessons || '');
+      setCustomFields((initialTrade.customFields as Record<string, string | number>) || {});
       setScreenshotBefore(initialTrade.screenshots?.[0] || '');
       setScreenshotAfter(initialTrade.screenshots?.[1] || '');
       if (initialTrade.exits && initialTrade.exits.length > 0) {
@@ -159,8 +168,97 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       setScreenshotAfter('');
       setEnablePartialExits(false);
       setPartialExits([]);
+      setCustomFields({});
+      setHasDraft(false);
+
+      // Restore an unfinished draft (autosave) if present
+      let restoredNotes = '';
+      try {
+        const rawDraft = localStorage.getItem(DRAFT_KEY);
+        if (rawDraft) {
+          const d = JSON.parse(rawDraft) as Record<string, unknown>;
+          if (d.symbol) setSymbol(String(d.symbol));
+          if (d.assetClass) setAssetClass(d.assetClass as AssetClass);
+          if (d.direction) setDirection(d.direction as TradeDirection);
+          if (d.timeframe) setTimeframe(String(d.timeframe));
+          if (typeof d.entryPrice === 'number') setEntryPrice(d.entryPrice);
+          if (typeof d.exitPrice === 'number') setExitPrice(d.exitPrice);
+          if (typeof d.stopLoss === 'number') setStopLoss(d.stopLoss);
+          if (typeof d.takeProfit === 'number') setTakeProfit(d.takeProfit);
+          if (typeof d.quantity === 'number') setQuantity(d.quantity);
+          if (typeof d.pnl === 'number') setPnl(d.pnl);
+          if (typeof d.pips === 'number') setPips(d.pips);
+          if (d.session) setSession(d.session as TradingSession);
+          if (d.setup) setSetup(d.setup as StrategyType);
+          if (d.emotion) setEmotion(d.emotion as EmotionState);
+          if (typeof d.rulesFollowed === 'boolean') setRulesFollowed(d.rulesFollowed);
+          if (Array.isArray(d.confluences)) setConfluences(d.confluences as string[]);
+          if (typeof d.notes === 'string') restoredNotes = d.notes;
+          if (typeof d.lessons === 'string') setLessons(d.lessons);
+          if (d.customFields && typeof d.customFields === 'object') {
+            setCustomFields(d.customFields as Record<string, string | number>);
+          }
+          setHasDraft(true);
+        }
+      } catch {
+        /* ignore corrupt draft */
+      }
+
+      // Attach content shared to the app (Android share target)
+      const sharedNote = localStorage.getItem('itrade_share_note');
+      if (sharedNote) {
+        restoredNotes = restoredNotes ? `${restoredNotes}\n${sharedNote}` : sharedNote;
+        localStorage.removeItem('itrade_share_note');
+      }
+
+      // Queue prefill wins over draft for the fields it provides
+      if (prefill) {
+        if (prefill.symbol) setSymbol(prefill.symbol);
+        if (prefill.direction) setDirection(prefill.direction);
+        if (prefill.setup) setSetup(prefill.setup);
+        if (typeof prefill.entryPrice === 'number') setEntryPrice(prefill.entryPrice);
+        if (typeof prefill.stopLoss === 'number') setStopLoss(prefill.stopLoss);
+        if (typeof prefill.takeProfit === 'number') setTakeProfit(prefill.takeProfit);
+        if (prefill.notes) {
+          restoredNotes = restoredNotes ? `${restoredNotes}\n${prefill.notes}` : prefill.notes;
+        }
+      }
+      setNotes(restoredNotes);
     }
-  }, [initialTrade, activeAccountId, accounts, isOpen]);
+  }, [initialTrade, activeAccountId, accounts, isOpen, prefill]);
+
+  // ---- Draft autosave: keep an unfinished new-entry safe (A5) ----
+  const draftSnapshot = useMemo(() => ({
+    symbol, assetClass, direction, timeframe, entryPrice, exitPrice, stopLoss, takeProfit,
+    quantity, pnl, pips, session, setup, emotion, rulesFollowed, confluences, notes, lessons, customFields
+  }), [symbol, assetClass, direction, timeframe, entryPrice, exitPrice, stopLoss, takeProfit, quantity, pnl, pips, session, setup, emotion, rulesFollowed, confluences, notes, lessons, customFields]);
+
+  useEffect(() => {
+    if (!isOpen || initialTrade) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draftSnapshot));
+      } catch {
+        /* ignore quota errors */
+      }
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [isOpen, initialTrade, draftSnapshot]);
+
+  // ---- Contextual edge (B5): historical performance of this setup + session combo ----
+  const contextEdge = useMemo(() => {
+    const closed = trades.filter(
+      (tr) =>
+        (tr.status === 'WIN' || tr.status === 'LOSS' || tr.status === 'BREAKEVEN') &&
+        tr.setup === setup &&
+        tr.session === session
+    );
+    if (closed.length < 5) return null;
+    const wins = closed.filter((tr) => tr.pnl > 0).length;
+    const winRate = (wins / closed.length) * 100;
+    const avgR = closed.reduce((sum, tr) => sum + (tr.rrAchieved || 0), 0) / closed.length;
+    return { count: closed.length, winRate, avgR };
+  }, [trades, setup, session]);
 
   // Auto calculate Quick Lot & Risk Size
   const currentAccount = accounts.find(a => a.id === accountId) || accounts[0];
@@ -306,6 +404,17 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
     return formatDuration((end - start) / (1000 * 60));
   }, [entryDate, exitDate, status]);
 
+  const modalRef = useModalA11y(isOpen, onClose);
+  const [formView, setFormView] = useState<'quick' | 'full'>('full');
+
+  // New entries start in Quick mode (essential fields only); editing starts in Full mode
+  useEffect(() => {
+    if (isOpen) {
+      setFormView(initialTrade ? 'full' : 'quick');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const toggleConfluence = (item: string) => {
@@ -356,6 +465,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       emotion,
       rulesFollowed,
       confluences,
+      customFields,
       notes,
       lessons,
       screenshots: [screenshotBefore, screenshotAfter].filter(Boolean),
@@ -369,25 +479,92 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
       addTrade(tradePayload);
     }
 
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+    setHasDraft(false);
+
     onClose();
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px' }}>
+      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Trade Entry Form" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px' }}>
         {/* Modal Header */}
         <div className="modal-header">
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               {initialTrade ? 'Edit Trade Entry' : 'Log New Trade Execution'}
             </h2>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              Catat data eksekusi trade secara terstruktur dan disiplin
+              Log your execution in a structured, disciplined way
             </span>
           </div>
-          <button onClick={onClose} className="btn btn-ghost btn-icon">
-            <X size={20} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {hasDraft && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-surface)', border: '1px dashed var(--border-color)', borderRadius: '7px', padding: '4px 8px' }}>
+                Draft restored
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      localStorage.removeItem(DRAFT_KEY);
+                    } catch {
+                      /* ignore */
+                    }
+                    setHasDraft(false);
+                    showToast('Draft discarded.', 'info');
+                  }}
+                  style={{ background: 'none', border: 'none', color: 'var(--theme-secondary)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, padding: 0 }}
+                >
+                  Discard
+                </button>
+              </span>
+            )}
+            <div style={{ display: 'flex', backgroundColor: '#0c152a', border: '1px solid #1c273e', borderRadius: '9px', padding: '3px', gap: '2px' }}>
+              <button
+                type="button"
+                aria-pressed={formView === 'quick'}
+                onClick={() => setFormView('quick')}
+                title="Essential fields only — fastest way to log a trade"
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  backgroundColor: formView === 'quick' ? 'var(--theme-secondary-strong)' : 'transparent',
+                  color: formView === 'quick' ? '#ffffff' : 'var(--text-secondary)'
+                }}
+              >
+                Quick
+              </button>
+              <button
+                type="button"
+                aria-pressed={formView === 'full'}
+                onClick={() => setFormView('full')}
+                title="All fields — screenshots, notes, partial exits and confluence checklist"
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  backgroundColor: formView === 'full' ? 'var(--theme-secondary-strong)' : 'transparent',
+                  color: formView === 'full' ? '#ffffff' : 'var(--text-secondary)'
+                }}
+              >
+                Full
+              </button>
+            </div>
+            <button onClick={onClose} className="btn btn-ghost btn-icon" aria-label="Close dialog">
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Modal Form Body */}
@@ -450,7 +627,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   padding: '3px 8px',
                   borderRadius: '6px',
                   backgroundColor: symbol === sym ? '#2563eb' : '#101626',
-                  color: symbol === sym ? '#ffffff' : '#94a3b8',
+                  color: symbol === sym ? '#ffffff' : 'var(--text-secondary)',
                   border: '1px solid #23324d',
                   cursor: 'pointer',
                   fontFamily: 'var(--font-mono)'
@@ -476,8 +653,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                     fontWeight: 700,
                     border: '1px solid',
                     borderColor: direction === 'LONG' ? 'var(--profit-green)' : '#1e293b',
-                    backgroundColor: direction === 'LONG' ? 'rgba(16, 185, 129, 0.15)' : '#080c18',
-                    color: direction === 'LONG' ? 'var(--profit-green)' : '#94a3b8',
+                    backgroundColor: direction === 'LONG' ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-sidebar)',
+                    color: direction === 'LONG' ? 'var(--profit-green)' : 'var(--text-secondary)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -496,8 +673,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                     fontWeight: 700,
                     border: '1px solid',
                     borderColor: direction === 'SHORT' ? 'var(--loss-red)' : '#1e293b',
-                    backgroundColor: direction === 'SHORT' ? 'rgba(239, 68, 68, 0.15)' : '#080c18',
-                    color: direction === 'SHORT' ? 'var(--loss-red)' : '#94a3b8',
+                    backgroundColor: direction === 'SHORT' ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-sidebar)',
+                    color: direction === 'SHORT' ? 'var(--loss-red)' : 'var(--text-secondary)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -530,9 +707,9 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       fontSize: '0.72rem',
                       fontWeight: 700,
                       border: '1px solid',
-                      borderColor: status === st ? '#3b82f6' : '#1e293b',
-                      backgroundColor: status === st ? '#1e293b' : '#080c18',
-                      color: status === st ? '#60a5fa' : '#94a3b8',
+                      borderColor: status === st ? 'var(--theme-secondary-strong)' : '#1e293b',
+                      backgroundColor: status === st ? '#1e293b' : 'var(--bg-sidebar)',
+                      color: status === st ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                       cursor: 'pointer',
                       textAlign: 'center'
                     }}
@@ -544,6 +721,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </div>
           </div>
 
+          {formView === 'full' && (<>
           {/* Opened At & Closed At Execution Timestamps */}
           <div style={{ backgroundColor: '#070b18', padding: '14px', borderRadius: '10px', border: '1px solid #1c283f', marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -552,7 +730,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 <span>Execution Timeline</span>
               </div>
               {holdingDuration && (
-                <span className="badge" style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.3)', textTransform: 'none' }}>
+                <span className="badge" style={{ backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)', color: 'var(--theme-secondary)', border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)', textTransform: 'none' }}>
                   ⏱️ Holding Duration: {holdingDuration}
                 </span>
               )}
@@ -562,7 +740,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               <div className="input-group" style={{ margin: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <label className="input-label" style={{ margin: 0 }}>Opened At *</label>
-                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
                     {formatDateTimeDDMMYYYY(entryDate)}
                   </span>
                 </div>
@@ -579,7 +757,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <label className="input-label" style={{ margin: 0 }}>Closed At {status === 'OPEN' ? '(Optional - Trade Open)' : '*'}</label>
                   {status !== 'OPEN' && (
-                    <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
                       {formatDateTimeDDMMYYYY(exitDate)}
                     </span>
                   )}
@@ -596,6 +774,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               </div>
             </div>
           </div>
+
+          </>)}
 
           {/* Quick Lot & Risk Auto-Sizer Trigger Bar */}
           <div style={{
@@ -615,19 +795,19 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 width: '26px',
                 height: '26px',
                 borderRadius: '6px',
-                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#60a5fa'
+                color: 'var(--theme-secondary)'
               }}>
                 <Calculator size={15} />
               </div>
               <div>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f8fafc' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   Risk & Position Auto-Sizer
                 </span>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block' }}>
                   Saldo: ${currentAccBalance.toLocaleString()} • Risiko: ${calculatedRiskAmount.toFixed(2)} ({riskPercentPreset}%)
                 </span>
               </div>
@@ -646,8 +826,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                     fontWeight: 700,
                     borderRadius: '6px',
                     backgroundColor: riskPercentPreset === pct ? '#2563eb' : '#0c152a',
-                    border: riskPercentPreset === pct ? '1px solid #3b82f6' : '1px solid #1c273e',
-                    color: riskPercentPreset === pct ? '#ffffff' : '#94a3b8',
+                    border: riskPercentPreset === pct ? '1px solid var(--theme-secondary-strong)' : '1px solid #1c273e',
+                    color: riskPercentPreset === pct ? '#ffffff' : 'var(--text-secondary)',
                     cursor: 'pointer'
                   }}
                 >
@@ -682,7 +862,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Entry Price *</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 step="any"
                 value={entryPrice}
                 onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
@@ -694,7 +874,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Exit Price</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 step="any"
                 value={exitPrice}
                 onChange={(e) => setExitPrice(parseFloat(e.target.value) || 0)}
@@ -705,7 +885,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Stop Loss</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 step="any"
                 value={stopLoss}
                 onChange={(e) => setStopLoss(parseFloat(e.target.value) || 0)}
@@ -716,7 +896,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Take Profit</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 step="any"
                 value={takeProfit}
                 onChange={(e) => setTakeProfit(parseFloat(e.target.value) || 0)}
@@ -729,7 +909,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 {assetClass === 'Crypto' ? 'Units / Quantity *' : assetClass === 'Indices' ? 'Contracts / Quantity *' : 'Lots / Quantity *'}
               </label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 step="any"
                 value={quantity}
                 onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
@@ -741,7 +921,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Realized Net PnL ($) *</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 step="any"
                 value={pnl}
                 onChange={(e) => setPnl(parseFloat(e.target.value) || 0)}
@@ -752,6 +932,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </div>
           </div>
 
+          {formView === 'full' && (<>
           {/* Partial Close / Multi-Exit Section */}
           <div style={{
             backgroundColor: '#070c1a',
@@ -762,12 +943,12 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: enablePartialExits ? '12px' : 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Layers size={16} color="#60a5fa" />
+                <Layers size={16} color="var(--theme-secondary)" />
                 <div>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     Partial Close / Scaling Out (TP1, TP2, Runner)
                   </span>
-                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block' }}>
                     Input penutupan lot bertahap & hitung otomatis weighted avg exit price & real RR
                   </span>
                 </div>
@@ -816,9 +997,9 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
 
                     {/* Exit Price */}
                     <div>
-                      <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>Exit Price</span>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', display: 'block' }}>Exit Price</span>
                       <input
-                        type="number"
+                        type="number" inputMode="decimal"
                         step="any"
                         value={exit.exitPrice || ''}
                         onChange={(e) => handleUpdatePartialExit(exit.id, 'exitPrice', parseFloat(e.target.value) || 0)}
@@ -830,11 +1011,11 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
 
                     {/* Quantity (Lot) */}
                     <div>
-                      <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', display: 'block' }}>
                         {assetClass === 'Crypto' ? 'Units' : 'Lots'}
                       </span>
                       <input
-                        type="number"
+                        type="number" inputMode="decimal"
                         step="any"
                         value={exit.quantity || ''}
                         onChange={(e) => handleUpdatePartialExit(exit.id, 'quantity', e.target.value)}
@@ -846,10 +1027,10 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
 
                     {/* Percentage (%) */}
                     <div>
-                      <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>Portion (%)</span>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', display: 'block' }}>Portion (%)</span>
                       <div style={{ position: 'relative' }}>
                         <input
-                          type="number"
+                          type="number" inputMode="decimal"
                           step="any"
                           value={exit.percentage || ''}
                           onChange={(e) => handleUpdatePartialExit(exit.id, 'percentage', e.target.value)}
@@ -857,7 +1038,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                           className="input-control font-mono"
                           style={{ fontSize: '0.8rem', padding: '6px 8px' }}
                         />
-                        <span style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.7rem', color: '#64748b' }}>%</span>
+                        <span style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.7rem', color: 'var(--text-muted)' }}>%</span>
                       </div>
                     </div>
 
@@ -868,6 +1049,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       className="btn btn-ghost btn-icon text-loss"
                       style={{ padding: '6px' }}
                       title="Remove TP"
+                      aria-label="Remove TP"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -892,9 +1074,9 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       className="btn btn-sm"
                       style={{
                         fontSize: '0.72rem',
-                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                        color: '#60a5fa',
-                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                        backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)',
+                        color: 'var(--theme-secondary)',
+                        border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px'
@@ -904,18 +1086,20 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                     </button>
                   </div>
 
-                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'flex', gap: '12px' }}>
-                    <span>Closed: <strong style={{ color: totalClosedQuantity === quantity ? 'var(--profit-green)' : '#f8fafc' }}>{totalClosedQuantity} / {quantity}</strong></span>
-                    <span>Remaining: <strong style={{ color: remainingQuantity > 0 ? '#f59e0b' : '#94a3b8' }}>{remainingQuantity}</strong></span>
-                    <span>Weighted Avg Price: <strong style={{ color: '#60a5fa', fontFamily: 'var(--font-mono)' }}>{calculatedWeightedExitPrice}</strong></span>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', display: 'flex', gap: '12px' }}>
+                    <span>Closed: <strong style={{ color: totalClosedQuantity === quantity ? 'var(--profit-green)' : 'var(--text-primary)' }}>{totalClosedQuantity} / {quantity}</strong></span>
+                    <span>Remaining: <strong style={{ color: remainingQuantity > 0 ? '#f59e0b' : 'var(--text-secondary)' }}>{remainingQuantity}</strong></span>
+                    <span>Weighted Avg Price: <strong style={{ color: 'var(--theme-secondary)', fontFamily: 'var(--font-mono)' }}>{calculatedWeightedExitPrice}</strong></span>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
+          </>)}
+
           {/* R:R Preview Banner */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', backgroundColor: 'rgba(59, 130, 246, 0.08)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.2)', marginBottom: '16px', fontSize: '0.78rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent)', borderRadius: '8px', border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)', marginBottom: '16px', fontSize: '0.78rem' }}>
             <span style={{ color: '#93c5fd' }}>
               Planned R:R: <strong style={{ color: '#ffffff', fontFamily: 'var(--font-mono)' }}>1 : {plannedRR}</strong>
             </span>
@@ -926,6 +1110,21 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               )}
             </span>
           </div>
+
+          {contextEdge && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', borderRadius: '10px', backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 25%, transparent)', marginBottom: '14px', flexWrap: 'wrap' }}>
+              <Target size={14} color="var(--theme-secondary)" />
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                Historical edge — <strong style={{ color: 'var(--text-primary)' }}>{setup}</strong> in <strong style={{ color: 'var(--text-primary)' }}>{session}</strong>:{' '}
+                <strong style={{ color: contextEdge.winRate >= 50 ? 'var(--profit-green)' : 'var(--loss-red)', fontFamily: 'var(--font-mono)' }}>
+                  {contextEdge.winRate.toFixed(0)}% win rate
+                </strong>{' '}
+                <span style={{ fontFamily: 'var(--font-mono)' }}>
+                  · avg {contextEdge.avgR >= 0 ? '+' : ''}{contextEdge.avgR.toFixed(2)}R · {contextEdge.count} trades
+                </span>
+              </span>
+            </div>
+          )}
 
           {/* Strategy, Session & Emotion */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '16px' }}>
@@ -1005,6 +1204,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </div>
           </div>
 
+          {formView === 'full' && (<>
           {/* Strategy Confluences Checklist */}
           <div style={{ marginBottom: '16px' }}>
             <label className="input-label" style={{ marginBottom: '8px', display: 'block' }}>
@@ -1023,7 +1223,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       padding: '4px 9px',
                       borderRadius: '6px',
                       backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.2)' : '#070a16',
-                      color: isSelected ? 'var(--profit-green)' : '#94a3b8',
+                      color: isSelected ? 'var(--profit-green)' : 'var(--text-secondary)',
                       border: `1px solid ${isSelected ? 'var(--profit-green)' : '#1e293b'}`,
                       cursor: 'pointer',
                       display: 'flex',
@@ -1058,8 +1258,10 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </div>
           </div>
 
+          </>)}
+
           {/* Rules Followed Switch */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', padding: '10px 14px', backgroundColor: '#070b17', borderRadius: '8px', border: '1px solid #1a2538' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', padding: '10px 14px', backgroundColor: 'var(--bg-sidebar)', borderRadius: '8px', border: '1px solid #1a2538' }}>
             <input
               type="checkbox"
               id="rulesFollowed"
@@ -1067,15 +1269,50 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               onChange={(e) => setRulesFollowed(e.target.checked)}
               style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#10b981' }}
             />
-            <label htmlFor="rulesFollowed" style={{ fontSize: '0.85rem', color: '#f8fafc', cursor: 'pointer' }}>
+            <label htmlFor="rulesFollowed" style={{ fontSize: '0.85rem', color: 'var(--text-primary)', cursor: 'pointer' }}>
               <strong>Followed Trading Plan & Risk Rules</strong> (No impulse revenge or oversized lot)
             </label>
           </div>
 
+          {formView === 'full' && customFieldDefs.length > 0 && (
+            <div style={{ marginBottom: '16px' }}>
+              <label className="input-label" style={{ display: 'block', marginBottom: '8px', fontWeight: 700 }}>Custom Fields</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                {customFieldDefs.map((def) => (
+                  <div className="input-group" style={{ margin: 0 }} key={def.id}>
+                    <label className="input-label">{def.label}</label>
+                    {def.type === 'select' ? (
+                      <select
+                        className="input-control"
+                        value={String(customFields[def.id] ?? '')}
+                        onChange={(e) => setCustomFields((prev) => ({ ...prev, [def.id]: e.target.value }))}
+                      >
+                        <option value="">—</option>
+                        {(def.options || []).map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type={def.type === 'number' ? 'number' : 'text'}
+                        inputMode={def.type === 'number' ? 'decimal' : undefined}
+                        step="any"
+                        className={`input-control${def.type === 'number' ? ' font-mono' : ''}`}
+                        value={customFields[def.id] ?? ''}
+                        onChange={(e) => setCustomFields((prev) => ({ ...prev, [def.id]: e.target.value }))}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {formView === 'full' && (<>
           {/* Dual Chart Screenshots (Before vs After) */}
           <div style={{
             padding: '14px',
-            backgroundColor: '#070b17',
+            backgroundColor: 'var(--bg-sidebar)',
             borderRadius: '12px',
             border: '1px solid #1e293b',
             marginBottom: '16px'
@@ -1129,13 +1366,16 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             </div>
           </div>
 
+          </>)}
+
+          {formView === 'full' && (<>
           {/* Rich Text Editor for Notes & Embedded Screenshots */}
           <div className="input-group" style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
               <label className="input-label" style={{ margin: 0 }}>
                 Trade Notes & Rich Visual Journal (Full Formatting & Image Paste)
               </label>
-              <span style={{ fontSize: '0.72rem', color: '#60a5fa', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--theme-secondary)', fontWeight: 600 }}>
                 Supports Direct Image Paste (Ctrl + V) & File Upload
               </span>
             </div>
@@ -1147,6 +1387,9 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             />
           </div>
 
+          </>)}
+
+          {formView === 'full' && (<>
           {/* Lessons Learned */}
           <div className="input-group" style={{ margin: 0 }}>
             <label className="input-label">Lessons Learned & Psychological Review</label>
@@ -1158,6 +1401,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               style={{ minHeight: '70px' }}
             />
           </div>
+
+          </>)}
 
           {/* Modal Footer Buttons */}
           <div className="modal-footer" style={{ marginTop: '24px' }}>

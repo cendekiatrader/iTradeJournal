@@ -19,10 +19,10 @@ export const StatCard: React.FC<StatCardProps> = ({
   subValue,
   subValueType = 'neutral',
   icon: Icon,
-  iconColor = '#3b82f6',
-  iconBg = 'rgba(59, 130, 246, 0.12)',
+  iconColor = 'var(--theme-secondary-strong)',
+  iconBg = 'color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent)',
   progress,
-  progressColor = '#3b82f6'
+  progressColor = 'var(--theme-secondary-strong)'
 }) => {
   const getSubColor = () => {
     switch (subValueType) {
@@ -45,7 +45,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             fontWeight: 700,
             fontFamily: 'var(--font-mono)',
             marginTop: '4px',
-            color: '#f8fafc',
+            color: 'var(--text-primary)',
             letterSpacing: '-0.02em'
           }}>
             {value}

@@ -37,7 +37,7 @@ export const WinrateRRRMatrix: React.FC = () => {
     } else {
       return {
         backgroundColor: 'rgba(148, 163, 184, 0.05)',
-        color: '#94a3b8',
+        color: 'var(--text-secondary)',
         border: '1px solid rgba(148, 163, 184, 0.1)',
       };
     }
@@ -48,7 +48,7 @@ export const WinrateRRRMatrix: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 6px 0', color: 'var(--text-main)' }}>
-            <Activity size={20} color="#3b82f6" />
+            <Activity size={20} color="var(--theme-secondary-strong)" />
             Winrate & RRR Sensitivity Threshold Matrix
           </h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, maxWidth: '600px', lineHeight: 1.5 }}>
@@ -57,11 +57,11 @@ export const WinrateRRRMatrix: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
             <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'rgba(16, 185, 129, 0.4)', border: '1px solid rgba(16, 185, 129, 0.6)' }}></span>
             Profit Edge
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
             <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'rgba(239, 68, 68, 0.3)', border: '1px solid rgba(239, 68, 68, 0.5)' }}></span>
             Bleeding Edge
           </div>
@@ -117,8 +117,8 @@ export const WinrateRRRMatrix: React.FC = () => {
         </table>
       </div>
 
-      <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'rgba(59, 130, 246, 0.05)', borderRadius: '10px', border: '1px solid rgba(59, 130, 246, 0.15)', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-        <Zap size={18} color="#60a5fa" style={{ flexShrink: 0, marginTop: '2px' }} />
+      <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 5%, transparent)', borderRadius: '10px', border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+        <Zap size={18} color="var(--theme-secondary)" style={{ flexShrink: 0, marginTop: '2px' }} />
         <div style={{ fontSize: '0.8rem', color: '#93c5fd', lineHeight: 1.6 }}>
           <strong>Edge Sustainability Insight:</strong> Formula ekspektasi dihitung dari <code>E = (Winrate × RRR) - Lossrate</code>. Area merah menunjukkan kombinasi Winrate/RRR yang akan menggerus modal Anda secara perlahan (*Bleeding Edge*), sedangkan area hijau tua menunjukkan *Cash Cow Zone* (Ekspektasi tinggi per trade).
         </div>

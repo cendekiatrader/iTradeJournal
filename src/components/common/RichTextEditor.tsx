@@ -175,6 +175,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Undo (Ctrl+Z)"
           style={{ padding: '5px' }}
+          aria-label="Undo (Ctrl+Z)"
         >
           <Undo size={14} color="#94a3b8" />
         </button>
@@ -184,6 +185,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Redo (Ctrl+Y)"
           style={{ padding: '5px' }}
+          aria-label="Redo (Ctrl+Y)"
         >
           <Redo size={14} color="#94a3b8" />
         </button>
@@ -228,6 +230,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Bold (Ctrl+B)"
           style={{ padding: '5px' }}
+          aria-label="Bold (Ctrl+B)"
         >
           <Bold size={14} color="#cbd5e1" />
         </button>
@@ -237,6 +240,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Italic (Ctrl+I)"
           style={{ padding: '5px' }}
+          aria-label="Italic (Ctrl+I)"
         >
           <Italic size={14} color="#cbd5e1" />
         </button>
@@ -246,6 +250,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Underline (Ctrl+U)"
           style={{ padding: '5px' }}
+          aria-label="Underline (Ctrl+U)"
         >
           <Underline size={14} color="#cbd5e1" />
         </button>
@@ -255,6 +260,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Strikethrough"
           style={{ padding: '5px' }}
+          aria-label="Strikethrough"
         >
           <Strikethrough size={14} color="#cbd5e1" />
         </button>
@@ -268,6 +274,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Bullet List"
           style={{ padding: '5px' }}
+          aria-label="Bullet List"
         >
           <List size={14} color="#cbd5e1" />
         </button>
@@ -277,6 +284,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Numbered List"
           style={{ padding: '5px' }}
+          aria-label="Numbered List"
         >
           <ListOrdered size={14} color="#cbd5e1" />
         </button>
@@ -286,6 +294,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="btn btn-ghost btn-icon btn-sm"
           title="Quote Block"
           style={{ padding: '5px' }}
+          aria-label="Quote Block"
         >
           <Quote size={14} color="#cbd5e1" />
         </button>

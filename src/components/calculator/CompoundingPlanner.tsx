@@ -66,8 +66,8 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Parameter Sliders */}
       <div className="card" style={{ padding: '20px' }}>
-        <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#f8fafc', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Sliders size={18} color="#3b82f6" />
+        <div style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Sliders size={18} color="var(--theme-secondary-strong)" />
           <span>Pengaturan Target Compounding & Withdrawal</span>
         </div>
 
@@ -75,8 +75,8 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           {/* Starting Principal */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-              <span style={{ color: '#94a3b8' }}>Modal Awal (Starting Capital):</span>
-              <span style={{ fontWeight: 700, color: '#f8fafc', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>Modal Awal (Starting Capital):</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
                 {formatCurrency(startingPrincipal, currency)}
               </span>
             </div>
@@ -87,14 +87,14 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
               step={500}
               value={startingPrincipal}
               onChange={(e) => setStartingPrincipal(Number(e.target.value))}
-              style={{ width: '100%', accentColor: '#3b82f6' }}
+              style={{ width: '100%', accentColor: 'var(--theme-secondary-strong)' }}
             />
           </div>
 
           {/* Return Rate % per Period */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-              <span style={{ color: '#94a3b8' }}>Target Profit per Bulan (%):</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Target Profit per Bulan (%):</span>
               <span style={{ fontWeight: 700, color: '#34d399', fontFamily: 'var(--font-mono)' }}>
                 +{returnRate}% / bln
               </span>
@@ -113,7 +113,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           {/* Duration in Months */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-              <span style={{ color: '#94a3b8' }}>Durasi Periode (Bulan):</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Durasi Periode (Bulan):</span>
               <span style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)' }}>
                 {periodsCount} Bulan
               </span>
@@ -132,7 +132,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           {/* Profit Withdrawal % */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-              <span style={{ color: '#94a3b8' }}>Rencana Tarik Profit (% WD):</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Rencana Tarik Profit (% WD):</span>
               <span style={{ fontWeight: 700, color: '#f59e0b', fontFamily: 'var(--font-mono)' }}>
                 {withdrawalRate}% WD
               </span>
@@ -153,7 +153,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
       {/* Summary KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
         <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), #090e1c)' }}>
-          <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Saldo Akhir Portofolio</div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Saldo Akhir Portofolio</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>
             {formatCurrency(tableData.finalBalance, currency)}
           </div>
@@ -162,32 +162,32 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           </div>
         </div>
 
-        <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), #090e1c)' }}>
-          <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Total Uang Masuk Bank</div>
+        <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent), #090e1c)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Uang Masuk Bank</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#38bdf8', marginTop: '4px' }}>
             {formatCurrency(tableData.totalWithdrawn, currency)}
           </div>
-          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
             Total Cash Withdrawal
           </div>
         </div>
 
         <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08), #090e1c)' }}>
-          <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Total Profit Tercipta</div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Profit Tercipta</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fbbf24', marginTop: '4px' }}>
             {formatCurrency(tableData.totalProfit, currency)}
           </div>
-          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
             Gross Profit Generated
           </div>
         </div>
 
         <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.08), #090e1c)' }}>
-          <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Multiple Factor</div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Multiple Factor</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#c084fc', marginTop: '4px' }}>
             {tableData.multiplier.toFixed(2)}x
           </div>
-          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
             Lipat Ganda Modal Awal
           </div>
         </div>
@@ -197,10 +197,10 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
       <div className="card" style={{ padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc' }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               Roadmap Pertumbuhan Saldo Bulan per Bulan
             </h3>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
               Simulasi compounding otomatis dengan target +{returnRate}% per bulan
             </span>
           </div>
@@ -209,7 +209,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #1e293b', color: '#94a3b8', textAlign: 'left' }}>
+              <tr style={{ borderBottom: '1px solid #1e293b', color: 'var(--text-secondary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 8px' }}>Bulan</th>
                 <th style={{ padding: '10px 8px' }}>Saldo Awal</th>
                 <th style={{ padding: '10px 8px', color: '#34d399' }}>Profit (+{returnRate}%)</th>
@@ -224,16 +224,16 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
                   <td style={{ padding: '10px 8px', fontWeight: 700, color: '#38bdf8' }}>
                     Bulan ke-{row.period}
                   </td>
-                  <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: '#cbd5e1' }}>
+                  <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                     {formatCurrency(row.startBalance, currency)}
                   </td>
                   <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: '#10b981', fontWeight: 600 }}>
                     +{formatCurrency(row.grossProfit, currency)}
                   </td>
-                  <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: row.withdrawal > 0 ? '#fbbf24' : '#64748b' }}>
+                  <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: row.withdrawal > 0 ? '#fbbf24' : 'var(--text-muted)' }}>
                     {row.withdrawal > 0 ? formatCurrency(row.withdrawal, currency) : '-'}
                   </td>
-                  <td style={{ padding: '10px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#f8fafc' }}>
+                  <td style={{ padding: '10px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {formatCurrency(row.endBalance, currency)}
                   </td>
                   <td style={{ padding: '10px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: '#38bdf8', fontWeight: 600 }}>

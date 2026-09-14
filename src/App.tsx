@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { JournalProvider, useJournal } from './context/JournalContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar, NavTab } from './components/Sidebar';
 import { DashboardView } from './components/dashboard/DashboardView';
-import { CalendarView } from './components/calendar/CalendarView';
 import { JournalView } from './components/journal/JournalView';
-import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { AccountsView } from './components/accounts/AccountsView';
 import { RiskCalculatorView } from './components/calculator/RiskCalculatorView';
 import { TradeFormModal } from './components/journal/TradeFormModal';
@@ -18,14 +16,41 @@ import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
-import { EconomicCalendarView } from './components/news/EconomicCalendarView';
-import { PlaybookView } from './components/playbook/PlaybookView';
 import { QuickRiskDock } from './components/calculator/QuickRiskDock';
-import { WorkspaceView } from './components/workspace/WorkspaceView';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
+import { CommandPalette } from './components/common/CommandPalette';
+import { ConfirmProvider } from './components/common/ConfirmDialog';
+import { ProductTour } from './components/common/ProductTour';
+import { PWAUpdatePrompt } from './components/common/PWAUpdatePrompt';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { ThemeSelectorModal } from './components/common/ThemeSelectorModal';
+import { MobileNav } from './components/MobileNav';
+import { SetupQueueView } from './components/queue/SetupQueueView';
+import { ReviewView } from './components/review/ReviewView';
+import { TradePrefill } from './types';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
+
+const CalendarView = lazy(() => import('./components/calendar/CalendarView').then((m) => ({ default: m.CalendarView })));
+const AnalyticsView = lazy(() => import('./components/analytics/AnalyticsView').then((m) => ({ default: m.AnalyticsView })));
+const EconomicCalendarView = lazy(() => import('./components/news/EconomicCalendarView').then((m) => ({ default: m.EconomicCalendarView })));
+const PlaybookView = lazy(() => import('./components/playbook/PlaybookView').then((m) => ({ default: m.PlaybookView })));
+const WorkspaceView = lazy(() => import('./components/workspace/WorkspaceView').then((m) => ({ default: m.WorkspaceView })));
+
+const ViewLoading: React.FC = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '90px 20px', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
+    <div style={{
+      width: '18px',
+      height: '18px',
+      border: '2px solid var(--border-color)',
+      borderTopColor: 'var(--theme-primary)',
+      borderRadius: '50%',
+      animation: 'spin 0.8s linear infinite'
+    }} />
+    Loading view…
+  </div>
+);
 
 const MainApp: React.FC = () => {
   const { user } = useAuth();
@@ -41,6 +66,10 @@ const MainApp: React.FC = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [themeModalOpen, setThemeModalOpen] = useState(false);
+  const [queuePrefill, setQueuePrefill] = useState<TradePrefill | null>(null);
   
   // Public Portfolio Route (#/u/username or ?u=username)
   const [publicUsername, setPublicUsername] = useState<string | null>(() => {
@@ -52,13 +81,27 @@ const MainApp: React.FC = () => {
     return params.get('u') || null;
   });
 
+  // Mentor Review Route (#/review/token)
+  const [reviewToken, setReviewToken] = useState<string | null>(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#/review/')) {
+      return hash.replace('#/review/', '').split('?')[0];
+    }
+    return null;
+  });
+
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-      if (hash.startsWith('#/u/')) {
+      if (hash.startsWith('#/review/')) {
+        setReviewToken(hash.replace('#/review/', '').split('?')[0]);
+        setPublicUsername(null);
+      } else if (hash.startsWith('#/u/')) {
         setPublicUsername(hash.replace('#/u/', '').split('?')[0]);
+        setReviewToken(null);
       } else {
         setPublicUsername(null);
+        setReviewToken(null);
       }
     };
     window.addEventListener('hashchange', handleHashChange);
@@ -82,6 +125,13 @@ const MainApp: React.FC = () => {
         if (submitBtn) {
           submitBtn.click();
         }
+        return;
+      }
+
+      // Ctrl/Cmd + K opens the command palette (works even while typing)
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setPaletteOpen(prev => !prev);
         return;
       }
 
@@ -118,6 +168,9 @@ const MainApp: React.FC = () => {
       } else if (e.key === 'm' || e.key === 'M') {
         e.preventDefault();
         setActiveTab('accounts');
+      } else if (e.key === 'q' || e.key === 'Q') {
+        e.preventDefault();
+        setActiveTab('queue');
       } else if (e.key === 'Escape') {
         setTradeFormOpen(false);
         setDetailTrade(null);
@@ -131,7 +184,7 @@ const MainApp: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const { deleteTrade, accountsMap, accounts, isLoadingCloud } = useJournal();
+  const { deleteTrade, accountsMap, accounts, isLoadingCloud, showToast, trades } = useJournal();
   const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(() => {
     return localStorage.getItem('itrade_onboarding_dismissed') === 'true';
   });
@@ -157,6 +210,7 @@ const MainApp: React.FC = () => {
       setAccountFormOpen(true);
       return;
     }
+    setQueuePrefill(null);
     setEditingTrade(null);
     setTradeFormOpen(true);
   };
@@ -170,6 +224,16 @@ const MainApp: React.FC = () => {
     setDetailTrade(trade);
   };
 
+  // Keep the open trade-detail modal in sync when the trade object changes (e.g. revert)
+  useEffect(() => {
+    if (!detailTrade) return;
+    const fresh = trades.find((t) => t.id === detailTrade.id);
+    if (fresh && fresh !== detailTrade) {
+      setDetailTrade(fresh);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trades]);
+
   const handleOpenNewAccount = () => {
     setEditingAccount(null);
     setAccountFormOpen(true);
@@ -180,7 +244,62 @@ const MainApp: React.FC = () => {
     setAccountFormOpen(true);
   };
 
+  // PWA shortcut & share-target deep links (#new-trade, #calculator, #queue, share text)
+  useEffect(() => {
+    const applyDeepLink = () => {
+      const hash = window.location.hash;
+      const params = new URLSearchParams(window.location.search);
+
+      if (hash === '#new-trade' || params.get('action') === 'new-trade') {
+        handleOpenNewTrade();
+        window.history.replaceState(null, '', window.location.pathname);
+      } else if (hash === '#calculator') {
+        setActiveTab('calculator');
+        window.history.replaceState(null, '', window.location.pathname);
+      } else if (hash === '#queue') {
+        setActiveTab('queue');
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+
+      const sharedParts = [params.get('share_title'), params.get('share_text'), params.get('share_url')].filter(Boolean);
+      if (sharedParts.length > 0) {
+        localStorage.setItem('itrade_share_note', sharedParts.join('\n'));
+        showToast('Shared content saved — it will attach to your next trade note.', 'info');
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    };
+    applyDeepLink();
+    window.addEventListener('hashchange', applyDeepLink);
+    return () => window.removeEventListener('hashchange', applyDeepLink);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts.length]);
+
+  // First-run product tour (after onboarding is done)
+  useEffect(() => {
+    if (!user || accounts.length === 0 || isLoadingCloud) return;
+    if (localStorage.getItem('itrade_tour_done') === 'true') return;
+    const timer = setTimeout(() => setTourOpen(true), 1500);
+    return () => clearTimeout(timer);
+  }, [user, accounts.length, isLoadingCloud]);
+
+  const handleCloseTour = () => {
+    setTourOpen(false);
+    localStorage.setItem('itrade_tour_done', 'true');
+  };
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  if (reviewToken) {
+    return (
+      <ReviewView
+        token={reviewToken}
+        onBack={() => {
+          window.location.hash = '';
+          setReviewToken(null);
+        }}
+      />
+    );
+  }
 
   if (publicUsername) {
     return (
@@ -212,9 +331,12 @@ const MainApp: React.FC = () => {
           onOpenTradeModal={handleOpenNewTrade}
           onOpenAccountModal={handleOpenNewAccount}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
+          onOpenCommandPalette={() => setPaletteOpen(true)}
         />
 
         <main className="page-body">
+          <Suspense fallback={<ViewLoading />}>
+            <ErrorBoundary key={activeTab} label={activeTab}>
           {activeTab === 'dashboard' && (
             <DashboardView
               onOpenTradeModal={handleOpenNewTrade}
@@ -267,6 +389,18 @@ const MainApp: React.FC = () => {
           {activeTab === 'calculator' && (
             <RiskCalculatorView />
           )}
+
+          {activeTab === 'queue' && (
+            <SetupQueueView
+              onExecute={(prefill) => {
+                setQueuePrefill(prefill);
+                setEditingTrade(null);
+                setTradeFormOpen(true);
+              }}
+            />
+          )}
+            </ErrorBoundary>
+          </Suspense>
         </main>
       </div>
 
@@ -276,8 +410,10 @@ const MainApp: React.FC = () => {
         onClose={() => {
           setTradeFormOpen(false);
           setEditingTrade(null);
+          setQueuePrefill(null);
         }}
         initialTrade={editingTrade}
+        prefill={queuePrefill}
       />
 
       <TradeDetailModal
@@ -335,10 +471,40 @@ const MainApp: React.FC = () => {
       {/* PWA Install Banner */}
       <PWAInstallPrompt />
 
+      {/* PWA Update Detector (new build available) */}
+      <PWAUpdatePrompt />
+
       {/* Keyboard Shortcuts Modal */}
       <KeyboardShortcutsModal
         isOpen={shortcutsModalOpen}
         onClose={() => setShortcutsModalOpen(false)}
+      />
+
+      {/* Command Palette (Ctrl+K) */}
+      <CommandPalette
+        isOpen={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        activeTab={activeTab}
+        onNavigate={setActiveTab}
+        onOpenTradeModal={handleOpenNewTrade}
+        onOpenAccountModal={handleOpenNewAccount}
+        onOpenShortcuts={() => setShortcutsModalOpen(true)}
+        onOpenThemeModal={() => setThemeModalOpen(true)}
+        onViewTradeDetail={handleViewTradeDetail}
+        onStartTour={() => setTourOpen(true)}
+      />
+
+      {/* First-run Product Tour */}
+      <ProductTour isOpen={tourOpen} onClose={handleCloseTour} />
+
+      {/* Theme selector (hosted in App so the command palette can open it) */}
+      <ThemeSelectorModal isOpen={themeModalOpen} onClose={() => setThemeModalOpen(false)} />
+
+      {/* Mobile bottom navigation + quick Log Trade FAB */}
+      <MobileNav
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        onOpenTradeModal={handleOpenNewTrade}
       />
 
       {/* Global Toast */}
@@ -352,7 +518,9 @@ export function App() {
     <ThemeProvider>
       <AuthProvider>
         <JournalProvider>
-          <MainApp />
+          <ConfirmProvider>
+            <MainApp />
+          </ConfirmProvider>
         </JournalProvider>
       </AuthProvider>
     </ThemeProvider>

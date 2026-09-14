@@ -6,7 +6,10 @@ import {
   AccountMetrics, 
   EquityPoint, 
   WithdrawalRecord,
-  PlaybookModel
+  PlaybookModel,
+  TradeAuditEntry,
+  TradeAuditChange,
+  CustomFieldDef
 } from '../types';
 import { 
   loadAccounts, 
@@ -19,7 +22,11 @@ import {
   savePlaybooks,
   loadActiveAccountId,
   saveActiveAccountId,
-  clearAllStorage
+  clearAllStorage,
+  loadTradeAudit,
+  saveTradeAudit,
+  loadCustomFieldDefs,
+  saveCustomFieldDefs
 } from '../utils/storage';
 import { 
   isSupabaseConfigured, 
@@ -35,11 +42,13 @@ import {
   syncWithdrawalToCloud, 
   deleteWithdrawalFromCloud,
   syncPlaybookToCloud,
-  deletePlaybookFromCloud
+  deletePlaybookFromCloud,
+  supabase
 } from '../utils/supabase';
 import { useAuth } from './AuthContext';
 import { calculateAccountMetrics, generateEquityCurve } from '../utils/calculations';
 import { setStealthModeState } from '../utils/formatters';
+import { isPerformanceMode } from '../utils/uiPrefs';
 import { INITIAL_ACCOUNTS, INITIAL_TRADES, INITIAL_WITHDRAWALS } from '../data/seedData';
 import confetti from 'canvas-confetti';
 
@@ -47,6 +56,18 @@ interface ToastState {
   message: string;
   type: 'success' | 'error' | 'info';
   visible: boolean;
+}
+
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
+export interface ToastItem {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+  action?: ToastAction;
 }
 
 interface JournalContextType {
@@ -83,9 +104,14 @@ interface JournalContextType {
   isLoadingCloud: boolean;
   isStealthMode: boolean;
   toggleStealthMode: () => void;
-  toast: ToastState;
-  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-  hideToast: () => void;
+  toasts: ToastItem[];
+  showToast: (message: string, type?: 'success' | 'error' | 'info', action?: ToastAction) => void;
+  hideToast: (id?: string) => void;
+  tradeAudit: TradeAuditEntry[];
+  getTradeAudit: (tradeId: string) => TradeAuditEntry[];
+  revertTradeAuditEntry: (entryId: string) => void;
+  customFieldDefs: CustomFieldDef[];
+  setCustomFieldDefs: (defs: CustomFieldDef[]) => void;
   triggerCelebration: () => void;
 }
 
@@ -113,7 +139,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [playbooks, setPlaybooks] = useState<PlaybookModel[]>(() => loadPlaybooks());
   const [activeAccountId, setActiveAccountIdState] = useState<string>(() => loadActiveAccountId());
   const [filters, setFiltersState] = useState<TradeFilter>(defaultFilter);
-  const [toast, setToast] = useState<ToastState>({ message: '', type: 'info', visible: false });
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [tradeAudit, setTradeAudit] = useState<TradeAuditEntry[]>(() => loadTradeAudit());
+  const [customFieldDefs, setCustomFieldDefsState] = useState<CustomFieldDef[]>(() => loadCustomFieldDefs());
   const [isCloudSync, setIsCloudSync] = useState<boolean>(false);
   const [isLoadingCloud, setIsLoadingCloud] = useState<boolean>(false);
   const [isStealthMode, setIsStealthMode] = useState<boolean>(() => {
@@ -200,23 +228,38 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     saveWithdrawals(withdrawals);
   }, [withdrawals]);
 
+  useEffect(() => {
+    saveTradeAudit(tradeAudit);
+  }, [tradeAudit]);
+
+  // Load custom field definitions from user metadata when signed in
+  useEffect(() => {
+    const cloudDefs = user?.user_metadata?.custom_fields;
+    if (Array.isArray(cloudDefs) && cloudDefs.length > 0) {
+      setCustomFieldDefsState(cloudDefs);
+      saveCustomFieldDefs(cloudDefs);
+    }
+  }, [user]);
+
   const setActiveAccountId = useCallback((id: string) => {
     setActiveAccountIdState(id);
     saveActiveAccountId(id);
   }, []);
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    setToast({ message, type, visible: true });
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info', action?: ToastAction) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setToasts(prev => [...prev.slice(-2), { id, message, type, action }]);
     setTimeout(() => {
-      setToast(prev => ({ ...prev, visible: false }));
-    }, 4000);
+      setToasts(prev => prev.filter(item => item.id !== id));
+    }, action ? 7000 : 4200);
   }, []);
 
-  const hideToast = useCallback(() => {
-    setToast(prev => ({ ...prev, visible: false }));
+  const hideToast = useCallback((id?: string) => {
+    setToasts(prev => (id ? prev.filter(item => item.id !== id) : []));
   }, []);
 
   const triggerCelebration = useCallback(() => {
+    if (isPerformanceMode()) return;
     confetti({
       particleCount: 80,
       spread: 70,
@@ -415,6 +458,30 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const updateTrade = (id: string, updates: Partial<Trade>) => {
     const now = new Date().toISOString();
+
+    // Audit trail: record what changed before applying the update
+    const before = trades.find(t => t.id === id);
+    if (before) {
+      const changes: TradeAuditChange[] = [];
+      (Object.keys(updates) as Array<keyof Trade>).forEach((key) => {
+        if (key === 'updatedAt') return;
+        const fromVal = (before as unknown as Record<string, unknown>)[key as string];
+        const toVal = (updates as unknown as Record<string, unknown>)[key as string];
+        if (JSON.stringify(fromVal) !== JSON.stringify(toVal)) {
+          changes.push({ field: String(key), from: fromVal, to: toVal });
+        }
+      });
+      if (changes.length > 0) {
+        const entry: TradeAuditEntry = {
+          id: `aud-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          tradeId: id,
+          at: now,
+          changes
+        };
+        setTradeAudit(prev => [entry, ...prev].slice(0, 800));
+      }
+    }
+
     setTrades(prev => {
       const updatedTrades = prev.map(t => t.id === id ? { ...t, ...updates, updatedAt: now } : t);
       const targetTrade = updatedTrades.find(t => t.id === id);
@@ -436,6 +503,31 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     showToast('Trade entry updated.', 'success');
   };
 
+  const restoreTrades = useCallback((snapshots: Trade[]) => {
+    if (snapshots.length === 0) return;
+    setTrades(prev => {
+      const missing = snapshots.filter(s => !prev.some(t => t.id === s.id));
+      if (missing.length === 0) return prev;
+      const restored = [...missing, ...prev];
+      setAccounts(accs => {
+        const recalculated = recalculateAccountBalances(accs, restored, withdrawals);
+        missing.forEach(s => {
+          const acc = recalculated.find(a => a.id === s.accountId);
+          if (acc && isSupabaseConfigured()) {
+            syncAccountToCloud(acc);
+          }
+        });
+        return recalculated;
+      });
+      return restored;
+    });
+    if (isSupabaseConfigured()) {
+      snapshots.forEach(s => syncTradeToCloud(s));
+    }
+    showToast(snapshots.length > 1 ? `${snapshots.length} trades restored.` : 'Trade restored.', 'success');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withdrawals]);
+
   const deleteTrade = (id: string) => {
     const targetTrade = trades.find(t => t.id === id);
     setTrades(prev => {
@@ -455,10 +547,14 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (isSupabaseConfigured()) {
       deleteTradeFromCloud(id);
     }
-    showToast('Trade deleted from journal.', 'info');
+    showToast('Trade deleted from journal.', 'info', targetTrade ? {
+      label: 'Undo',
+      onClick: () => restoreTrades([targetTrade])
+    } : undefined);
   };
 
   const bulkDeleteTrades = (ids: string[]) => {
+    const snapshots = trades.filter(t => ids.includes(t.id));
     setTrades(prev => {
       const updatedTrades = prev.filter(t => !ids.includes(t.id));
       setAccounts(accs => recalculateAccountBalances(accs, updatedTrades, withdrawals));
@@ -467,7 +563,10 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (isSupabaseConfigured()) {
       bulkDeleteTradesFromCloud(ids);
     }
-    showToast(`${ids.length} trades deleted.`, 'info');
+    showToast(`${ids.length} trades deleted.`, 'info', snapshots.length > 0 ? {
+      label: 'Undo',
+      onClick: () => restoreTrades(snapshots)
+    } : undefined);
   };
 
   // Withdrawal Actions
@@ -541,7 +640,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (isSupabaseConfigured()) {
       syncPlaybookToCloud(newPb);
     }
-    showToast(`Setup playbook "${newPb.title}" berhasil disimpan!`, 'success');
+    showToast(`Playbook "${newPb.title}" saved!`, 'success');
   };
 
   const updatePlaybook = (id: string, updates: Partial<PlaybookModel>) => {
@@ -554,7 +653,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
       return updated;
     });
-    showToast('Playbook SOP diperbarui.', 'success');
+    showToast('Playbook updated.', 'success');
   };
 
   const deletePlaybook = (id: string) => {
@@ -566,7 +665,36 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (isSupabaseConfigured()) {
       deletePlaybookFromCloud(id);
     }
-    showToast('Playbook SOP dihapus.', 'info');
+    showToast('Playbook deleted.', 'info');
+  };
+
+  const setCustomFieldDefs = useCallback((defs: CustomFieldDef[]) => {
+    setCustomFieldDefsState(defs);
+    saveCustomFieldDefs(defs);
+    if (user && isSupabaseConfigured() && supabase) {
+      supabase.auth.updateUser({ data: { custom_fields: defs } }).catch(() => {
+        /* non-blocking */
+      });
+    }
+  }, [user]);
+
+  const getTradeAudit = useCallback((tradeId: string) => {
+    return tradeAudit.filter(e => e.tradeId === tradeId);
+  }, [tradeAudit]);
+
+  const revertTradeAuditEntry = (entryId: string) => {
+    const entry = tradeAudit.find(e => e.id === entryId);
+    if (!entry) return;
+    if (!trades.some(t => t.id === entry.tradeId)) {
+      showToast('Cannot revert — the trade no longer exists.', 'error');
+      return;
+    }
+    const updates: Record<string, unknown> = {};
+    entry.changes.forEach(c => {
+      updates[c.field] = c.from;
+    });
+    updateTrade(entry.tradeId, updates as Partial<Trade>);
+    showToast('Edit reverted — previous values restored.', 'success');
   };
 
   // Backup & Import
@@ -624,7 +752,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       syncAccountToCloud(cleanStarterAccount);
     }
 
-    showToast('Semua data trade & akun berhasil dihapus bersih!', 'info');
+    showToast('All data has been reset.', 'info');
   };
 
   const resetToDemoData = () => {
@@ -671,9 +799,14 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         isLoadingCloud,
         isStealthMode,
         toggleStealthMode,
-        toast,
+        toasts,
         showToast,
         hideToast,
+        tradeAudit,
+        getTradeAudit,
+        revertTradeAuditEntry,
+        customFieldDefs,
+        setCustomFieldDefs,
         triggerCelebration
       }}
     >

@@ -85,9 +85,9 @@ export const PWAInstallPrompt: React.FC = () => {
         zIndex: 850,
         maxWidth: '380px',
         backgroundColor: '#0c1326',
-        border: '1px solid rgba(59, 130, 246, 0.4)',
+        border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 40%, transparent)',
         borderRadius: '16px',
-        boxShadow: '0 12px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(59, 130, 246, 0.15)',
+        boxShadow: '0 12px 35px rgba(0, 0, 0, 0.8), 0 0 20px color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)',
         padding: '14px 16px',
         display: 'flex',
         alignItems: 'center',
@@ -101,21 +101,21 @@ export const PWAInstallPrompt: React.FC = () => {
           height: '42px',
           borderRadius: '12px',
           background: 'linear-gradient(135deg, #1e3a8a, #0b1329)',
-          border: '1px solid rgba(59, 130, 246, 0.4)',
+          border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 40%, transparent)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0
         }}
       >
-        <Smartphone size={22} color="#60a5fa" />
+        <Smartphone size={22} color="var(--theme-secondary)" />
       </div>
 
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#f8fafc', marginBottom: '2px' }}>
+        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>
           Install App di HP / Laptop
         </div>
-        <div style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.35 }}>
+        <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
           {isIOS ? (
             <span>Tap ikon <strong>Share [↑]</strong> lalu pilih <strong>Add to Home Screen</strong></span>
           ) : (
@@ -145,7 +145,7 @@ export const PWAInstallPrompt: React.FC = () => {
         <button
           onClick={handleDismiss}
           className="btn btn-ghost btn-icon btn-sm"
-          style={{ color: '#64748b', padding: '4px' }}
+          style={{ color: 'var(--text-muted)', padding: '4px' }}
           title="Tutup"
         >
           <X size={16} />

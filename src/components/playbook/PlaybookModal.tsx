@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PlaybookModel, StrategyType } from '../../types';
 import { X, Check, Image as ImageIcon, Plus, Trash2, Star, Sparkles } from 'lucide-react';
 import { useJournal } from '../../context/JournalContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface PlaybookModalProps {
   isOpen: boolean;
@@ -71,6 +72,8 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
       setRating(5);
     }
   }, [initialPlaybook, isOpen]);
+
+  const modalRef = useModalA11y(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -142,17 +145,17 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '780px' }}>
+      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Playbook Setup Model" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '780px' }}>
         <div className="modal-header">
           <div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               {initialPlaybook ? 'Edit Playbook Model SOP' : 'Buat Setup Playbook Baru (A+ Model)'}
             </h2>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
               Katalog aturan baku SOP dan blueprint eksekusi strategi
             </span>
           </div>
-          <button onClick={onClose} className="btn btn-ghost btn-icon">
+          <button onClick={onClose} className="btn btn-ghost btn-icon" aria-label="Close dialog">
             <X size={20} />
           </button>
         </div>
@@ -200,7 +203,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Target Winrate %</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 value={winrateTarget}
                 onChange={(e) => setWinrateTarget(parseFloat(e.target.value) || 0)}
                 className="input-control font-mono"
@@ -210,7 +213,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Target R:R</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 step="0.1"
                 value={rrTarget}
                 onChange={(e) => setRrTarget(parseFloat(e.target.value) || 0)}
@@ -226,6 +229,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                     type="button"
                     key={star}
                     onClick={() => setRating(star)}
+                    aria-label={`Rate ${star} out of 5 stars`}
                     style={{
                       background: 'none',
                       border: 'none',
@@ -263,7 +267,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                 type="button"
                 onClick={() => handleAddItem(setRules)}
                 className="btn btn-ghost btn-sm"
-                style={{ fontSize: '0.72rem', color: '#60a5fa' }}
+                style={{ fontSize: '0.72rem', color: 'var(--theme-secondary)' }}
               >
                 + Tambah Rule
               </button>
@@ -284,6 +288,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                     onClick={() => handleRemoveItem(setRules, idx)}
                     className="btn btn-ghost btn-icon btn-sm"
                     style={{ color: '#ef4444' }}
+                    aria-label="Remove rule"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -323,6 +328,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                     onClick={() => handleRemoveItem(setConfluences, idx)}
                     className="btn btn-ghost btn-icon btn-sm"
                     style={{ color: '#ef4444' }}
+                    aria-label="Remove confluence"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -362,6 +368,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                     onClick={() => handleRemoveItem(setMistakesToAvoid, idx)}
                     className="btn btn-ghost btn-icon btn-sm"
                     style={{ color: '#ef4444' }}
+                    aria-label="Remove mistake"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -371,7 +378,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
           </div>
 
           {/* Chart Blueprint Screenshots (Before vs After) */}
-          <div style={{ padding: '12px', backgroundColor: '#070b17', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '16px' }}>
+          <div style={{ padding: '12px', backgroundColor: 'var(--bg-sidebar)', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '16px' }}>
             <label className="input-label" style={{ marginBottom: '8px' }}>
               Chart Blueprint Contoh (Dukung Link URL atau Paste Gambar Langsung)
             </label>

@@ -155,7 +155,7 @@ export const EconomicCalendarView: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Flame size={24} color="#ef4444" />
             <span>Economic Calendar & News Radar</span>
             <span style={{
@@ -187,11 +187,11 @@ export const EconomicCalendarView: React.FC = () => {
           padding: '8px 16px',
           borderRadius: '12px',
           backgroundColor: '#0c1326',
-          border: '1px solid #233148'
+          border: '1px solid var(--border-color)'
         }}>
-          <Clock size={16} color="#3b82f6" />
-          <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Waktu Lokal:</span>
-          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', fontFamily: 'var(--font-mono)' }}>
+          <Clock size={16} color="var(--theme-secondary-strong)" />
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Waktu Lokal:</span>
+          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
             {currentTime} WIB
           </span>
         </div>
@@ -225,7 +225,7 @@ export const EconomicCalendarView: React.FC = () => {
           <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f87171', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>Protokol Manajemen Risiko Saat Rilis Berita Red Folder (High Impact)</span>
           </div>
-          <p style={{ fontSize: '0.8rem', color: '#cbd5e1', marginTop: '4px', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-strong)', marginTop: '4px', lineHeight: 1.5 }}>
             Hindari membuka posisi baru <strong>15 menit sebelum hingga 15 menit setelah</strong> rilis berita bertanda merah (CPI, NFP, FOMC, Suku Bunga) untuk menghindari <em>slippage</em>, pelebaran <em>spread</em>, dan <em>fakeout whipsaw</em>.
           </p>
         </div>
@@ -252,9 +252,9 @@ export const EconomicCalendarView: React.FC = () => {
                 fontSize: '0.78rem',
                 fontWeight: 600,
                 borderRadius: '8px',
-                backgroundColor: selectedCurrency === curr ? '#1e3a8a' : '#0c1222',
-                borderColor: selectedCurrency === curr ? '#3b82f6' : '#233148',
-                color: selectedCurrency === curr ? '#93c5fd' : '#94a3b8'
+                backgroundColor: selectedCurrency === curr ? '#1e3a8a' : 'var(--bg-panel)',
+                borderColor: selectedCurrency === curr ? 'var(--theme-secondary-strong)' : 'var(--border-color)',
+                color: selectedCurrency === curr ? '#93c5fd' : 'var(--text-secondary)'
               }}
             >
               {curr === 'ALL' ? '🌐 All Currencies' : curr}
@@ -270,9 +270,9 @@ export const EconomicCalendarView: React.FC = () => {
             style={{
               padding: '6px 12px',
               fontSize: '0.78rem',
-              backgroundColor: selectedImpact === 'ALL' ? '#1e293b' : '#0c1222',
-              borderColor: selectedImpact === 'ALL' ? '#475569' : '#233148',
-              color: selectedImpact === 'ALL' ? '#f8fafc' : '#94a3b8'
+              backgroundColor: selectedImpact === 'ALL' ? '#1e293b' : 'var(--bg-panel)',
+              borderColor: selectedImpact === 'ALL' ? '#475569' : 'var(--border-color)',
+              color: selectedImpact === 'ALL' ? 'var(--text-primary)' : 'var(--text-secondary)'
             }}
           >
             Semua Tingkat Dampak
@@ -284,9 +284,9 @@ export const EconomicCalendarView: React.FC = () => {
               padding: '6px 12px',
               fontSize: '0.78rem',
               fontWeight: 700,
-              backgroundColor: selectedImpact === 'HIGH' ? 'rgba(239, 68, 68, 0.2)' : '#0c1222',
-              borderColor: selectedImpact === 'HIGH' ? '#ef4444' : '#233148',
-              color: selectedImpact === 'HIGH' ? '#f87171' : '#94a3b8',
+              backgroundColor: selectedImpact === 'HIGH' ? 'rgba(239, 68, 68, 0.2)' : 'var(--bg-panel)',
+              borderColor: selectedImpact === 'HIGH' ? '#ef4444' : 'var(--border-color)',
+              color: selectedImpact === 'HIGH' ? '#f87171' : 'var(--text-secondary)',
               gap: '6px'
             }}
           >
@@ -301,11 +301,11 @@ export const EconomicCalendarView: React.FC = () => {
         {/* Live Interactive Economic Calendar Widget */}
         <div className="card" style={{ padding: '20px', minHeight: '680px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Globe size={18} color="#3b82f6" />
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Globe size={18} color="var(--theme-secondary-strong)" />
               <span>Real-Time Economic Releases Feed</span>
             </h3>
-            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
               Powered by Live Global Market Feeds
             </span>
           </div>
@@ -318,7 +318,7 @@ export const EconomicCalendarView: React.FC = () => {
         {/* Major Key Events Cheat Sheet Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="card" style={{ padding: '20px' }}>
-            <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#f8fafc', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Zap size={17} color="#f59e0b" />
               <span>Katalog Berita Berdampak Terbesar</span>
             </h3>
@@ -357,11 +357,11 @@ export const EconomicCalendarView: React.FC = () => {
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
                     {news.event}
                   </div>
 
-                  <p style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.4, margin: 0 }}>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', lineHeight: 1.4, margin: 0 }}>
                     {news.description}
                   </p>
                 </div>
@@ -370,12 +370,12 @@ export const EconomicCalendarView: React.FC = () => {
           </div>
 
           {/* Quick News Trading Rules Card */}
-          <div className="card" style={{ padding: '20px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), #090e1c)' }}>
-            <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#60a5fa', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div className="card" style={{ padding: '20px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent), #090e1c)' }}>
+            <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--theme-secondary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Info size={16} />
               <span>3 Aturan Emas Saat News:</span>
             </h4>
-            <ul style={{ fontSize: '0.76rem', color: '#cbd5e1', paddingLeft: '18px', margin: 0, lineHeight: 1.6 }}>
+            <ul style={{ fontSize: '0.76rem', color: 'var(--text-strong)', paddingLeft: '18px', margin: 0, lineHeight: 1.6 }}>
               <li><strong>Jangan Pasang Order Blindly:</strong> Tunggu candle 15m/1H pasca-news ditutup untuk melihat arah likuiditas yang sebenarnya (*displacement*).</li>
               <li><strong>Perhatikan Breakeven / Partial:</strong> Jika sudah ada posisi profit sebelum news besar, kunci dengan SL+ (Breakeven) atau TP parsial.</li>
               <li><strong>Manfaatkan FVG Pasca-News:</strong> Seringkali news menciptakan FVG / Imbalance besar yang sangat akurat untuk di-retest sesudahnya.</li>
