@@ -236,7 +236,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
             </div>
           </div>
 
-          <div style={{ borderLeft: '1px solid #1e293b', paddingLeft: '12px' }}>
+          <div style={{ borderLeft: '1px solid var(--bg-chip)', paddingLeft: '12px' }}>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Trade Outcome</div>
             <div style={{
               fontSize: '0.85rem',

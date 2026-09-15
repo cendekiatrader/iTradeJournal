@@ -45,7 +45,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
           setAccounts(data.accounts);
           setTrades(data.trades);
         } else {
-          setError(`Profil trader "@${username}" tidak ditemukan atau berstatus privat.`);
+          setError(`Trader profile "@${username}" was not found or is private.`);
         }
       })
       .catch((err) => {
@@ -134,7 +134,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
           Profil Tidak Ditemukan / Privat
         </h2>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', maxWidth: '420px', marginBottom: '24px' }}>
-          {error || 'Trader ini belum mengaktifkan profil publik mereka.'}
+          {error || 'This trader has not enabled their public profile yet.'}
         </p>
         <button onClick={onBackToApp} className="btn btn-primary">
           <ArrowLeft size={16} />
@@ -175,10 +175,10 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button onClick={handleCopy} className="btn btn-secondary btn-sm" style={{ gap: '6px' }}>
             {copied ? <Check size={14} color="#10b981" /> : <Share2 size={14} />}
-            <span>{copied ? 'Link Tersalin' : 'Share Profile'}</span>
+            <span>{copied ? 'Link Copied' : 'Share Profile'}</span>
           </button>
           <button onClick={onBackToApp} className="btn btn-primary btn-sm">
-            <span>Buka Journal Saya</span>
+            <span>Open My Journal</span>
           </button>
         </div>
       </header>
@@ -376,7 +376,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                   Verified Trade Records ({filteredTrades.length})
                 </h3>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  Catatan eksekusi posisi yang terverifikasi di sistem iTradeJournal
+                  Verified position execution notes in iTradeJournal
                 </p>
               </div>
 
@@ -406,7 +406,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #1e293b', color: 'var(--text-secondary)', textAlign: 'left' }}>
+                  <tr style={{ borderBottom: '1px solid var(--bg-chip)', color: 'var(--text-secondary)', textAlign: 'left' }}>
                     <th style={{ padding: '10px 8px' }}>Symbol</th>
                     <th style={{ padding: '10px 8px' }}>Side</th>
                     <th style={{ padding: '10px 8px' }}>Setup</th>
@@ -498,10 +498,10 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
             Ingin Memiliki Trading Journal & Link Portofolio Seperti Ini?
           </h4>
           <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 16px auto' }}>
-            Catat trading Anda, pantau analitik multi-akun, dan bagikan track record terverifikasi secara gratis.
+            Journal your trades, track multi-account analytics, and share a verified track record — free.
           </p>
           <button onClick={onBackToApp} className="btn btn-primary" style={{ padding: '10px 24px', fontWeight: 700 }}>
-            <span>Mulai Buat Trading Journal Anda</span>
+            <span>Start Your Trading Journal</span>
           </button>
         </div>
       </div>

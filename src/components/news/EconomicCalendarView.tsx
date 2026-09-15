@@ -38,7 +38,7 @@ const UPCOMING_MAJOR_NEWS: HighImpactItem[] = [
     impact: 'HIGH',
     forecast: '0.3%',
     previous: '0.3%',
-    description: 'Ukuran utama inflasi konsumen AS. Sangat mempengaruhi arah suku bunga The Fed dan volatilitas tinggi pada XAUUSD, DXY, EURUSD, & Crypto.'
+    description: 'The key US consumer inflation gauge. Strongly influences Fed rate direction and drives high volatility in XAUUSD, DXY, EURUSD, & Crypto.'
   },
   {
     id: 'nfp-usd',
@@ -50,7 +50,7 @@ const UPCOMING_MAJOR_NEWS: HighImpactItem[] = [
     impact: 'HIGH',
     forecast: '185K',
     previous: '206K',
-    description: 'Data ketenagakerjaan sektor non-pertanian AS. Memicu ekspansi likuiditas besar (liquidity sweep) pada pair mayor.'
+    description: 'US non-farm payrolls data. Triggers large liquidity expansions (liquidity sweeps) on major pairs.'
   },
   {
     id: 'fomc-usd',
@@ -74,7 +74,7 @@ const UPCOMING_MAJOR_NEWS: HighImpactItem[] = [
     impact: 'HIGH',
     forecast: '3.75%',
     previous: '4.25%',
-    description: 'Kebijakan moneter Bank Sentral Eropa. Berdampak tinggi langsung pada pair EURUSD dan EURGBP.'
+    description: 'European Central Bank monetary policy. High direct impact on EURUSD and EURGBP.'
   },
   {
     id: 'boe-gbp',
@@ -86,7 +86,7 @@ const UPCOMING_MAJOR_NEWS: HighImpactItem[] = [
     impact: 'HIGH',
     forecast: '5.00%',
     previous: '5.25%',
-    description: 'Keputusan suku bunga Bank of England. Memicu volatilitas tajam pada GBPUSD dan GBPJPY.'
+    description: 'Bank of England rate decision. Triggers sharp volatility in GBPUSD and GBPJPY.'
   },
   {
     id: 'ppi-usd',
@@ -98,7 +98,7 @@ const UPCOMING_MAJOR_NEWS: HighImpactItem[] = [
     impact: 'HIGH',
     forecast: '0.2%',
     previous: '0.4%',
-    description: 'Indeks harga produsen (inflasi grosir). Menjadi indikator awal sebelum data inflasi konsumen CPI.'
+    description: 'Producer price index (wholesale inflation). A leading indicator ahead of the CPI consumer inflation data.'
   }
 ];
 
@@ -175,7 +175,7 @@ export const EconomicCalendarView: React.FC = () => {
             </span>
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Pantau rilis berita fundamental ekonomi global berimpact tinggi secara real-time untuk melindungi risiko trading.
+            Track high-impact global economic news releases in real time to protect your trading risk.
           </p>
         </div>
 
@@ -190,7 +190,7 @@ export const EconomicCalendarView: React.FC = () => {
           border: '1px solid var(--border-color)'
         }}>
           <Clock size={16} color="var(--theme-secondary-strong)" />
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Waktu Lokal:</span>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Local Time:</span>
           <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
             {currentTime} WIB
           </span>
@@ -223,10 +223,10 @@ export const EconomicCalendarView: React.FC = () => {
 
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f87171', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>Protokol Manajemen Risiko Saat Rilis Berita Red Folder (High Impact)</span>
+            <span>Risk Management Protocol Around Red-Folder (High Impact) News</span>
           </div>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-strong)', marginTop: '4px', lineHeight: 1.5 }}>
-            Hindari membuka posisi baru <strong>15 menit sebelum hingga 15 menit setelah</strong> rilis berita bertanda merah (CPI, NFP, FOMC, Suku Bunga) untuk menghindari <em>slippage</em>, pelebaran <em>spread</em>, dan <em>fakeout whipsaw</em>.
+            Avoid opening new positions <strong>15 minutes before to 15 minutes after</strong> red-flagged news releases (CPI, NFP, FOMC, interest rates) to avoid <em>slippage</em>, <em>spread</em> widening, and <em>fakeout whipsaw</em>.
           </p>
         </div>
       </div>
@@ -270,7 +270,7 @@ export const EconomicCalendarView: React.FC = () => {
             style={{
               padding: '6px 12px',
               fontSize: '0.78rem',
-              backgroundColor: selectedImpact === 'ALL' ? '#1e293b' : 'var(--bg-panel)',
+              backgroundColor: selectedImpact === 'ALL' ? 'var(--bg-chip)' : 'var(--bg-panel)',
               borderColor: selectedImpact === 'ALL' ? '#475569' : 'var(--border-color)',
               color: selectedImpact === 'ALL' ? 'var(--text-primary)' : 'var(--text-secondary)'
             }}
@@ -331,7 +331,7 @@ export const EconomicCalendarView: React.FC = () => {
                     padding: '12px',
                     borderRadius: '10px',
                     backgroundColor: '#070b16',
-                    border: '1px solid #1e293b'
+                    border: '1px solid var(--bg-chip)'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
@@ -373,12 +373,12 @@ export const EconomicCalendarView: React.FC = () => {
           <div className="card" style={{ padding: '20px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent), #090e1c)' }}>
             <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--theme-secondary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Info size={16} />
-              <span>3 Aturan Emas Saat News:</span>
+              <span>3 Golden Rules Around News:</span>
             </h4>
             <ul style={{ fontSize: '0.76rem', color: 'var(--text-strong)', paddingLeft: '18px', margin: 0, lineHeight: 1.6 }}>
-              <li><strong>Jangan Pasang Order Blindly:</strong> Tunggu candle 15m/1H pasca-news ditutup untuk melihat arah likuiditas yang sebenarnya (*displacement*).</li>
-              <li><strong>Perhatikan Breakeven / Partial:</strong> Jika sudah ada posisi profit sebelum news besar, kunci dengan SL+ (Breakeven) atau TP parsial.</li>
-              <li><strong>Manfaatkan FVG Pasca-News:</strong> Seringkali news menciptakan FVG / Imbalance besar yang sangat akurat untuk di-retest sesudahnya.</li>
+              <li><strong>Don't Place Orders Blindly:</strong> Wait for the post-news 15m/1H candle to close before reading the real liquidity direction (*displacement*).</li>
+              <li><strong>Mind Breakeven / Partial:</strong> If a position is already in profit before major news, protect it with SL+ (breakeven) or a partial TP.</li>
+              <li><strong>Use Post-News FVGs:</strong> News often creates large FVG / imbalance zones that are precise to retest afterwards.</li>
             </ul>
           </div>
         </div>

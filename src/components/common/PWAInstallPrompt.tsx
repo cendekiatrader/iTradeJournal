@@ -117,7 +117,7 @@ export const PWAInstallPrompt: React.FC = () => {
         </div>
         <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
           {isIOS ? (
-            <span>Tap ikon <strong>Share [↑]</strong> lalu pilih <strong>Add to Home Screen</strong></span>
+            <span>Tap the <strong>Share [↑]</strong> icon then choose <strong>Add to Home Screen</strong></span>
           ) : (
             <span>Akses cepat full-screen seperti aplikasi resmi tanpa browser!</span>
           )}
@@ -146,7 +146,7 @@ export const PWAInstallPrompt: React.FC = () => {
           onClick={handleDismiss}
           className="btn btn-ghost btn-icon btn-sm"
           style={{ color: 'var(--text-muted)', padding: '4px' }}
-          title="Tutup"
+          title="Close"
         >
           <X size={16} />
         </button>

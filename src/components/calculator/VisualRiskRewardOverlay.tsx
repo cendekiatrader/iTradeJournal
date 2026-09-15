@@ -128,7 +128,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
           flexDirection: 'column',
           borderRadius: '12px',
           overflow: 'hidden',
-          border: '1px solid #1e293b',
+          border: '1px solid var(--bg-chip)',
           backgroundColor: '#040711',
           position: 'relative'
         }}>
@@ -220,7 +220,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
             padding: '10px 14px',
             borderRadius: '10px',
             backgroundColor: '#070b16',
-            border: '1px solid #1e293b',
+            border: '1px solid var(--bg-chip)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
@@ -277,7 +277,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
         padding: '12px 16px',
         borderRadius: '10px',
         backgroundColor: '#040711',
-        border: '1px solid #1e293b',
+        border: '1px solid var(--bg-chip)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -287,7 +287,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Sparkles size={16} color="#38bdf8" />
           <span style={{ fontSize: '0.76rem', color: 'var(--text-strong)' }}>
-            Batas Winrate Minimal untuk Impas (Break-Even):
+            Minimum Win Rate to Break Even:
           </span>
         </div>
 
@@ -301,7 +301,7 @@ export const VisualRiskRewardOverlay: React.FC<VisualRiskRewardOverlayProps> = (
             Cukup {breakEvenWinRate.toFixed(1)}% Win Rate
           </span>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-            (Dengan rasio 1:{rrRatio}, Anda tetap profit meski 60%+ trade Anda rugi!)
+            (With a 1:{rrRatio} ratio you stay profitable even if 60%+ of your trades lose!)
           </span>
         </div>
       </div>

@@ -32,7 +32,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
   const [dateFilter, setDateFilter] = useState<'all' | '30d' | 'this_month' | 'ytd'>('all');
   const [hideDollar, setHideDollar] = useState(false);
   const [traderNote, setTraderNote] = useState(
-    'Laporan ini diverifikasi secara mandiri berdasarkan catatan histori transaksi akun trading. Seluruh eksekusi mengikuti SOP manajemen risiko yang ketat.'
+    'This report is self-verified based on the account recorded transaction history. All executions followed a strict risk management SOP.'
   );
 
   const reportTrades = useMemo(() => {
@@ -122,7 +122,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
                 Executive PDF Audit Report Generator
               </h2>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                Ekspor laporan portofolio resmi siap cetak / simpan sebagai PDF untuk investor & mentor
+                Export an official portfolio report — print-ready / save as PDF for investors & mentors
               </p>
             </div>
           </div>
@@ -141,7 +141,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
         <div className="no-print" style={{
           padding: '12px 20px',
           backgroundColor: '#070b16',
-          borderBottom: '1px solid #1e293b',
+          borderBottom: '1px solid var(--bg-chip)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -157,9 +157,9 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
               className="input-field"
               style={{ padding: '4px 10px', fontSize: '0.78rem', width: 'auto' }}
             >
-              <option value="all">Semua Riwayat (All-Time)</option>
-              <option value="30d">30 Hari Terakhir</option>
-              <option value="this_month">Bulan Ini</option>
+              <option value="all">All History (All-Time)</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="this_month">This Month</option>
               <option value="ytd">Year to Date (YTD)</option>
             </select>
           </div>
@@ -172,7 +172,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             style={{ fontSize: '0.76rem', padding: '4px 10px' }}
           >
             {hideDollar ? <EyeOff size={14} color="#f59e0b" /> : <Eye size={14} color="#10b981" />}
-            <span>{hideDollar ? 'Mode Privasi: Nominal Disensor (***)' : 'Mode Lengkap: Tampilkan Nominal ($)'}</span>
+            <span>{hideDollar ? 'Privacy Mode: values hidden (***)' : 'Full Mode: show values ($)'}</span>
           </button>
         </div>
 
@@ -190,7 +190,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
-            borderBottom: '2px solid #1e293b',
+            borderBottom: '2px solid var(--bg-chip)',
             paddingBottom: '20px',
             marginBottom: '24px'
           }}>
@@ -219,7 +219,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
                 Executive Performance & Portfolio Audit
               </div>
               <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
-                Akun: <strong>{activeAccount?.name || 'All Accounts'}</strong> ({activeAccount?.broker || 'Multi-Broker'}) • Mata Uang: <strong>{currentCurrency}</strong>
+                Account: <strong>{activeAccount?.name || 'All Accounts'}</strong> ({activeAccount?.broker || 'Multi-Broker'}) • Currency: <strong>{currentCurrency}</strong>
               </div>
             </div>
 
@@ -228,7 +228,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
               <div style={{ fontSize: '0.84rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>
                 {auditId}
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px' }}>Tanggal Cetak:</div>
+              <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px' }}>Report Date:</div>
               <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1' }}>
                 {reportDate}
               </div>
@@ -243,7 +243,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             padding: '14px 18px',
             borderRadius: '12px',
             backgroundColor: '#070b16',
-            border: '1px solid #1e293b',
+            border: '1px solid var(--bg-chip)',
             marginBottom: '24px'
           }}>
             <div>
@@ -268,7 +268,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             gap: '12px',
             marginBottom: '24px'
           }}>
-            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid #1e293b' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid var(--bg-chip)' }}>
               <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Net Cumulative Return</span>
               <div style={{
                 fontSize: '1.25rem',
@@ -281,21 +281,21 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
               </div>
             </div>
 
-            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid #1e293b' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid var(--bg-chip)' }}>
               <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Win Rate (%)</span>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: reportMetrics.winRate >= 50 ? '#34d399' : '#f87171', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
                 {reportMetrics.winRate.toFixed(1)}%
               </div>
             </div>
 
-            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid #1e293b' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid var(--bg-chip)' }}>
               <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Profit Factor</span>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
                 {reportMetrics.profitFactor.toFixed(2)}
               </div>
             </div>
 
-            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid #1e293b' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid var(--bg-chip)' }}>
               <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Average Risk-to-Reward</span>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
                 1 : {reportMetrics.avgRR.toFixed(2)}
@@ -308,7 +308,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             padding: '14px 18px',
             borderRadius: '10px',
             backgroundColor: '#070b16',
-            border: '1px solid #1e293b',
+            border: '1px solid var(--bg-chip)',
             marginBottom: '24px'
           }}>
             <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
@@ -322,13 +322,13 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
           {/* Transaction History Table */}
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#f8fafc', marginBottom: '10px' }}>
-              Riwayat Transaksi Tertutup ({reportTrades.length} Eksekusi)
+              Closed Transactions ({reportTrades.length} executions)
             </div>
 
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #1e293b', color: '#94a3b8', textAlign: 'left' }}>
-                  <th style={{ padding: '8px 6px' }}>Waktu</th>
+                <tr style={{ borderBottom: '1px solid var(--bg-chip)', color: '#94a3b8', textAlign: 'left' }}>
+                  <th style={{ padding: '8px 6px' }}>Time</th>
                   <th style={{ padding: '8px 6px' }}>Symbol</th>
                   <th style={{ padding: '8px 6px' }}>Tipe</th>
                   <th style={{ padding: '8px 6px' }}>Setup SOP</th>
@@ -385,7 +385,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             </table>
             {reportTrades.length > 25 && (
               <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#64748b', marginTop: '8px' }}>
-                * Menampilkan 25 dari total {reportTrades.length} transaksi pada ringkasan cetak.
+                * Showing 25 of {reportTrades.length} transactions in the printed summary.
               </div>
             )}
           </div>
@@ -396,7 +396,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingTop: '16px',
-            borderTop: '1px solid #1e293b',
+            borderTop: '1px solid var(--bg-chip)',
             fontSize: '0.7rem',
             color: '#64748b'
           }}>

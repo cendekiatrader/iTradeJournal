@@ -77,7 +77,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             <div style={{
               width: '100%',
               height: '4px',
-              backgroundColor: '#1e293b',
+              backgroundColor: 'var(--bg-chip)',
               borderRadius: '2px',
               overflow: 'hidden'
             }}>

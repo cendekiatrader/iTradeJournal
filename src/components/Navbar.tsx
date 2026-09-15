@@ -259,7 +259,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        <div style={{ width: '1px', height: '24px', backgroundColor: '#1e293b' }} />
+        <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--bg-chip)' }} />
 
         {/* Account Selector (Single-Line Compact) */}
         <div ref={accountRef} className="navbar-account-switcher" style={{ position: 'relative' }}>
@@ -273,7 +273,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               alignItems: 'center',
               gap: '8px',
               backgroundColor: 'var(--bg-panel)',
-              border: '1px solid #1e293b',
+              border: '1px solid var(--bg-chip)',
               padding: '6px 12px',
               borderRadius: '8px',
               color: 'var(--text-primary)',
@@ -334,7 +334,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   justifyContent: 'space-between',
                   padding: '9px 12px',
                   borderRadius: '8px',
-                  backgroundColor: activeAccountId === 'all' ? '#1e293b' : 'transparent',
+                  backgroundColor: activeAccountId === 'all' ? 'var(--bg-chip)' : 'transparent',
                   border: 'none',
                   color: 'var(--text-primary)',
                   cursor: 'pointer',
@@ -452,7 +452,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 padding: '5px 10px',
                 borderRadius: '8px',
                 backgroundColor: 'var(--bg-panel)',
-                borderColor: '#1e293b'
+                borderColor: 'var(--bg-chip)'
               }}
             >
               <div style={{
@@ -490,7 +490,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 zIndex: 200,
                 animation: 'fadeIn 0.15s ease'
               }}>
-                <div style={{ padding: '6px 8px', borderBottom: '1px solid #1e293b', marginBottom: '6px' }}>
+                <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--bg-chip)', marginBottom: '6px' }}>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {user.user_metadata?.full_name || 'Trader'}
                   </div>
@@ -557,7 +557,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <Zap size={14} /> Performance Mode{uiPrefsState.performance ? ' · ON' : ''}
                 </button>
 
-                <div style={{ height: '1px', backgroundColor: '#1e293b', margin: '6px 0' }} />
+                <div style={{ height: '1px', backgroundColor: 'var(--bg-chip)', margin: '6px 0' }} />
 
                 {/* Data & Backup Tools */}
                 <div style={{ padding: '2px 8px', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
@@ -615,7 +615,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <Trash2 size={14} color="#ef4444" /> Reset All Data
                 </button>
 
-                <div style={{ height: '1px', backgroundColor: '#1e293b', margin: '6px 0' }} />
+                <div style={{ height: '1px', backgroundColor: 'var(--bg-chip)', margin: '6px 0' }} />
 
                 {/* Logout */}
                 <button
@@ -677,12 +677,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           type="button"
           onClick={toggleStealthMode}
           className="btn btn-secondary btn-icon btn-sm"
-          title={isStealthMode ? 'Tampilkan Saldo (Stealth Mode Aktif)' : 'Sembunyikan Saldo (Stealth Mode)'}
+          title={isStealthMode ? 'Show Balance (Stealth Mode Active)' : 'Hide Balance (Stealth Mode)'}
           aria-label={isStealthMode ? 'Show balances (stealth mode is on)' : 'Hide balances (stealth mode)'}
           aria-pressed={isStealthMode}
           style={{
             backgroundColor: isStealthMode ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-panel)',
-            borderColor: isStealthMode ? '#ef4444' : '#1e293b',
+            borderColor: isStealthMode ? '#ef4444' : 'var(--bg-chip)',
             color: isStealthMode ? '#f87171' : 'var(--text-secondary)',
             padding: '7px 10px'
           }}

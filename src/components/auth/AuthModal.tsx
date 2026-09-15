@@ -153,17 +153,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
 
     if (!isConfigured) {
-      setErrorMessage('Supabase URL & Anon Key belum terpasang di .env / Vercel.');
+      setErrorMessage('Supabase URL & Anon Key are not configured in .env / Vercel.');
       return;
     }
 
     if (mode === 'signup') {
       if (password.length < 6) {
-        setErrorMessage('Password minimal harus 6 karakter.');
+        setErrorMessage('Password must be at least 6 characters.');
         return;
       }
       if (password !== confirmPassword) {
-        setErrorMessage('Konfirmasi password tidak cocok.');
+        setErrorMessage('Passwords do not match.');
         return;
       }
 
@@ -172,10 +172,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setLoading(false);
 
       if (error) {
-        setErrorMessage(error.message || 'Gagal mendaftar. Silakan coba lagi.');
+        setErrorMessage(error.message || 'Sign up failed. Please try again.');
       } else {
-        setSuccessMessage('Pendaftaran berhasil! Silakan periksa email Anda untuk konfirmasi (atau login langsung).');
-        showToast('Pendaftaran akun berhasil! 🎉', 'success');
+        setSuccessMessage('Sign up successful! Check your email to confirm (or sign in directly).');
+        showToast('Account created successfully! 🎉', 'success');
         setTimeout(() => {
           onClose();
           resetState();
@@ -187,7 +187,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setLoading(false);
 
       if (error) {
-        setErrorMessage(error.message || 'Email atau password salah.');
+        setErrorMessage(error.message || 'Invalid email or password.');
       } else {
         showToast('Berhasil login! Selamat datang kembali. 🚀', 'success');
         onClose();
@@ -195,7 +195,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
     } else if (mode === 'forgot') {
       if (!email) {
-        setErrorMessage('Masukkan email Anda.');
+        setErrorMessage('Enter your email.');
         return;
       }
 
@@ -206,7 +206,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (error) {
         setErrorMessage(error.message || 'Gagal mengirim email reset password.');
       } else {
-        setSuccessMessage('Link reset password telah dikirim ke email Anda! Silakan periksa inbox/spam.');
+        setSuccessMessage('Password reset link sent! Check your inbox/spam folder.');
         showToast('Email reset password berhasil dikirim! 📩', 'info');
       }
     }
@@ -283,7 +283,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 padding: '10px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: mode === 'signin' ? '#1e293b' : 'transparent',
+                backgroundColor: mode === 'signin' ? 'var(--bg-chip)' : 'transparent',
                 color: mode === 'signin' ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                 fontWeight: mode === 'signin' ? 700 : 500,
                 fontSize: '0.85rem',
@@ -300,7 +300,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 padding: '10px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: mode === 'signup' ? '#1e293b' : 'transparent',
+                backgroundColor: mode === 'signup' ? 'var(--bg-chip)' : 'transparent',
                 color: mode === 'signup' ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                 fontWeight: mode === 'signup' ? 700 : 500,
                 fontSize: '0.85rem',
@@ -407,7 +407,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         padding: 0
                       }}
                     >
-                      Lupa Password?
+                      Forgot password?
                     </button>
                   )}
                 </div>
@@ -497,12 +497,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </>
               ) : mode === 'signup' ? (
                 <>
-                  <span>Buat Akun Gratis</span>
+                  <span>Create Free Account</span>
                   <Sparkles size={16} />
                 </>
               ) : (
                 <>
-                  <span>Kirim Link Reset Password</span>
+                  <span>Send Reset Link</span>
                   <Mail size={16} />
                 </>
               )}
@@ -532,9 +532,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {mode !== 'forgot' && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: '10px' }}>
-                <div style={{ flex: 1, height: '1px', backgroundColor: '#1e293b' }} />
+                <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--bg-chip)' }} />
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Atau</span>
-                <div style={{ flex: 1, height: '1px', backgroundColor: '#1e293b' }} />
+                <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--bg-chip)' }} />
               </div>
 
               {/* Discord 1-Click Login Button */}

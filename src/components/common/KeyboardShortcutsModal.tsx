@@ -100,7 +100,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                     gap: '6px',
                     backgroundColor: '#070b16',
                     borderRadius: '10px',
-                    border: '1px solid #1e293b',
+                    border: '1px solid var(--bg-chip)',
                     padding: '8px 12px'
                   }}>
                     {items.map((item, idx) => (
@@ -121,7 +121,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                         <kbd style={{
                           padding: '3px 8px',
                           borderRadius: '6px',
-                          backgroundColor: '#1e293b',
+                          backgroundColor: 'var(--bg-chip)',
                           border: '1px solid #334155',
                           boxShadow: '0 2px 0 #0f172a',
                           color: '#38bdf8',
@@ -141,7 +141,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
 
           <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={onClose} className="btn btn-primary" style={{ padding: '8px 24px' }}>
-              Tutup (Esc)
+              Close (Esc)
             </button>
           </div>
         </div>

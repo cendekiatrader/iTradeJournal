@@ -45,7 +45,7 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
                 Institutional Accent Themes
               </h2>
               <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
-                Pilih tema aksen warna visual mewah yang sesuai dengan selera Anda
+                Pick a luxurious accent theme that matches your taste
               </p>
             </div>
           </div>
@@ -69,7 +69,7 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
                     padding: '14px 18px',
                     borderRadius: '14px',
                     backgroundColor: isSelected ? `${item.primaryColor}14` : '#070b16',
-                    border: isSelected ? `2px solid ${item.primaryColor}` : '1px solid #1e293b',
+                    border: isSelected ? `2px solid ${item.primaryColor}` : '1px solid var(--bg-chip)',
                     boxShadow: isSelected ? `0 0 20px ${item.glowColor}` : 'none',
                     display: 'flex',
                     alignItems: 'center',

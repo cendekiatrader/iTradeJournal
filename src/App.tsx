@@ -5,6 +5,7 @@ import { JournalProvider, useJournal } from './context/JournalContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar, NavTab } from './components/Sidebar';
 import { DashboardView } from './components/dashboard/DashboardView';
+import { WeeklyReviewModal } from './components/review/WeeklyReviewModal';
 import { JournalView } from './components/journal/JournalView';
 import { AccountsView } from './components/accounts/AccountsView';
 import { RiskCalculatorView } from './components/calculator/RiskCalculatorView';
@@ -70,6 +71,7 @@ const MainApp: React.FC = () => {
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [weeklyReviewOpen, setWeeklyReviewOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [themeModalOpen, setThemeModalOpen] = useState(false);
   const [queuePrefill, setQueuePrefill] = useState<TradePrefill | null>(null);
@@ -390,6 +392,7 @@ const MainApp: React.FC = () => {
               onViewTradeDetail={handleViewTradeDetail}
               onNavigateToJournal={() => setActiveTab('journal')}
               onNavigateToNews={() => setActiveTab('news')}
+              onOpenWeeklyReview={() => setWeeklyReviewOpen(true)}
             />
           )}
 
@@ -529,10 +532,14 @@ const MainApp: React.FC = () => {
         onOpenThemeModal={() => setThemeModalOpen(true)}
         onViewTradeDetail={handleViewTradeDetail}
         onStartTour={() => setTourOpen(true)}
+        onOpenWeeklyReview={() => setWeeklyReviewOpen(true)}
       />
 
       {/* First-run Product Tour */}
       <ProductTour isOpen={tourOpen} onClose={handleCloseTour} />
+
+      {/* Guided Weekly Review wizard */}
+      <WeeklyReviewModal isOpen={weeklyReviewOpen} onClose={() => setWeeklyReviewOpen(false)} />
 
       {/* Theme selector (hosted in App so the command palette can open it) */}
       <ThemeSelectorModal isOpen={themeModalOpen} onClose={() => setThemeModalOpen(false)} />

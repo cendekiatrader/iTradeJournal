@@ -124,7 +124,7 @@ export const MonteCarloView: React.FC = () => {
             </span>
           </h2>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Simulasi probabilitas matematika 1.000 skenario acak masa depan untuk memproyeksikan target saldo dan batas risiko drawdown.
+            Mathematical probability simulation of 1,000 random future scenarios to project balance targets and drawdown risk limits.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export const MonteCarloView: React.FC = () => {
         <div className="card" style={{ padding: '20px' }}>
           <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Sliders size={17} color="var(--theme-secondary-strong)" />
-            <span>Pengaturan Parameter Simulasi</span>
+            <span>Simulation Parameters</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -221,7 +221,7 @@ export const MonteCarloView: React.FC = () => {
             {/* Number of Future Trades */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Jumlah Trade Mendatang:</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Upcoming Trades:</span>
                 <span style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)' }}>{tradesCount} Trades</span>
               </div>
               <input 
@@ -238,7 +238,7 @@ export const MonteCarloView: React.FC = () => {
             {/* Target Profit % */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Target Pertumbuhan (%):</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Growth Target (%):</span>
                 <span style={{ fontWeight: 700, color: '#f59e0b', fontFamily: 'var(--font-mono)' }}>+{targetProfitPct}%</span>
               </div>
               <input 
@@ -264,7 +264,7 @@ export const MonteCarloView: React.FC = () => {
                 {simulationResult.probOfProfit.toFixed(1)}%
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                Akun Berakhir Hijau
+                Accounts Ending Green
               </div>
             </div>
 
@@ -279,7 +279,7 @@ export const MonteCarloView: React.FC = () => {
             </div>
 
             <div className="card" style={{ padding: '14px', background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08), #090e1c)' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Peluang Capai Target</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Chance of Hitting Target</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#fbbf24', marginTop: '3px' }}>
                 {simulationResult.probOfReachingTarget.toFixed(1)}%
               </div>
@@ -289,12 +289,12 @@ export const MonteCarloView: React.FC = () => {
             </div>
 
             <div className="card" style={{ padding: '14px', background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08), #090e1c)' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Risiko Max DD Breach</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Max DD Breach Risk</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 800, color: simulationResult.probOfExceedingDrawdown <= 5 ? '#10b981' : '#ef4444', marginTop: '3px' }}>
                 {simulationResult.probOfExceedingDrawdown.toFixed(1)}%
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                Risiko Tembus Drawdown
+                Probability of Breaching Drawdown
               </div>
             </div>
           </div>
@@ -307,7 +307,7 @@ export const MonteCarloView: React.FC = () => {
                   Simulated Equity Pathways & Confidence Intervals
                 </h3>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                  Visualisasi 1.000 iterasi dengan pita rentang 90% Confidence (5th - 95th Percentile)
+                  Visualization of 1,000 iterations with a 90% confidence band (5th–95th percentile)
                 </span>
               </div>
 
@@ -343,9 +343,9 @@ export const MonteCarloView: React.FC = () => {
                 </defs>
 
                 {/* Grid Lines */}
-                <line x1="0" y1={innerHeight * 0.25} x2={chartWidth} y2={innerHeight * 0.25} stroke="#1e293b" strokeDasharray="3 3" />
-                <line x1="0" y1={innerHeight * 0.5} x2={chartWidth} y2={innerHeight * 0.5} stroke="#1e293b" strokeDasharray="3 3" />
-                <line x1="0" y1={innerHeight * 0.75} x2={chartWidth} y2={innerHeight * 0.75} stroke="#1e293b" strokeDasharray="3 3" />
+                <line x1="0" y1={innerHeight * 0.25} x2={chartWidth} y2={innerHeight * 0.25} stroke="var(--bg-chip)" strokeDasharray="3 3" />
+                <line x1="0" y1={innerHeight * 0.5} x2={chartWidth} y2={innerHeight * 0.5} stroke="var(--bg-chip)" strokeDasharray="3 3" />
+                <line x1="0" y1={innerHeight * 0.75} x2={chartWidth} y2={innerHeight * 0.75} stroke="var(--bg-chip)" strokeDasharray="3 3" />
 
                 {/* Starting balance baseline */}
                 {(() => {

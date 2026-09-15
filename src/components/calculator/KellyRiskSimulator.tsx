@@ -62,9 +62,9 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       riskPercent: quarterKelly,
       color: '#10b981',
       badge: 'RECOMMENDED',
-      description: 'Pertumbuhan optimal dengan volatilitas sangat rendah & drawdown minimal.',
-      drawdownRisk: 'Sangat Rendah (< 8%)',
-      growthSpeed: 'Stabil & Konsisten'
+      description: 'Optimal growth with very low volatility & minimal drawdown.',
+      drawdownRisk: 'Very Low (< 8%)',
+      growthSpeed: 'Steady & Consistent'
     },
     {
       id: 'half',
@@ -72,9 +72,9 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       riskPercent: halfKelly,
       color: 'var(--theme-secondary-strong)',
       badge: 'PRO GROWTH',
-      description: 'Menangkap 75% dari laju puncak Kelly dengan pengurangan risiko drawdown hingga 50%.',
-      drawdownRisk: 'Sedang (~ 15-20%)',
-      growthSpeed: 'Cepat'
+      description: 'Captures 75% of the peak Kelly growth rate with up to 50% less drawdown risk.',
+      drawdownRisk: 'Moderate (~ 15-20%)',
+      growthSpeed: 'Fast'
     },
     {
       id: 'fixed1',
@@ -82,9 +82,9 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       riskPercent: 1.0,
       color: '#38bdf8',
       badge: 'CONSERVATIVE',
-      description: 'Standar aturan emas prop firm untuk melindungi akun dari drawdown breach.',
-      drawdownRisk: 'Rendah (< 10%)',
-      growthSpeed: 'Standar'
+      description: 'The prop-firm golden rule standard to protect accounts from a drawdown breach.',
+      drawdownRisk: 'Low (< 10%)',
+      growthSpeed: 'Standard'
     },
     {
       id: 'full',
@@ -92,9 +92,9 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       riskPercent: fullKelly,
       color: '#ef4444',
       badge: 'HIGH VOLATILITY',
-      description: 'Maksimum teoritis matematika. Tidak disarankan untuk live account karena ayunan drawdown tajam.',
-      drawdownRisk: 'Tinggi (Bisa > 40%)',
-      growthSpeed: 'Ekstrem'
+      description: 'Theoretical mathematical maximum. Not recommended for live accounts due to sharp drawdown swings.',
+      drawdownRisk: 'High (can exceed 40%)',
+      growthSpeed: 'Extreme'
     }
   ];
 
@@ -104,14 +104,14 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       <div className="card" style={{ padding: '20px' }}>
         <div style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Sliders size={18} color="var(--theme-secondary-strong)" />
-          <span>Pengaturan Parameter Kelly Criterion</span>
+          <span>Kelly Criterion Parameters</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
           {/* Starting Balance */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Saldo Akun (Balance):</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Account Balance:</span>
               <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
                 {formatCurrency(balance, currency)}
               </span>
@@ -193,13 +193,13 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
         <div>
           <div style={{ fontSize: '0.92rem', fontWeight: 700, color: hasPositiveEdge ? '#34d399' : '#f87171' }}>
             {hasPositiveEdge 
-              ? `Mathematical Positive Edge Terdeteksi (Optimal Risk: ${quarterKelly.toFixed(2)}% – ${halfKelly.toFixed(2)}%)` 
-              : 'Negative Mathematical Edge! Jangan Buka Posisi.'}
+              ? `Mathematical Positive Edge Detected (Optimal Risk: ${quarterKelly.toFixed(2)}% – ${halfKelly.toFixed(2)}%)` 
+              : 'Negative Mathematical Edge — Do Not Take The Position.'}
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-strong)', marginTop: '2px', lineHeight: 1.4 }}>
             {hasPositiveEdge 
-              ? 'Berdasarkan teori probabilitas Kelly Criterion, gunakan model Quarter-Kelly atau Half-Kelly untuk memaksimalkan pelipatgandaan saldo tanpa risiko drawdown yang berlebihan.'
-              : 'Kombinasi Winrate dan R:R saat ini menghasilkan ekspektasi matematika negatif. Tingkatkan Winrate atau perlebar target R:R Anda.'}
+              ? 'Based on Kelly Criterion probability theory, use the Quarter-Kelly or Half-Kelly model to maximize balance growth without excessive drawdown risk.'
+              : 'Your current win rate and R:R produce a negative mathematical expectancy. Improve your win rate or widen your R:R target.'}
           </div>
         </div>
       </div>
@@ -263,7 +263,7 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
                   <span style={{ fontSize: '0.76rem', fontWeight: 600, color: 'var(--text-strong)' }}>{m.drawdownRisk}</span>
                 </div>
                 <div>
-                  <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', display: 'block' }}>Laju Pertumbuhan</span>
+                  <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', display: 'block' }}>Growth Rate</span>
                   <span style={{ fontSize: '0.76rem', fontWeight: 600, color: m.color }}>{m.growthSpeed}</span>
                 </div>
               </div>
@@ -276,10 +276,10 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       <div className="card" style={{ padding: '20px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent), #090e1c)' }}>
         <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--theme-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Info size={16} />
-          <span>Mengapa Trader Institusional Menggunakan Half-Kelly atau Quarter-Kelly?</span>
+          <span>Why Do Institutional Traders Use Half-Kelly or Quarter-Kelly?</span>
         </h4>
         <p style={{ fontSize: '0.78rem', color: 'var(--text-strong)', lineHeight: 1.55, margin: 0 }}>
-          <strong>Kelly Criterion</strong> pertama kali dirumuskan oleh ilmuwan matematika John L. Kelly Jr. di Bell Labs. Formula Full Kelly memberikan laju pertumbuhan modal tercepat secara matematis, namun memiliki ayunan volatilitas (*volatility drag*) yang terlalu ekstrem bagi psikologi manusia. Oleh karena itu, fund manager dan trader profesional selalu menerapkan <strong>Fractional Kelly (Half-Kelly atau Quarter-Kelly)</strong> untuk mendapatkan kurva pertumbuhan mulus tanpa risiko *Drawdown Breach* pada akun prop firm atau akun live!
+          <strong>Kelly Criterion</strong> was first formulated by mathematician John L. Kelly Jr. at Bell Labs. The Full Kelly formula gives the fastest mathematical capital growth, but its volatility swings (*volatility drag*) are too extreme for human psychology. That is why fund managers and professional traders always apply <strong>Fractional Kelly (Half-Kelly or Quarter-Kelly)</strong> to get a smooth growth curve without *Drawdown Breach* risk on prop firm or live accounts!
         </p>
       </div>
     </div>

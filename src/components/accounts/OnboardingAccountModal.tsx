@@ -65,7 +65,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
             Selamat Datang di iTradeJournal!
           </h2>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-            Mari siapkan Akun Trading Utama Anda untuk mulai mencatat riwayat trade, mengukur winrate, dan melacak pertumbuhan modal.
+            Set up your main trading account to start logging trades, measuring win rate, and tracking capital growth.
           </p>
         </div>
 
@@ -73,12 +73,12 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
             {/* Account Name */}
             <div className="input-group" style={{ margin: 0 }}>
-              <label className="input-label" style={{ fontSize: '0.78rem' }}>Nama Akun Trading</label>
+              <label className="input-label" style={{ fontSize: '0.78rem' }}>Trading Account Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Contoh: Akun Utama Personal / FTMO Challenge"
+                placeholder="e.g. Personal Main Account / FTMO Challenge"
                 className="input-control"
                 required
               />
@@ -99,7 +99,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
               </div>
 
               <div className="input-group" style={{ margin: 0 }}>
-                <label className="input-label" style={{ fontSize: '0.78rem' }}>Tipe Akun</label>
+                <label className="input-label" style={{ fontSize: '0.78rem' }}>Account Type</label>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value as AccountType)}
@@ -117,7 +117,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
             {/* Balance & Currency */}
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
               <div className="input-group" style={{ margin: 0 }}>
-                <label className="input-label" style={{ fontSize: '0.78rem' }}>Saldo Awal (Initial Balance)</label>
+                <label className="input-label" style={{ fontSize: '0.78rem' }}>Initial Balance</label>
                 <input
                   type="number" inputMode="decimal"
                   min="0"
@@ -131,7 +131,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
               </div>
 
               <div className="input-group" style={{ margin: 0 }}>
-                <label className="input-label" style={{ fontSize: '0.78rem' }}>Mata Uang</label>
+                <label className="input-label" style={{ fontSize: '0.78rem' }}>Currency</label>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value as Currency)}
@@ -165,7 +165,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
                 borderRadius: '10px'
               }}
             >
-              <Wallet size={16} /> Buat Akun & Mulai Mencatat <ArrowRight size={16} />
+              <Wallet size={16} /> Create Account & Start Journaling <ArrowRight size={16} />
             </button>
 
             <button
@@ -183,7 +183,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
                 gap: '6px'
               }}
             >
-              <Eye size={14} /> Lewati & Lihat Fitur Dahulu (Explore)
+              <Eye size={14} /> Skip & Explore First
             </button>
           </div>
         </form>

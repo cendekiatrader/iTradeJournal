@@ -231,7 +231,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                   return (
                     <div style={{
                       backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                      border: '1px solid #1e293b',
+                      border: '1px solid var(--bg-chip)',
                       borderRadius: '8px',
                       padding: '8px 10px',
                       marginBottom: '12px',

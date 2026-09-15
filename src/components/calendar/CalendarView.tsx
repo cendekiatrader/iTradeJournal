@@ -363,7 +363,7 @@ const formatRMultiple = (r: number): string => {
                     <span style={{
                       fontSize: '0.68rem',
                       fontFamily: 'var(--font-mono)',
-                      backgroundColor: '#1e293b',
+                      backgroundColor: 'var(--bg-chip)',
                       color: 'var(--text-strong)',
                       padding: '1px 5px',
                       borderRadius: '4px'

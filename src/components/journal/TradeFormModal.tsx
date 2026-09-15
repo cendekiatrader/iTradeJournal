@@ -652,7 +652,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                     borderRadius: '8px',
                     fontWeight: 700,
                     border: '1px solid',
-                    borderColor: direction === 'LONG' ? 'var(--profit-green)' : '#1e293b',
+                    borderColor: direction === 'LONG' ? 'var(--profit-green)' : 'var(--bg-chip)',
                     backgroundColor: direction === 'LONG' ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-sidebar)',
                     color: direction === 'LONG' ? 'var(--profit-green)' : 'var(--text-secondary)',
                     cursor: 'pointer',
@@ -672,7 +672,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                     borderRadius: '8px',
                     fontWeight: 700,
                     border: '1px solid',
-                    borderColor: direction === 'SHORT' ? 'var(--loss-red)' : '#1e293b',
+                    borderColor: direction === 'SHORT' ? 'var(--loss-red)' : 'var(--bg-chip)',
                     backgroundColor: direction === 'SHORT' ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-sidebar)',
                     color: direction === 'SHORT' ? 'var(--loss-red)' : 'var(--text-secondary)',
                     cursor: 'pointer',
@@ -707,8 +707,8 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       fontSize: '0.72rem',
                       fontWeight: 700,
                       border: '1px solid',
-                      borderColor: status === st ? 'var(--theme-secondary-strong)' : '#1e293b',
-                      backgroundColor: status === st ? '#1e293b' : 'var(--bg-sidebar)',
+                      borderColor: status === st ? 'var(--theme-secondary-strong)' : 'var(--bg-chip)',
+                      backgroundColor: status === st ? 'var(--bg-chip)' : 'var(--bg-sidebar)',
                       color: status === st ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                       cursor: 'pointer',
                       textAlign: 'center'
@@ -808,7 +808,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   Risk & Position Auto-Sizer
                 </span>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block' }}>
-                  Saldo: ${currentAccBalance.toLocaleString()} • Risiko: ${calculatedRiskAmount.toFixed(2)} ({riskPercentPreset}%)
+                  Balance: ${currentAccBalance.toLocaleString()} • Risk: ${calculatedRiskAmount.toFixed(2)} ({riskPercentPreset}%)
                 </span>
               </div>
             </div>
@@ -982,7 +982,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       backgroundColor: '#0a1022',
                       padding: '8px 10px',
                       borderRadius: '8px',
-                      border: '1px solid #1e293b'
+                      border: '1px solid var(--bg-chip)'
                     }}
                   >
                     {/* Label (TP1, TP2, etc) */}
@@ -1224,7 +1224,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       borderRadius: '6px',
                       backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.2)' : '#070a16',
                       color: isSelected ? 'var(--profit-green)' : 'var(--text-secondary)',
-                      border: `1px solid ${isSelected ? 'var(--profit-green)' : '#1e293b'}`,
+                      border: `1px solid ${isSelected ? 'var(--profit-green)' : 'var(--bg-chip)'}`,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -1314,7 +1314,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             padding: '14px',
             backgroundColor: 'var(--bg-sidebar)',
             borderRadius: '12px',
-            border: '1px solid #1e293b',
+            border: '1px solid var(--bg-chip)',
             marginBottom: '16px'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -1333,12 +1333,12 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   type="text"
                   value={screenshotBefore}
                   onChange={(e) => setScreenshotBefore(e.target.value)}
-                  placeholder="https://www.tradingview.com/x/... atau Paste Gambar (Before)"
+                  placeholder="https://www.tradingview.com/x/... or paste an image (Before)"
                   className="input-control font-mono"
                   style={{ width: '100%', fontSize: '0.78rem' }}
                 />
                 {screenshotBefore && (
-                  <div style={{ marginTop: '6px', maxHeight: '90px', overflow: 'hidden', borderRadius: '6px', border: '1px solid #1e293b' }}>
+                  <div style={{ marginTop: '6px', maxHeight: '90px', overflow: 'hidden', borderRadius: '6px', border: '1px solid var(--bg-chip)' }}>
                     <img src={screenshotBefore} alt="Before preview" style={{ width: '100%', height: '90px', objectFit: 'cover' }} />
                   </div>
                 )}
@@ -1353,12 +1353,12 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   type="text"
                   value={screenshotAfter}
                   onChange={(e) => setScreenshotAfter(e.target.value)}
-                  placeholder="https://www.tradingview.com/x/... atau Paste Gambar (After)"
+                  placeholder="https://www.tradingview.com/x/... or paste an image (After)"
                   className="input-control font-mono"
                   style={{ width: '100%', fontSize: '0.78rem' }}
                 />
                 {screenshotAfter && (
-                  <div style={{ marginTop: '6px', maxHeight: '90px', overflow: 'hidden', borderRadius: '6px', border: '1px solid #1e293b' }}>
+                  <div style={{ marginTop: '6px', maxHeight: '90px', overflow: 'hidden', borderRadius: '6px', border: '1px solid var(--bg-chip)' }}>
                     <img src={screenshotAfter} alt="After preview" style={{ width: '100%', height: '90px', objectFit: 'cover' }} />
                   </div>
                 )}

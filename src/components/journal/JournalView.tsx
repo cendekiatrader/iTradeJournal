@@ -29,6 +29,7 @@ import { EmptyState } from '../common/EmptyState';
 import { createReviewSession } from '../../utils/review';
 import { TableRowSkeleton } from '../common/Skeleton';
 import { useConfirm } from '../common/ConfirmDialog';
+import { TrashModal } from './TrashModal';
 
 const COLUMN_TOGGLES = [
   { id: 'account', label: 'Account' },
@@ -69,6 +70,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
     activeAccount,
     deleteTrade,
     bulkDeleteTrades,
+    trashedTrades,
     updateTrade,
     trades,
     customFieldDefs,
@@ -119,6 +121,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
   const [viewName, setViewName] = useState('');
   const [focusedRowIndex, setFocusedRowIndex] = useState(-1);
   const [editingCell, setEditingCell] = useState<{ tradeId: string; field: 'status' | 'setup' } | null>(null);
+  const [showTrash, setShowTrash] = useState(false);
 
   useEffect(() => {
     try {
@@ -267,8 +270,8 @@ export const JournalView: React.FC<JournalViewProps> = ({
   const handleBulkDelete = async () => {
     const confirmed = await confirm({
       title: `Delete ${selectedTradeIds.length} selected trade(s)?`,
-      message: 'These trades will be permanently removed from your journal.',
-      confirmText: 'Delete selected',
+      message: 'They will be moved to Trash and kept for 30 days — you can restore them anytime.',
+      confirmText: 'Move to Trash',
       variant: 'danger'
     });
     if (confirmed) {
@@ -313,6 +316,13 @@ export const JournalView: React.FC<JournalViewProps> = ({
           >
             <FileSpreadsheet size={15} color="#10b981" /> Export CSV
           </button>
+
+          <button
+            onClick={() => setShowTrash(true)}
+            className="btn btn-secondary btn-sm"
+          >
+            <Trash2 size={15} color="var(--text-secondary)" /> Trash{trashedTrades.length > 0 ? ` (${trashedTrades.length})` : ''}
+          </button>
           
           <button onClick={onOpenTradeModal} className="btn btn-primary">
             <Plus size={16} strokeWidth={2.5} /> Log Trade
@@ -349,7 +359,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  backgroundColor: filters.status === st ? '#1e293b' : 'transparent',
+                  backgroundColor: filters.status === st ? 'var(--bg-chip)' : 'transparent',
                   color: filters.status === st ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                   transition: 'all 0.15s'
                 }}
@@ -841,8 +851,8 @@ export const JournalView: React.FC<JournalViewProps> = ({
                             onClick={async () => {
                               const confirmed = await confirm({
                                 title: `Delete trade ${trade.symbol}?`,
-                                message: 'This trade will be permanently removed from your journal.',
-                                confirmText: 'Delete trade',
+                                message: 'It will be moved to Trash and kept for 30 days — you can restore it anytime.',
+                                confirmText: 'Move to Trash',
                                 variant: 'danger'
                               });
                               if (confirmed) {
@@ -895,6 +905,9 @@ export const JournalView: React.FC<JournalViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Trash (soft-deleted trades) */}
+      <TrashModal isOpen={showTrash} onClose={() => setShowTrash(false)} />
 
       {/* Executive PDF Audit Report Modal */}
       <ExecutiveReportModal

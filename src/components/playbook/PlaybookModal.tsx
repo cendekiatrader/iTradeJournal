@@ -251,7 +251,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Jelaskan alasan logis mengapa strategi ini bekerja, narasi likuiditas, dan waktu eksekusi ideal..."
+              placeholder="Explain the logic behind why this strategy works, the liquidity narrative, and the ideal execution window..."
               className="input-control"
               style={{ minHeight: '65px' }}
             />
@@ -261,7 +261,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
           <div style={{ marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
               <label className="input-label" style={{ margin: 0 }}>
-                Syarat Wajib Masuk Posisi (Entry Rules)
+                Entry Rules (Mandatory Conditions)
               </label>
               <button
                 type="button"
@@ -269,7 +269,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                 className="btn btn-ghost btn-sm"
                 style={{ fontSize: '0.72rem', color: 'var(--theme-secondary)' }}
               >
-                + Tambah Rule
+                + Add Rule
               </button>
             </div>
             {rules.map((rule, idx) => (
@@ -309,7 +309,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                 className="btn btn-ghost btn-sm"
                 style={{ fontSize: '0.72rem', color: '#34d399' }}
               >
-                + Tambah Konfluensi
+                + Add Confluence
               </button>
             </div>
             {confluences.map((conf, idx) => (
@@ -341,7 +341,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
           <div style={{ marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
               <label className="input-label" style={{ margin: 0, color: '#f87171' }}>
-                Kesalahan yang Harus Dihindari (Anti-Pattern / Trap)
+                Mistakes to Avoid (Anti-Pattern / Trap)
               </label>
               <button
                 type="button"
@@ -349,7 +349,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                 className="btn btn-ghost btn-sm"
                 style={{ fontSize: '0.72rem', color: '#f87171' }}
               >
-                + Tambah Larangan
+                + Add Restriction
               </button>
             </div>
             {mistakesToAvoid.map((mistake, idx) => (
@@ -378,9 +378,9 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
           </div>
 
           {/* Chart Blueprint Screenshots (Before vs After) */}
-          <div style={{ padding: '12px', backgroundColor: 'var(--bg-sidebar)', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '16px' }}>
+          <div style={{ padding: '12px', backgroundColor: 'var(--bg-sidebar)', borderRadius: '10px', border: '1px solid var(--bg-chip)', marginBottom: '16px' }}>
             <label className="input-label" style={{ marginBottom: '8px' }}>
-              Chart Blueprint Contoh (Dukung Link URL atau Paste Gambar Langsung)
+              Example Chart Blueprint (supports URL links or pasted images)
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
@@ -392,12 +392,12 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                   value={chartBeforeUrl}
                   onChange={(e) => setChartBeforeUrl(e.target.value)}
                   onPaste={handlePasteImage(setChartBeforeUrl)}
-                  placeholder="Paste gambar atau ketik URL..."
+                  placeholder="Paste an image or type a URL..."
                   className="input-control font-mono"
                   style={{ fontSize: '0.78rem' }}
                 />
                 {chartBeforeUrl && (
-                  <div style={{ marginTop: '6px', height: '80px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #1e293b' }}>
+                  <div style={{ marginTop: '6px', height: '80px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--bg-chip)' }}>
                     <img src={chartBeforeUrl} alt="Before preview" style={{ width: '100%', height: '80px', objectFit: 'cover' }} />
                   </div>
                 )}
@@ -412,12 +412,12 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                   value={chartAfterUrl}
                   onChange={(e) => setChartAfterUrl(e.target.value)}
                   onPaste={handlePasteImage(setChartAfterUrl)}
-                  placeholder="Paste gambar atau ketik URL..."
+                  placeholder="Paste an image or type a URL..."
                   className="input-control font-mono"
                   style={{ fontSize: '0.78rem' }}
                 />
                 {chartAfterUrl && (
-                  <div style={{ marginTop: '6px', height: '80px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #1e293b' }}>
+                  <div style={{ marginTop: '6px', height: '80px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--bg-chip)' }}>
                     <img src={chartAfterUrl} alt="After preview" style={{ width: '100%', height: '80px', objectFit: 'cover' }} />
                   </div>
                 )}
@@ -427,10 +427,10 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
 
           <div className="modal-footer" style={{ marginTop: '16px' }}>
             <button type="button" onClick={onClose} className="btn btn-secondary">
-              Batal
+              Cancel
             </button>
             <button type="submit" className="btn btn-primary">
-              {initialPlaybook ? 'Simpan Perubahan' : 'Simpan ke Playbook'}
+              {initialPlaybook ? 'Save Changes' : 'Save to Playbook'}
             </button>
           </div>
         </form>

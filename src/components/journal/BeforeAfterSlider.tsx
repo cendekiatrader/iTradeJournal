@@ -231,7 +231,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
         /* Side-by-Side Mode */
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', backgroundColor: '#070b14' }}>
-            <div style={{ padding: '8px 12px', backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid #1e293b', fontSize: '0.74rem', fontWeight: 700, color: '#93c5fd' }}>
+            <div style={{ padding: '8px 12px', backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid var(--bg-chip)', fontSize: '0.74rem', fontWeight: 700, color: '#93c5fd' }}>
               {beforeLabel}
             </div>
             <img 
@@ -243,7 +243,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
           </div>
 
           <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', backgroundColor: '#070b14' }}>
-            <div style={{ padding: '8px 12px', backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid #1e293b', fontSize: '0.74rem', fontWeight: 700, color: '#34d399' }}>
+            <div style={{ padding: '8px 12px', backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid var(--bg-chip)', fontSize: '0.74rem', fontWeight: 700, color: '#34d399' }}>
               {afterLabel}
             </div>
             <img 

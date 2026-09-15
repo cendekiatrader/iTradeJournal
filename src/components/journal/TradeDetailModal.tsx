@@ -136,7 +136,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
                 </div>
               </div>
 
-              <div style={{ width: '1px', height: '28px', backgroundColor: '#1e293b' }} />
+              <div style={{ width: '1px', height: '28px', backgroundColor: 'var(--bg-chip)' }} />
 
               <div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -209,7 +209,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
 
           {/* Partial Exits Breakdown (if exists) */}
           {trade.exits && trade.exits.length > 0 && (
-            <div style={{ backgroundColor: '#070b1a', padding: '14px', borderRadius: '10px', border: '1px solid #1e293b' }}>
+            <div style={{ backgroundColor: '#070b1a', padding: '14px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#93c5fd', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span>Scaling Out / Partial Exits History</span>
               </div>
@@ -235,7 +235,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               Strategy Setup Model
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <span className="badge" style={{ backgroundColor: '#1e293b', color: 'var(--theme-secondary)', padding: '6px 12px', fontSize: '0.8rem' }}>
+              <span className="badge" style={{ backgroundColor: 'var(--bg-chip)', color: 'var(--theme-secondary)', padding: '6px 12px', fontSize: '0.8rem' }}>
                 {trade.setup}
               </span>
               <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>

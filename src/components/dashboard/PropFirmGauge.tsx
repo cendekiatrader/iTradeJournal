@@ -42,7 +42,7 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
             <CheckCircle2 size={12} /> Target Passed! 🎉
           </span>
         ) : (
-          <span className="badge" style={{ backgroundColor: '#1e293b', color: '#93c5fd' }}>
+          <span className="badge" style={{ backgroundColor: 'var(--bg-chip)', color: '#93c5fd' }}>
             Phase Evaluation
           </span>
         )}
@@ -61,7 +61,7 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
             </span>
           </div>
 
-          <div style={{ width: '100%', height: '8px', backgroundColor: '#1e293b', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+          <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--bg-chip)', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
             <div style={{
               width: `${targetProgress}%`,
               height: '100%',
@@ -94,7 +94,7 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
             </span>
           </div>
 
-          <div style={{ width: '100%', height: '8px', backgroundColor: '#1e293b', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+          <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--bg-chip)', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
             <div style={{
               width: `${Math.max(0, ddBufferPercent)}%`,
               height: '100%',

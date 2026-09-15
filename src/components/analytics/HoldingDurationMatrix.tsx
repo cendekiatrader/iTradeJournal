@@ -134,7 +134,7 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
             <span>Trade Holding Duration & Time Edge Matrix</span>
           </h3>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Temukan durasi tahan posisi yang menghasilkan win rate & profitabilitas tertinggi bagi Anda
+            Find the holding durations that give you the highest win rate & profitability
           </p>
         </div>
 
@@ -169,7 +169,7 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
                 padding: '16px',
                 borderRadius: '14px',
                 backgroundColor: '#070b16',
-                border: '1px solid #1e293b',
+                border: '1px solid var(--bg-chip)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -205,7 +205,7 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
                     fontWeight: 700,
                     padding: '2px 8px',
                     borderRadius: '6px',
-                    backgroundColor: bracket.trades > 0 ? '#1e293b' : 'rgba(255,255,255,0.04)',
+                    backgroundColor: bracket.trades > 0 ? 'var(--bg-chip)' : 'rgba(255,255,255,0.04)',
                     color: bracket.trades > 0 ? 'var(--text-strong)' : 'var(--text-muted)'
                   }}>
                     {bracket.trades} Trades

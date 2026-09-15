@@ -32,7 +32,8 @@ import {
   SlidersHorizontal,
   X,
   RotateCcw,
-  Check
+  Check,
+  NotebookPen
 } from 'lucide-react';
 import { Trade } from '../../types';
 
@@ -41,6 +42,7 @@ interface DashboardViewProps {
   onViewTradeDetail: (trade: Trade) => void;
   onNavigateToJournal: () => void;
   onNavigateToNews?: () => void;
+  onOpenWeeklyReview?: () => void;
 }
 
 const DEFAULT_CARD_VISIBILITY: Record<string, boolean> = {
@@ -77,7 +79,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenTradeModal,
   onViewTradeDetail,
   onNavigateToJournal,
-  onNavigateToNews
+  onNavigateToNews,
+  onOpenWeeklyReview
 }) => {
   const { metrics, equityCurve, activeAccount, filteredTrades, accountsMap, isLoadingCloud, accounts, isDemoMode, importSampleTrades } = useJournal();
   const { user } = useAuth();
@@ -214,13 +217,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={onOpenWeeklyReview}
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', fontSize: '0.8rem' }}
+            title="Guided weekly review — stats, wins, fixes, reflection"
+          >
+            <NotebookPen size={15} />
+            <span>Weekly Review</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setShowCustomizeModal(true)}
             className="btn btn-secondary btn-sm"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', fontSize: '0.8rem' }}
-            title="Pilih kartu metrik yang ingin ditampilkan atau disembunyikan"
+            title="Choose which metric cards to show or hide"
           >
             <SlidersHorizontal size={15} />
             <span>Customize Cards ({activeCount}/12)</span>
@@ -525,7 +539,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #1e293b', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                <tr style={{ borderBottom: '1px solid var(--bg-chip)', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                   <th style={{ padding: '10px 12px' }}>Opened At</th>
                   <th style={{ padding: '10px 12px' }}>Account</th>
                   <th style={{ padding: '10px 12px' }}>Symbol</th>
@@ -633,7 +647,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             tabIndex={-1}
             style={{
             backgroundColor: '#0c1322',
-            border: '1px solid #1e293b',
+            border: '1px solid var(--bg-chip)',
             borderRadius: '16px',
             width: '100%',
             maxWidth: '560px',

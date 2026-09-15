@@ -145,6 +145,24 @@ export const NotificationCenter: React.FC = () => {
       }
     });
 
+    // Backup reminder (data safety)
+    try {
+      const lastBackup = localStorage.getItem('itrade_last_backup_at');
+      if (trades.length > 0) {
+        const days = lastBackup ? Math.floor((Date.now() - new Date(lastBackup).getTime()) / 86400000) : null;
+        if (!lastBackup || (days !== null && days >= 14)) {
+          alerts.push({
+            id: 'backup-reminder',
+            severity: 'warning',
+            title: lastBackup && days !== null ? `Backup overdue — last export was ${days} days ago` : 'No backup exported yet',
+            detail: 'Export a JSON backup from the user menu to safeguard your data.'
+          });
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+
     return alerts.sort((a, b) => (a.severity === 'critical' ? -1 : 1) - (b.severity === 'critical' ? -1 : 1)).slice(0, 4);
   }, [accounts, trades]);
 

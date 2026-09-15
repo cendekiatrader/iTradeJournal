@@ -99,7 +99,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
         </div>
 
         {/* Tab Switcher */}
-        <div style={{ display: 'flex', gap: '6px', backgroundColor: '#070b16', padding: '4px', borderRadius: '10px', border: '1px solid #1e293b' }}>
+        <div style={{ display: 'flex', gap: '6px', backgroundColor: '#070b16', padding: '4px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
           <button
             type="button"
             onClick={() => setActiveSubTab('lot')}
@@ -220,8 +220,8 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
                       fontSize: '0.78rem',
                       fontWeight: 600,
                       border: '1px solid',
-                      borderColor: instrument === inst ? 'var(--theme-secondary-strong)' : '#1e293b',
-                      backgroundColor: instrument === inst ? '#1e293b' : 'var(--bg-sidebar)',
+                      borderColor: instrument === inst ? 'var(--theme-secondary-strong)' : 'var(--bg-chip)',
+                      backgroundColor: instrument === inst ? 'var(--bg-chip)' : 'var(--bg-sidebar)',
                       color: instrument === inst ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                       cursor: 'pointer'
                     }}
@@ -263,7 +263,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
                       fontSize: '0.75rem',
                       fontWeight: 700,
                       border: '1px solid',
-                      borderColor: riskPercent === pct ? '#ef4444' : '#1e293b',
+                      borderColor: riskPercent === pct ? '#ef4444' : 'var(--bg-chip)',
                       backgroundColor: riskPercent === pct ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-sidebar)',
                       color: riskPercent === pct ? 'var(--loss-red)' : 'var(--text-secondary)',
                       cursor: 'pointer'

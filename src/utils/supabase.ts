@@ -143,6 +143,7 @@ export const fetchCloudTrades = async (): Promise<Trade[] | null> => {
       lessons: item.lessons || '',
       screenshots: Array.isArray(item.screenshots) ? item.screenshots : [],
       status: item.status,
+      deletedAt: item.deleted_at || undefined,
       createdAt: item.created_at || new Date().toISOString(),
       updatedAt: item.created_at || new Date().toISOString()
     }));
@@ -184,7 +185,10 @@ export const syncTradeToCloud = async (trade: Trade): Promise<boolean> => {
       notes: trade.notes || null,
       lessons: trade.lessons || null,
       screenshots: trade.screenshots || [],
-      status: trade.status
+      status: trade.status,
+      // Only reference the column when set, so saves keep working even before
+      // the trash migration (deleted_at) has been applied.
+      ...(trade.deletedAt ? { deleted_at: trade.deletedAt } : {})
     };
 
     const { error } = await supabase.from('trades').upsert(payload);
@@ -516,7 +520,9 @@ export const fetchPublicTraderData = async (username: string): Promise<{
       .eq('user_id', profile.id)
       .order('entry_date', { ascending: false });
 
-    const trades: Trade[] = (tradesData || []).map(item => ({
+    const trades: Trade[] = (tradesData || [])
+      .filter((item: any) => !item.deleted_at)
+      .map(item => ({
       id: item.id,
       accountId: item.account_id,
       symbol: item.symbol,

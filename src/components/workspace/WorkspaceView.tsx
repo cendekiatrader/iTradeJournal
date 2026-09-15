@@ -266,7 +266,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {recent.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                Belum ada trade yang dicatat.
+                No trades recorded yet.
               </div>
             ) : (
               recent.map(t => (
@@ -405,13 +405,13 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
             </span>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Pilih dan susun modul live trading, chart, dan kalkulator untuk multi-monitor secara fleksibel
+            Arrange live trading modules, charts, and calculators freely across multi-monitor setups
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {/* Preset Layout Switcher */}
-          <div style={{ display: 'flex', backgroundColor: 'var(--bg-sidebar)', padding: '3px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+          <div style={{ display: 'flex', backgroundColor: 'var(--bg-sidebar)', padding: '3px', borderRadius: '8px', border: '1px solid var(--bg-chip)' }}>
             {[
               { id: 'split-2', label: 'Dual Split' },
               { id: 'split-3', label: 'Triple Screen' },
@@ -472,14 +472,14 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
             Workspace Belum Memiliki Modul Aktif
           </h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '460px', margin: '0 auto 16px' }}>
-            Klik tombol customize di atas untuk memilih modul yang ingin Anda tampilkan pada layar workspace ini.
+            Click the customize button above to choose which modules to show on this workspace.
           </p>
           <button
             type="button"
             onClick={() => setShowConfigModal(true)}
             className="btn btn-primary btn-sm"
           >
-            + Buka Pengaturan Modul
+            + Open Module Settings
           </button>
         </div>
       ) : (
@@ -528,9 +528,9 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                       type="button"
                       onClick={() => popOutMultiMonitorWindow(modId, modInfo.title)}
                       className="btn btn-ghost btn-icon btn-sm"
-                      title="Buka modul ini di Jendela Terpisah untuk Layar / Monitor 2 atau 3"
+                      title="Open this module in a separate window for monitor 2 or 3"
                       style={{ color: 'var(--text-secondary)', padding: '4px' }}
-                      aria-label="Buka modul ini di Jendela Terpisah untuk Layar / Monitor 2 atau 3"
+                      aria-label="Open this module in a separate window for monitor 2 or 3"
                     >
                       <ExternalLink size={14} />
                     </button>
@@ -539,7 +539,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                       type="button"
                       onClick={() => toggleModule(modId)}
                       className="btn btn-ghost btn-icon btn-sm"
-                      title="Sembunyikan modul ini"
+                      title="Hide this module"
                       style={{ color: 'var(--text-secondary)', padding: '4px' }}
                     >
                       <X size={14} />
@@ -567,7 +567,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                   Customize Workspace Modules & Presets
                 </h2>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  Pilih modul yang ingin diaktifkan. Pengaturan tersimpan permanen per akun di cloud.
+                  Pick the modules you want enabled. Settings are saved per account in the cloud.
                 </span>
               </div>
               <button onClick={() => setShowConfigModal(false)} className="btn btn-ghost btn-icon" aria-label="Close dialog">
@@ -577,7 +577,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
 
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* TradingView Symbol Input */}
-              <div style={{ padding: '12px', backgroundColor: 'var(--bg-sidebar)', borderRadius: '10px', border: '1px solid #1e293b' }}>
+              <div style={{ padding: '12px', backgroundColor: 'var(--bg-sidebar)', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
                 <label className="input-label" style={{ fontSize: '0.78rem', marginBottom: '6px', display: 'block' }}>
                   Default TradingView Symbol / Pair
                 </label>
@@ -596,7 +596,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                     className="btn btn-secondary btn-sm"
                     style={{ fontSize: '0.78rem' }}
                   >
-                    Simpan Symbol
+                    Save Symbol
                   </button>
                 </div>
               </div>
@@ -604,7 +604,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
               {/* Module Checklist Grid */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#93c5fd', textTransform: 'uppercase' }}>
-                  Daftar Modul Workspace
+                  Workspace Modules
                 </span>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
@@ -619,7 +619,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
                         style={{
                           padding: '10px 12px',
                           borderRadius: '8px',
-                          border: `1px solid ${isActive ? 'var(--theme-secondary-strong)' : '#1e293b'}`,
+                          border: `1px solid ${isActive ? 'var(--theme-secondary-strong)' : 'var(--bg-chip)'}`,
                           backgroundColor: isActive ? 'color-mix(in srgb, var(--theme-secondary-strong) 10%, transparent)' : 'var(--bg-sidebar)',
                           cursor: 'pointer',
                           display: 'flex',

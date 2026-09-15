@@ -25,6 +25,7 @@ import {
   Palette,
   Compass,
   Moon,
+  NotebookPen,
   Zap
 } from 'lucide-react';
 
@@ -39,6 +40,7 @@ interface CommandPaletteProps {
   onOpenThemeModal: () => void;
   onViewTradeDetail: (trade: Trade) => void;
   onStartTour: () => void;
+  onOpenWeeklyReview: () => void;
 }
 
 interface CommandItem {
@@ -173,6 +175,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
         run: () => {
           onClose();
           props.onStartTour();
+        }
+      },
+      {
+        id: 'action-weekly-review',
+        label: 'Start weekly review',
+        group: 'Actions',
+        icon: <NotebookPen size={15} />,
+        keywords: 'weekly review recap reflect journal friday goals',
+        run: () => {
+          onClose();
+          props.onOpenWeeklyReview();
         }
       },
       {

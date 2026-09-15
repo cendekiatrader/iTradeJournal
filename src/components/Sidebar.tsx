@@ -184,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="sidebar-badge" style={{
                       fontSize: '0.68rem',
                       fontFamily: 'var(--font-mono)',
-                      backgroundColor: isActive ? 'color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)' : '#1e293b',
+                      backgroundColor: isActive ? 'color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)' : 'var(--bg-chip)',
                       color: isActive ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                       padding: '2px 6px',
                       borderRadius: '4px',

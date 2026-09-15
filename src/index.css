@@ -34,6 +34,7 @@
 :root, [data-theme="emerald"] {
   --bg-main: #040814;
   --bg-card: #090f20;
+  --bg-chip: #1e293b;
   --bg-card-hover: #0f172e;
   --bg-surface: #101932;
   --bg-surface-elevated: #162244;

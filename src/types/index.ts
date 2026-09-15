@@ -80,6 +80,8 @@ export interface TradeExit {
 }
 
 export interface Trade {
+  /** Set when the trade was moved to Trash (soft delete). */
+  deletedAt?: string;
   id: string;
   accountId: string;
   symbol: string;

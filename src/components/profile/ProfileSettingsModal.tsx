@@ -109,7 +109,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile.username.trim()) {
-      showToast('Username tidak boleh kosong.', 'error');
+      showToast('Username cannot be empty.', 'error');
       return;
     }
 
@@ -122,10 +122,10 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
     setSaving(false);
 
     if (success) {
-      showToast('Pengaturan profil publik berhasil disimpan! 🚀', 'success');
+      showToast('Public profile settings saved! 🚀', 'success');
       onClose();
     } else {
-      showToast('Gagal menyimpan profil. Pastikan username belum dipakai.', 'error');
+      showToast('Failed to save profile. Make sure the username is not taken.', 'error');
     }
   };
 
@@ -156,7 +156,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 Verified Public Portfolio Link
               </h2>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                Bagikan track record & portofolio trading terverifikasi Anda ke publik
+                Share your verified track record & trading portfolio publicly
               </p>
             </div>
           </div>
@@ -191,7 +191,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                       {profile.isPublic ? 'Profil Publik Aktif' : 'Profil Publik Nonaktif (Privat)'}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                      {profile.isPublic ? 'Orang lain bisa melihat link portofolio Anda' : 'Hanya Anda yang bisa melihat journal Anda'}
+                      {profile.isPublic ? 'Anyone with the link can view your portfolio' : 'Only you can see your journal'}
                     </div>
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                     style={{ gap: '6px', padding: '6px 12px', whiteSpace: 'nowrap' }}
                   >
                     {copied ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-                    <span>{copied ? 'Tersalin' : 'Salin'}</span>
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
                   </button>
 
                   <a
@@ -267,7 +267,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                     target="_blank"
                     rel="noreferrer"
                     className="btn btn-ghost btn-icon btn-sm"
-                    title="Buka Halaman Publik"
+                    title="Open Public Page"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     <ExternalLink size={16} />
@@ -318,7 +318,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 <textarea
                   value={profile.bio}
                   onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
-                  placeholder="Ceritakan gaya trading Anda, instrumen favorit, atau pengalaman trading..."
+                  placeholder="Tell us about your trading style, favorite instruments, or experience..."
                   rows={2}
                   className="input-control"
                   style={{ width: '100%', resize: 'none' }}
@@ -363,7 +363,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 gap: '10px'
               }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>
-                  Pengaturan Privasi Publik:
+                  Public Privacy Settings:
                 </div>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-strong)' }}>
@@ -383,7 +383,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                     onChange={(e) => setProfile(prev => ({ ...prev, showEquityCurve: e.target.checked }))}
                     style={{ accentColor: 'var(--theme-secondary-strong)' }}
                   />
-                  <span>Tampilkan Grafik Equity Curve</span>
+                  <span>Show Equity Curve Chart</span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-strong)' }}>
@@ -393,7 +393,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                     onChange={(e) => setProfile(prev => ({ ...prev, showTradesHistory: e.target.checked }))}
                     style={{ accentColor: 'var(--theme-secondary-strong)' }}
                   />
-                  <span>Tampilkan Daftar Riwayat Trade</span>
+                  <span>Show Trade History</span>
                 </label>
               </div>
 
@@ -470,11 +470,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
               {/* Submit / Save Button */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
                 <button type="button" onClick={onClose} className="btn btn-secondary">
-                  Batal
+                  Cancel
                 </button>
                 <button type="submit" disabled={saving} className="btn btn-primary" style={{ gap: '6px' }}>
                   <Save size={15} />
-                  <span>{saving ? 'Menyimpan...' : 'Simpan Profil'}</span>
+                  <span>{saving ? 'Saving...' : 'Save Profile'}</span>
                 </button>
               </div>
             </form>

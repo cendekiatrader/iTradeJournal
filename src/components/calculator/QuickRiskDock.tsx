@@ -106,7 +106,7 @@ export const QuickRiskDock: React.FC = () => {
     const lotText = lot > 0 ? (instrument === 'Crypto' ? (lot >= 10 ? lot.toFixed(2) : lot.toFixed(4)) : lot.toFixed(2)) : '0.00';
 
     const pipUnitLabel = instrument === 'Crypto' ? 'RECOMMENDED UNITS' : instrument === 'Indices' ? 'RECOMMENDED CONTRACTS' : 'RECOMMENDED LOT';
-    const pipBtnLabel = instrument === 'Crypto' ? 'Salin Unit' : instrument === 'Indices' ? 'Salin Ctr' : 'Salin Lot';
+    const pipBtnLabel = instrument === 'Crypto' ? 'Copy Units' : instrument === 'Indices' ? 'Copy Ctr' : 'Copy Lot';
 
     pipWindow.document.body.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:10px; height:100%; box-sizing:border-box;">
@@ -186,7 +186,7 @@ export const QuickRiskDock: React.FC = () => {
       copyBtn.addEventListener('click', () => {
         pipWindow.navigator.clipboard.writeText(lotText);
         const textSpan = pipWindow.document.getElementById('pip-copy-text');
-        if (textSpan) textSpan.innerText = 'Tersalin!';
+        if (textSpan) textSpan.innerText = 'Copied!';
         setTimeout(() => {
           if (textSpan) textSpan.innerText = pipBtnLabel;
         }, 1500);
@@ -219,7 +219,7 @@ export const QuickRiskDock: React.FC = () => {
   // Launch Always-on-Top Document Picture-in-Picture
   const launchAlwaysOnTopPiP = async () => {
     if (!('documentPictureInPicture' in window)) {
-      showToast('Browser Anda belum mendukung Window Always-On-Top PiP (Gunakan Chrome / Edge terbaru)', 'error');
+      showToast('Your browser does not support Always-On-Top PiP windows (use the latest Chrome / Edge)', 'error');
       return;
     }
 
@@ -321,9 +321,9 @@ export const QuickRiskDock: React.FC = () => {
                   type="button"
                   onClick={launchAlwaysOnTopPiP}
                   className="btn btn-ghost btn-icon btn-sm"
-                  title="Buka Window Always-on-Top di Desktop (Di atas MT5 / TradingView)"
+                  title="Open always-on-top window (above MT5 / TradingView)"
                   style={{ color: isPipActive ? '#34d399' : 'var(--theme-secondary)', padding: '4px' }}
-                  aria-label="Buka Window Always-on-Top di Desktop (Di atas MT5 / TradingView)"
+                  aria-label="Open always-on-top window (above MT5 / TradingView)"
                 >
                   <ExternalLink size={15} />
                 </button>
@@ -365,7 +365,7 @@ export const QuickRiskDock: React.FC = () => {
                       borderRadius: '4px',
                       fontSize: '0.7rem',
                       fontWeight: 700,
-                      backgroundColor: riskPercent === r ? 'var(--theme-secondary-strong)' : '#1e293b',
+                      backgroundColor: riskPercent === r ? 'var(--theme-secondary-strong)' : 'var(--bg-chip)',
                       color: riskPercent === r ? '#ffffff' : 'var(--text-secondary)',
                       border: 'none',
                       cursor: 'pointer'
@@ -396,9 +396,9 @@ export const QuickRiskDock: React.FC = () => {
                     borderRadius: '6px',
                     fontSize: '0.7rem',
                     fontWeight: 600,
-                    backgroundColor: instrument === ast ? '#1e293b' : 'transparent',
+                    backgroundColor: instrument === ast ? 'var(--bg-chip)' : 'transparent',
                     color: instrument === ast ? 'var(--theme-secondary)' : 'var(--text-muted)',
-                    border: `1px solid ${instrument === ast ? 'var(--theme-secondary-strong)' : '#1e293b'}`,
+                    border: `1px solid ${instrument === ast ? 'var(--theme-secondary-strong)' : 'var(--bg-chip)'}`,
                     cursor: 'pointer'
                   }}
                 >
@@ -475,13 +475,13 @@ export const QuickRiskDock: React.FC = () => {
                 style={{ padding: '6px 10px', fontSize: '0.75rem', gap: '4px' }}
               >
                 {copied ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
-                <span>{copied ? 'Tersalin' : `Salin ${unitLabelSingular}`}</span>
+                <span>{copied ? 'Copied' : `Copy ${unitLabelSingular}`}</span>
               </button>
             </div>
 
             {/* Always on top tip */}
             <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-              Klik ikon <ExternalLink size={10} style={{ display: 'inline' }} /> untuk window melayang di atas chart Desktop (Always-On-Top)
+              Click the <ExternalLink size={10} style={{ display: 'inline' }} /> icon for a floating window above desktop charts (Always-On-Top)
             </div>
           </div>
         )}

@@ -26,7 +26,9 @@ import {
   loadTradeAudit,
   saveTradeAudit,
   loadCustomFieldDefs,
-  saveCustomFieldDefs
+  saveCustomFieldDefs,
+  loadTrashedTrades,
+  saveTrashedTrades,
 } from '../utils/storage';
 import { 
   isSupabaseConfigured, 
@@ -112,6 +114,10 @@ interface JournalContextType {
   tradeAudit: TradeAuditEntry[];
   getTradeAudit: (tradeId: string) => TradeAuditEntry[];
   revertTradeAuditEntry: (entryId: string) => void;
+  trashedTrades: Trade[];
+  restoreTrashedTrades: (ids: string[]) => void;
+  deleteForever: (ids: string[]) => void;
+  emptyTrash: () => void;
   isDemoMode: boolean;
   enterDemoMode: () => void;
   exitDemoMode: () => void;
@@ -141,6 +147,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { user } = useAuth();
   const [accounts, setAccounts] = useState<TradingAccount[]>(() => loadAccounts());
   const [trades, setTrades] = useState<Trade[]>(() => loadTrades());
+  const [trashedTrades, setTrashedTrades] = useState<Trade[]>(() => loadTrashedTrades());
   const [withdrawals, setWithdrawals] = useState<WithdrawalRecord[]>(() => loadWithdrawals());
   const [playbooks, setPlaybooks] = useState<PlaybookModel[]>(() => loadPlaybooks());
   const [activeAccountId, setActiveAccountIdState] = useState<string>(() => loadActiveAccountId());
@@ -171,7 +178,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsStealthMode(prev => {
       const next = !prev;
       setStealthModeState(next);
-      showToast(next ? '👁️ Stealth Mode Aktif: Saldo disensor' : '👁️ Stealth Mode Nonaktif: Saldo ditampilkan', 'info');
+      showToast(next ? '👁️ Stealth Mode ON: balances hidden' : '👁️ Stealth Mode OFF: balances visible', 'info');
       return next;
     });
   }, []);
@@ -200,8 +207,13 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setAccounts(cloudAccounts || []);
           saveAccounts(cloudAccounts || []);
 
-          setTrades(cloudTrades || []);
-          saveTrades(cloudTrades || []);
+          const allCloudTrades = cloudTrades || [];
+          const activeCloudTrades = allCloudTrades.filter(t => !t.deletedAt);
+          const cloudTrashed = allCloudTrades.filter(t => t.deletedAt);
+          setTrades(activeCloudTrades);
+          saveTrades(activeCloudTrades);
+          setTrashedTrades(cloudTrashed);
+          saveTrashedTrades(cloudTrashed);
 
           setWithdrawals(cloudWithdrawals || []);
           saveWithdrawals(cloudWithdrawals || []);
@@ -227,12 +239,14 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const localPbs = loadPlaybooks();
       setAccounts(localAccs.length > 0 ? localAccs : INITIAL_ACCOUNTS);
       setTrades(localTrades.length > 0 ? localTrades : INITIAL_TRADES);
+      setTrashedTrades(loadTrashedTrades());
       setWithdrawals(localWds.length > 0 ? localWds : INITIAL_WITHDRAWALS);
       setPlaybooks(localPbs);
     } else if (!user) {
       // Supabase configured but logged out (the public landing page is shown instead)
       setAccounts([]);
       setTrades([]);
+      setTrashedTrades([]);
       setWithdrawals([]);
       setPlaybooks([]);
     }
@@ -253,6 +267,24 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trades]);
+
+  useEffect(() => {
+    saveTrashedTrades(trashedTrades);
+  }, [trashedTrades]);
+
+  // Auto-purge trashed trades older than 30 days
+  useEffect(() => {
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    setTrashedTrades(prev => {
+      const kept = prev.filter(t => t.deletedAt && new Date(t.deletedAt).getTime() > cutoff);
+      if (kept.length === prev.length) return prev;
+      if (isSupabaseConfigured()) {
+        prev.filter(t => !kept.includes(t)).forEach(t => deleteTradeFromCloud(t.id));
+      }
+      return kept;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     saveWithdrawals(withdrawals);
@@ -604,43 +636,100 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteTrade = (id: string) => {
     const targetTrade = trades.find(t => t.id === id);
+    if (!targetTrade) return;
+    const trashedTrade: Trade = { ...targetTrade, deletedAt: new Date().toISOString() };
     setTrades(prev => {
       const updatedTrades = prev.filter(t => t.id !== id);
       setAccounts(accs => {
         const recalculated = recalculateAccountBalances(accs, updatedTrades, withdrawals);
-        if (targetTrade) {
-          const targetAcc = recalculated.find(a => a.id === targetTrade.accountId);
-          if (targetAcc && isSupabaseConfigured()) {
-            syncAccountToCloud(targetAcc);
-          }
+        const targetAcc = recalculated.find(a => a.id === targetTrade.accountId);
+        if (targetAcc && isSupabaseConfigured()) {
+          syncAccountToCloud(targetAcc);
         }
         return recalculated;
       });
       return updatedTrades;
     });
+    setTrashedTrades(prev => [trashedTrade, ...prev]);
     if (isSupabaseConfigured()) {
-      deleteTradeFromCloud(id);
+      syncTradeToCloud(trashedTrade);
     }
-    showToast('Trade deleted from journal.', 'info', targetTrade ? {
+    showToast('Trade moved to Trash (kept 30 days).', 'info', {
       label: 'Undo',
-      onClick: () => restoreTrades([targetTrade])
-    } : undefined);
+      onClick: () => restoreTrashedTrades([id])
+    });
   };
 
   const bulkDeleteTrades = (ids: string[]) => {
     const snapshots = trades.filter(t => ids.includes(t.id));
+    if (snapshots.length === 0) return;
+    const stamp = new Date().toISOString();
+    const trashed = snapshots.map(t => ({ ...t, deletedAt: stamp }));
     setTrades(prev => {
       const updatedTrades = prev.filter(t => !ids.includes(t.id));
       setAccounts(accs => recalculateAccountBalances(accs, updatedTrades, withdrawals));
       return updatedTrades;
     });
+    setTrashedTrades(prev => [...trashed, ...prev]);
+    if (isSupabaseConfigured()) {
+      trashed.forEach(t => syncTradeToCloud(t));
+    }
+    showToast(`${ids.length} trades moved to Trash (kept 30 days).`, 'info', {
+      label: 'Undo',
+      onClick: () => restoreTrashedTrades(ids)
+    });
+  };
+
+  // Trash (soft delete) helpers
+  const restoreTrashedTrades = (ids: string[]) => {
+    if (ids.length === 0) return;
+    const toRestore = trashedTrades.filter(t => ids.includes(t.id));
+    if (toRestore.length === 0) return;
+    const restored: Trade[] = toRestore.map(t => {
+      const copy: Trade = { ...t };
+      delete copy.deletedAt;
+      return copy;
+    });
+    setTrashedTrades(prev => prev.filter(t => !ids.includes(t.id)));
+    setTrades(prev => {
+      const missing = restored.filter(s => !prev.some(t => t.id === s.id));
+      if (missing.length === 0) return prev;
+      const next = [...missing, ...prev];
+      setAccounts(accs => {
+        const recalculated = recalculateAccountBalances(accs, next, withdrawals);
+        missing.forEach(s => {
+          const acc = recalculated.find(a => a.id === s.accountId);
+          if (acc && isSupabaseConfigured()) {
+            syncAccountToCloud(acc);
+          }
+        });
+        return recalculated;
+      });
+      return next;
+    });
+    if (isSupabaseConfigured()) {
+      restored.forEach(s => syncTradeToCloud(s));
+    }
+    showToast(restored.length > 1 ? `${restored.length} trades restored.` : 'Trade restored.', 'success');
+  };
+
+  const deleteForever = (ids: string[]) => {
+    if (ids.length === 0) return;
+    setTrashedTrades(prev => prev.filter(t => !ids.includes(t.id)));
     if (isSupabaseConfigured()) {
       bulkDeleteTradesFromCloud(ids);
     }
-    showToast(`${ids.length} trades deleted.`, 'info', snapshots.length > 0 ? {
-      label: 'Undo',
-      onClick: () => restoreTrades(snapshots)
-    } : undefined);
+    showToast(ids.length > 1 ? `${ids.length} trades deleted forever.` : 'Trade deleted forever.', 'info');
+  };
+
+  const emptyTrash = () => {
+    if (trashedTrades.length === 0) return;
+    const ids = trashedTrades.map(t => t.id);
+    setTrashedTrades([]);
+    if (isSupabaseConfigured()) {
+      bulkDeleteTradesFromCloud(ids);
+    }
+    showToast('Trash emptied.', 'info');
   };
 
   // Withdrawal Actions
@@ -877,6 +966,10 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         tradeAudit,
         getTradeAudit,
         revertTradeAuditEntry,
+        trashedTrades,
+        restoreTrashedTrades,
+        deleteForever,
+        emptyTrash,
         isDemoMode,
         enterDemoMode,
         exitDemoMode,

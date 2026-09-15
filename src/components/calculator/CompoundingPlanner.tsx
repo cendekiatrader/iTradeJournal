@@ -68,7 +68,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
       <div className="card" style={{ padding: '20px' }}>
         <div style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Sliders size={18} color="var(--theme-secondary-strong)" />
-          <span>Pengaturan Target Compounding & Withdrawal</span>
+          <span>Compounding & Withdrawal Targets</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
@@ -113,7 +113,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           {/* Duration in Months */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Durasi Periode (Bulan):</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Period Length (Months):</span>
               <span style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)' }}>
                 {periodsCount} Bulan
               </span>
@@ -153,17 +153,17 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
       {/* Summary KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
         <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), #090e1c)' }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Saldo Akhir Portofolio</div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Final Portfolio Balance</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>
             {formatCurrency(tableData.finalBalance, currency)}
           </div>
           <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '2px' }}>
-            +{formatPercent(((tableData.finalBalance - startingPrincipal) / startingPrincipal) * 100)} Pertumbuhan
+            +{formatPercent(((tableData.finalBalance - startingPrincipal) / startingPrincipal) * 100)} Growth
           </div>
         </div>
 
         <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent), #090e1c)' }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Uang Masuk Bank</div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Banked Payouts</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#38bdf8', marginTop: '4px' }}>
             {formatCurrency(tableData.totalWithdrawn, currency)}
           </div>
@@ -198,10 +198,10 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <div>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Roadmap Pertumbuhan Saldo Bulan per Bulan
+              Month-by-Month Balance Growth Roadmap
             </h3>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-              Simulasi compounding otomatis dengan target +{returnRate}% per bulan
+              Automatic compounding simulation targeting +{returnRate}% per month
             </span>
           </div>
         </div>
@@ -209,12 +209,12 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #1e293b', color: 'var(--text-secondary)', textAlign: 'left' }}>
+              <tr style={{ borderBottom: '1px solid var(--bg-chip)', color: 'var(--text-secondary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 8px' }}>Bulan</th>
-                <th style={{ padding: '10px 8px' }}>Saldo Awal</th>
+                <th style={{ padding: '10px 8px' }}>Starting Balance</th>
                 <th style={{ padding: '10px 8px', color: '#34d399' }}>Profit (+{returnRate}%)</th>
                 <th style={{ padding: '10px 8px', color: '#f59e0b' }}>Tarik Tunai ({withdrawalRate}%)</th>
-                <th style={{ padding: '10px 8px', textAlign: 'right' }}>Saldo Akhir</th>
+                <th style={{ padding: '10px 8px', textAlign: 'right' }}>Ending Balance</th>
                 <th style={{ padding: '10px 8px', textAlign: 'right' }}>Akumulasi WD</th>
               </tr>
             </thead>

@@ -32,11 +32,11 @@ export const ResetPasswordModal: React.FC = () => {
     setErrorMessage('');
 
     if (password.length < 6) {
-      setErrorMessage('Password minimal harus 6 karakter.');
+      setErrorMessage('Password must be at least 6 characters.');
       return;
     }
     if (password !== confirmPassword) {
-      setErrorMessage('Konfirmasi password tidak cocok.');
+      setErrorMessage('Passwords do not match.');
       return;
     }
 
@@ -45,10 +45,10 @@ export const ResetPasswordModal: React.FC = () => {
     setLoading(false);
 
     if (error) {
-      setErrorMessage(error.message || 'Gagal mengubah password. Silakan coba lagi.');
+      setErrorMessage(error.message || 'Failed to update password. Please try again.');
     } else {
       setSuccess(true);
-      showToast('Password Anda berhasil diperbarui! 🔑', 'success');
+      showToast('Password updated successfully! 🔑', 'success');
       setTimeout(() => {
         setIsPasswordRecovery(false);
         // Clear hash from URL
@@ -116,7 +116,7 @@ export const ResetPasswordModal: React.FC = () => {
                 Password Berhasil Diperbarui!
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                Anda sekarang sudah bisa menggunakan password baru untuk login.
+                You can now sign in with your new password.
               </p>
             </div>
           ) : (
@@ -154,7 +154,7 @@ export const ResetPasswordModal: React.FC = () => {
               </div>
 
               <div className="input-group" style={{ margin: 0 }}>
-                <label className="input-label">Konfirmasi Password Baru</label>
+                <label className="input-label">Confirm New Password</label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input

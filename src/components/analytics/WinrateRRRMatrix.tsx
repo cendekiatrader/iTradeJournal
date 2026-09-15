@@ -120,7 +120,7 @@ export const WinrateRRRMatrix: React.FC = () => {
       <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 5%, transparent)', borderRadius: '10px', border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
         <Zap size={18} color="var(--theme-secondary)" style={{ flexShrink: 0, marginTop: '2px' }} />
         <div style={{ fontSize: '0.8rem', color: '#93c5fd', lineHeight: 1.6 }}>
-          <strong>Edge Sustainability Insight:</strong> Formula ekspektasi dihitung dari <code>E = (Winrate × RRR) - Lossrate</code>. Area merah menunjukkan kombinasi Winrate/RRR yang akan menggerus modal Anda secara perlahan (*Bleeding Edge*), sedangkan area hijau tua menunjukkan *Cash Cow Zone* (Ekspektasi tinggi per trade).
+          <strong>Edge Sustainability Insight:</strong> Expectancy formula: <code>E = (Winrate × RRR) - Lossrate</code>. Red areas mark Winrate/RRR combinations that slowly bleed your capital (*Bleeding Edge*), while dark green marks the *Cash Cow Zone* (high expectancy per trade).
         </div>
       </div>
     </div>

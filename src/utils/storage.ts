@@ -3,6 +3,7 @@ import { INITIAL_ACCOUNTS, INITIAL_TRADES, INITIAL_WITHDRAWALS } from '../data/s
 
 const ACCOUNTS_STORAGE_KEY = 'itrade_accounts_v1';
 const TRADES_STORAGE_KEY = 'itrade_trades_v1';
+const TRASHED_STORAGE_KEY = 'itrade_trashed_trades_v1';
 const WITHDRAWALS_STORAGE_KEY = 'itrade_withdrawals_v1';
 const PLAYBOOK_STORAGE_KEY = 'itrade_playbooks_v1';
 const ACTIVE_ACCOUNT_KEY = 'itrade_active_account_v1';
@@ -15,13 +16,13 @@ export const INITIAL_PLAYBOOKS: PlaybookModel[] = [
     timeframe: '1m / 5m',
     winrateTarget: 70,
     rrTarget: 2.5,
-    description: 'Setup likuiditas sesi London pasca sapuan Asian Range High/Low diikuti Market Structure Shift (MSS) dan entry pada 50% Fair Value Gap.',
+    description: 'London session liquidity setup after an Asian Range High/Low sweep, followed by a Market Structure Shift (MSS) and entry at the 50% Fair Value Gap.',
     rules: [
-      'Asian High / Low tersapu bersih sebelum 03:00 AM EST',
-      'Terjadi displacement kuat membentuk Fair Value Gap (FVG)',
-      'Entry di 50% Consequent Encroachment (CE) FVG',
-      'Stop Loss di bawah/atas swing trigger displacement',
-      'Take Profit minimal 1:2 R:R atau opposite liquidity pool'
+      'Asian High / Low fully swept before 03:00 AM EST',
+      'Strong displacement creates a Fair Value Gap (FVG)',
+      'Entry at the 50% Consequent Encroachment (CE) of the FVG',
+      'Stop Loss below/above the displacement trigger swing',
+      'Take Profit at minimum 1:2 R:R or the opposite liquidity pool'
     ],
     confluences: [
       'Asian Session High Swept',
@@ -30,9 +31,9 @@ export const INITIAL_PLAYBOOKS: PlaybookModel[] = [
       'London Killzone Active'
     ],
     mistakesToAvoid: [
-      'Entry sebelum Asian High/Low tersapu',
-      'Memaksa entry ketika FVG sudah dimitigasi penuh',
-      'Menahan posisi melewati news CPI/NFP'
+      'Entering before the Asian High/Low is swept',
+      'Forcing an entry after the FVG is fully mitigated',
+      'Holding through CPI/NFP news'
     ],
     rating: 5,
     createdAt: new Date().toISOString(),
@@ -45,23 +46,23 @@ export const INITIAL_PLAYBOOKS: PlaybookModel[] = [
     timeframe: '15m / 1H',
     winrateTarget: 65,
     rrTarget: 3.0,
-    description: 'Fakeout / false breakout pada Previous Day High/Low (PDH/PDL) yang gagal closing candle di luar range dan langsung ditutup kembali ke dalam range.',
+    description: 'Fakeout / false breakout at the Previous Day High/Low (PDH/PDL) where the candle fails to close outside the range and gets rejected back inside.',
     rules: [
-      'Identifikasi PDH / PDL pada Higher Timeframe (4H / Daily)',
-      'Candle menyapu level tersebut hanya dengan wick (ekor)',
-      'Candle berikutnya close kembali ke dalam range (Rejection)',
-      'Entry pada market order begitu candle rejection close',
-      'Target TP pada equilibrium / midrange atau opposite liquidity'
+      'Identify PDH / PDL on the higher timeframe (4H / Daily)',
+      'Candle sweeps the level with a wick only',
+      'Next candle closes back inside the range (rejection)',
+      'Enter at market as soon as the rejection candle closes',
+      'Take Profit at equilibrium / midrange or opposite liquidity'
     ],
     confluences: [
       'Previous Day High / Low Sweep',
       'Candle Rejection Wick',
       'Premium / Discount Array',
-      'Divergence pada RSI'
+      'RSI Divergence'
     ],
     mistakesToAvoid: [
-      'Entry saat candle HTF masih closing solid di luar range',
-      'Menempatkan SL terlalu tipis pada volatilitas tinggi'
+      'Entering while the HTF candle is still closing solid outside the range',
+      'Placing the SL too tight in high volatility'
     ],
     rating: 5,
     createdAt: new Date().toISOString(),
@@ -142,6 +143,29 @@ export const saveTrades = (trades: Trade[]): boolean => {
   }
 };
 
+export const loadTrashedTrades = (): Trade[] => {
+  try {
+    const saved = localStorage.getItem(TRASHED_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.error('Error loading trashed trades from localStorage:', err);
+  }
+  return [];
+};
+
+export const saveTrashedTrades = (trades: Trade[]): boolean => {
+  try {
+    localStorage.setItem(TRASHED_STORAGE_KEY, JSON.stringify(trades));
+    return true;
+  } catch (err) {
+    console.error('Error saving trashed trades to localStorage:', err);
+    return false;
+  }
+};
+
 export const loadWithdrawals = (): WithdrawalRecord[] => {
   try {
     const saved = localStorage.getItem(WITHDRAWALS_STORAGE_KEY);
@@ -209,6 +233,12 @@ export const exportDatabaseToJSON = (
     trades,
     withdrawals
   };
+
+  try {
+    localStorage.setItem('itrade_last_backup_at', new Date().toISOString());
+  } catch {
+    /* ignore */
+  }
 
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
