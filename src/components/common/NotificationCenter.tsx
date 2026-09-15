@@ -3,7 +3,7 @@ import { useJournal } from '../../context/JournalContext';
 import { fetchReviewComments, ReviewComment } from '../../utils/review';
 import { isSupabaseConfigured } from '../../utils/supabase';
 import { formatCurrency } from '../../utils/formatters';
-import { Bell, ShieldAlert, MessageSquare, AlertTriangle } from 'lucide-react';
+import { Bell, ShieldAlert, MessageSquare, AlertTriangle, Check, CheckCheck, Trash2 } from 'lucide-react';
 
 interface RiskAlert {
   id: string;
@@ -16,7 +16,27 @@ interface MentorItem extends ReviewComment {
   token: string;
 }
 
-const SEEN_KEY = 'itrade_notif_seen_at';
+const READ_KEY = 'itrade_notif_read_v1';
+const DISMISSED_KEY = 'itrade_notif_dismissed_v1';
+const MAX_TRACKED = 200;
+
+const loadIds = (key: string): string[] => {
+  try {
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveIds = (key: string, ids: string[]) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(ids.slice(-MAX_TRACKED)));
+  } catch {
+    /* ignore */
+  }
+};
 
 const sectionLabel: React.CSSProperties = {
   padding: '8px 8px 4px',
@@ -35,20 +55,35 @@ const rowStyle: React.CSSProperties = {
   borderRadius: '9px'
 };
 
+const iconBtnStyle: React.CSSProperties = {
+  padding: '3px',
+  borderRadius: '6px',
+  flexShrink: 0,
+  lineHeight: 0
+};
+
 export const NotificationCenter: React.FC = () => {
   const { accounts, trades } = useJournal();
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<MentorItem[]>([]);
-  const [seenAt, setSeenAt] = useState(() => localStorage.getItem(SEEN_KEY) || '');
+  const [readIds, setReadIds] = useState<string[]>(() => loadIds(READ_KEY));
+  const [dismissedIds, setDismissedIds] = useState<string[]>(() => loadIds(DISMISSED_KEY));
   const [fetchTick, setFetchTick] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    saveIds(READ_KEY, readIds);
+  }, [readIds]);
+
+  useEffect(() => {
+    saveIds(DISMISSED_KEY, dismissedIds);
+  }, [dismissedIds]);
 
   // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
         setOpen(false);
-        setSeenAt(new Date().toISOString());
       }
     };
     document.addEventListener('mousedown', handler);
@@ -91,6 +126,7 @@ export const NotificationCenter: React.FC = () => {
     const alerts: RiskAlert[] = [];
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     accounts.forEach((acc) => {
       const closed = trades.filter(
@@ -106,9 +142,10 @@ export const NotificationCenter: React.FC = () => {
         if (limit > 0 && todayPnl < 0) {
           const used = Math.min(100, (-todayPnl / limit) * 100);
           if (used >= 50) {
+            const level = used >= 80 ? 'critical' : 'warning';
             alerts.push({
-              id: `daily-${acc.id}`,
-              severity: used >= 80 ? 'critical' : 'warning',
+              id: `daily-${acc.id}-${dateKey}-${level}`,
+              severity: level,
               title: `${acc.name}: ${used.toFixed(0)}% of the daily loss limit used`,
               detail: `Today ${formatCurrency(todayPnl, acc.currency)} of ${formatCurrency(-limit, acc.currency)} allowed`
             });
@@ -134,9 +171,10 @@ export const NotificationCenter: React.FC = () => {
         if (allowed > 0 && maxDD > 0) {
           const bufferPct = Math.max(0, ((allowed - maxDD) / allowed) * 100);
           if (bufferPct < 35) {
+            const level = bufferPct < 20 ? 'critical' : 'warning';
             alerts.push({
-              id: `dd-${acc.id}`,
-              severity: bufferPct < 20 ? 'critical' : 'warning',
+              id: `dd-${acc.id}-${Math.floor(bufferPct / 10)}-${level}`,
+              severity: level,
               title: `${acc.name}: only ${bufferPct.toFixed(0)}% drawdown buffer left`,
               detail: `Max drawdown used ${formatCurrency(maxDD, acc.currency)} of ${formatCurrency(allowed, acc.currency)}`
             });
@@ -152,7 +190,7 @@ export const NotificationCenter: React.FC = () => {
         const days = lastBackup ? Math.floor((Date.now() - new Date(lastBackup).getTime()) / 86400000) : null;
         if (!lastBackup || (days !== null && days >= 14)) {
           alerts.push({
-            id: 'backup-reminder',
+            id: `backup-${lastBackup ? lastBackup.slice(0, 10) : 'never'}`,
             severity: 'warning',
             title: lastBackup && days !== null ? `Backup overdue — last export was ${days} days ago` : 'No backup exported yet',
             detail: 'Export a JSON backup from the user menu to safeguard your data.'
@@ -166,15 +204,60 @@ export const NotificationCenter: React.FC = () => {
     return alerts.sort((a, b) => (a.severity === 'critical' ? -1 : 1) - (b.severity === 'critical' ? -1 : 1)).slice(0, 4);
   }, [accounts, trades]);
 
-  const newCommentCount = comments.filter((c) => !seenAt || c.createdAt > seenAt).length;
-  const count = riskAlerts.length + newCommentCount;
+  const visibleAlerts = riskAlerts.filter((a) => !dismissedIds.includes(a.id));
+  const visibleComments = comments.filter((c) => !dismissedIds.includes(`comment-${c.id}`));
+  const allVisibleIds = [...visibleAlerts.map((a) => a.id), ...visibleComments.map((c) => `comment-${c.id}`)];
+  const unreadIds = allVisibleIds.filter((id) => !readIds.includes(id));
+  const count = unreadIds.length;
+  const totalVisible = allVisibleIds.length;
+
+  const isUnread = (id: string) => !readIds.includes(id) && !dismissedIds.includes(id);
+
+  const toggleRead = (id: string) => {
+    setReadIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const markAllRead = () => {
+    setReadIds((prev) => Array.from(new Set([...prev, ...allVisibleIds])));
+  };
+
+  const dismiss = (id: string) => {
+    setDismissedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setReadIds((prev) => prev.filter((x) => x !== id));
+  };
+
+  const actionButtons = (id: string, label: string) => {
+    const read = readIds.includes(id);
+    return (
+      <div style={{ display: 'flex', gap: '2px', flexShrink: 0, marginLeft: 'auto' }}>
+        <button
+          type="button"
+          className="btn btn-ghost btn-icon btn-sm"
+          style={{ ...iconBtnStyle, opacity: read ? 0.4 : 1 }}
+          onClick={() => toggleRead(id)}
+          title={read ? `Mark "${label}" as unread` : `Mark "${label}" as read`}
+          aria-label={read ? `Mark ${label} as unread` : `Mark ${label} as read`}
+          aria-pressed={read}
+        >
+          <Check size={13} color={read ? 'var(--text-muted)' : 'var(--theme-secondary)'} />
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-icon btn-sm"
+          style={{ ...iconBtnStyle, opacity: 0.75 }}
+          onClick={() => dismiss(id)}
+          title={`Delete notification: ${label}`}
+          aria-label={`Delete notification: ${label}`}
+        >
+          <Trash2 size={13} color="var(--text-muted)" />
+        </button>
+      </div>
+    );
+  };
 
   const togglePanel = () => {
     if (!open) {
-      localStorage.setItem(SEEN_KEY, new Date().toISOString());
       setFetchTick((t) => t + 1);
-    } else {
-      setSeenAt(new Date().toISOString());
     }
     setOpen((o) => !o);
   };
@@ -185,7 +268,7 @@ export const NotificationCenter: React.FC = () => {
         type="button"
         onClick={togglePanel}
         className="btn btn-secondary btn-icon btn-sm"
-        aria-label={count > 0 ? `Notifications — ${count} new` : 'Notifications'}
+        aria-label={count > 0 ? `Notifications — ${count} unread` : 'Notifications'}
         aria-expanded={open}
         title="Notifications"
         style={{ position: 'relative', padding: '7px 10px' }}
@@ -200,7 +283,7 @@ export const NotificationCenter: React.FC = () => {
             position: 'absolute',
             top: 'calc(100% + 6px)',
             right: 0,
-            width: '360px',
+            width: '380px',
             maxWidth: 'calc(100vw - 32px)',
             backgroundColor: 'var(--bg-panel)',
             border: '1px solid var(--border-color)',
@@ -212,58 +295,117 @@ export const NotificationCenter: React.FC = () => {
         >
           <div
             style={{
-              padding: '12px 14px',
+              padding: '10px 12px',
               borderBottom: '1px solid var(--border-color)',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              gap: '8px'
             }}
           >
             <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>Notifications</span>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-              {count} item{count === 1 ? '' : 's'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                {totalVisible} item{totalVisible === 1 ? '' : 's'}
+              </span>
+              {count > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={markAllRead}
+                  style={{ fontSize: '0.68rem', padding: '2px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  title="Mark all notifications as read"
+                >
+                  <CheckCheck size={12} /> Mark all read
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '8px' }}>
-            {riskAlerts.length === 0 && comments.length === 0 ? (
+            {visibleAlerts.length === 0 && visibleComments.length === 0 ? (
               <div style={{ padding: '26px 16px', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 No notifications. Risk alerts and mentor feedback will appear here.
               </div>
             ) : (
               <>
-                {riskAlerts.length > 0 && (
+                {visibleAlerts.length > 0 && (
                   <>
                     <div style={sectionLabel}>Risk Alerts</div>
-                    {riskAlerts.map((a) => (
-                      <div key={a.id} style={rowStyle}>
-                        {a.severity === 'critical' ? (
-                          <ShieldAlert size={16} color="var(--loss-red)" style={{ flexShrink: 0, marginTop: '1px' }} />
-                        ) : (
-                          <AlertTriangle size={16} color="#f59e0b" style={{ flexShrink: 0, marginTop: '1px' }} />
-                        )}
-                        <div>
-                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>{a.title}</div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{a.detail}</div>
+                    {visibleAlerts.map((a) => {
+                      const unread = isUnread(a.id);
+                      return (
+                        <div
+                          key={a.id}
+                          style={{
+                            ...rowStyle,
+                            borderLeft: `2px solid ${unread ? 'var(--theme-secondary)' : 'transparent'}`,
+                            backgroundColor: unread ? 'var(--bg-card)' : 'transparent'
+                          }}
+                        >
+                          {a.severity === 'critical' ? (
+                            <ShieldAlert size={16} color="var(--loss-red)" style={{ flexShrink: 0, marginTop: '1px' }} />
+                          ) : (
+                            <AlertTriangle size={16} color="#f59e0b" style={{ flexShrink: 0, marginTop: '1px' }} />
+                          )}
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div
+                              style={{
+                                fontSize: '0.8rem',
+                                fontWeight: unread ? 700 : 600,
+                                color: unread ? 'var(--text-primary)' : 'var(--text-secondary)'
+                              }}
+                            >
+                              {a.title}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{a.detail}</div>
+                          </div>
+                          {actionButtons(a.id, a.title)}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </>
                 )}
 
-                {comments.length > 0 && (
+                {visibleComments.length > 0 && (
                   <>
                     <div style={sectionLabel}>Mentor Feedback</div>
-                    {comments.map((c) => {
-                      const isNew = !seenAt || c.createdAt > seenAt;
+                    {visibleComments.map((c) => {
+                      const id = `comment-${c.id}`;
+                      const unread = isUnread(id);
                       return (
-                        <div key={c.id} style={rowStyle}>
+                        <div
+                          key={c.id}
+                          style={{
+                            ...rowStyle,
+                            borderLeft: `2px solid ${unread ? 'var(--theme-secondary)' : 'transparent'}`,
+                            backgroundColor: unread ? 'var(--bg-card)' : 'transparent'
+                          }}
+                        >
                           <MessageSquare size={16} color="var(--theme-secondary)" style={{ flexShrink: 0, marginTop: '1px' }} />
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div
+                              style={{
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                color: unread ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                display: 'flex',
+                                gap: '6px',
+                                alignItems: 'center'
+                              }}
+                            >
                               {c.author}
-                              {isNew && (
-                                <span style={{ fontSize: '0.58rem', fontWeight: 800, color: '#ffffff', backgroundColor: 'var(--loss-red)', padding: '1px 5px', borderRadius: '5px' }}>
+                              {unread && (
+                                <span
+                                  style={{
+                                    fontSize: '0.58rem',
+                                    fontWeight: 800,
+                                    color: '#ffffff',
+                                    backgroundColor: 'var(--loss-red)',
+                                    padding: '1px 5px',
+                                    borderRadius: '5px'
+                                  }}
+                                >
                                   NEW
                                 </span>
                               )}
@@ -286,6 +428,7 @@ export const NotificationCenter: React.FC = () => {
                               {new Date(c.createdAt).toLocaleString()}
                             </div>
                           </div>
+                          {actionButtons(id, `feedback from ${c.author}`)}
                         </div>
                       );
                     })}
