@@ -26,6 +26,7 @@ import {
   Compass,
   Moon,
   NotebookPen,
+  MessageSquarePlus,
   Zap
 } from 'lucide-react';
 
@@ -41,6 +42,7 @@ interface CommandPaletteProps {
   onViewTradeDetail: (trade: Trade) => void;
   onStartTour: () => void;
   onOpenWeeklyReview: () => void;
+  onOpenFeedback: () => void;
 }
 
 interface CommandItem {
@@ -186,6 +188,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
         run: () => {
           onClose();
           props.onOpenWeeklyReview();
+        }
+      },
+      {
+        id: 'action-feedback',
+        label: 'Send feedback',
+        group: 'Actions',
+        icon: <MessageSquarePlus size={15} />,
+        keywords: 'feedback bug report idea suggestion support help',
+        run: () => {
+          onClose();
+          props.onOpenFeedback();
         }
       },
       {

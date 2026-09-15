@@ -225,3 +225,139 @@ export const deleteAdminComment = async (id: string): Promise<boolean> => {
     return false;
   }
 };
+
+// ==========================================
+// Feedback / Announcements / Analytics
+// ==========================================
+
+export interface AdminFeedback {
+  id: string;
+  user_id: string | null;
+  email: string | null;
+  category: string;
+  message: string;
+  status: string;
+  created_at: string;
+}
+
+export interface AdminAnnouncement {
+  id: string;
+  title: string;
+  body: string;
+  active: boolean;
+  created_at: string;
+}
+
+export interface AdminAnalytics {
+  total_users?: number;
+  active_7d?: number;
+  active_30d?: number;
+  dormant?: number;
+  signups_30d?: { day: string; count: number }[];
+  trades_30d?: { day: string; count: number }[];
+  top_users?: { user_id: string; email: string | null; trades: number }[];
+}
+
+export const fetchAdminFeedback = async (): Promise<AdminFeedback[]> => {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('id, user_id, email, category, message, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+    return (data as AdminFeedback[]) || [];
+  } catch (err) {
+    console.error('admin feedback failed:', err);
+    return [];
+  }
+};
+
+export const setFeedbackStatus = async (id: string, status: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('feedback').update({ status }).eq('id', id);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('setFeedbackStatus failed:', err);
+    return false;
+  }
+};
+
+export const deleteFeedback = async (id: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('feedback').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('deleteFeedback failed:', err);
+    return false;
+  }
+};
+
+export const fetchAdminAnnouncements = async (): Promise<AdminAnnouncement[]> => {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('announcements')
+      .select('id, title, body, active, created_at')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    return (data as AdminAnnouncement[]) || [];
+  } catch (err) {
+    console.error('admin announcements failed:', err);
+    return [];
+  }
+};
+
+export const createAnnouncement = async (title: string, body: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('announcements').insert({ title, body, active: true });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('createAnnouncement failed:', err);
+    return false;
+  }
+};
+
+export const setAnnouncementActive = async (id: string, active: boolean): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('announcements').update({ active }).eq('id', id);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('setAnnouncementActive failed:', err);
+    return false;
+  }
+};
+
+export const deleteAnnouncement = async (id: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('announcements').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('deleteAnnouncement failed:', err);
+    return false;
+  }
+};
+
+export const fetchAdminAnalytics = async (): Promise<AdminAnalytics | null> => {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase.rpc('admin_analytics');
+    if (error) throw error;
+    return (data as AdminAnalytics) || null;
+  } catch (err) {
+    console.error('admin_analytics failed:', err);
+    return null;
+  }
+};

@@ -17,6 +17,8 @@ import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { LandingPage } from './components/landing/LandingPage';
 import { SuspendedScreen } from './components/auth/SuspendedScreen';
 import { DemoModeBanner } from './components/common/DemoModeBanner';
+import { AnnouncementBanner } from './components/common/AnnouncementBanner';
+import { FeedbackModal } from './components/common/FeedbackModal';
 import { isSupabaseConfigured, fetchMyUserFlags } from './utils/supabase';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
@@ -74,6 +76,7 @@ const MainApp: React.FC = () => {
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [weeklyReviewOpen, setWeeklyReviewOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [themeModalOpen, setThemeModalOpen] = useState(false);
   const [queuePrefill, setQueuePrefill] = useState<TradePrefill | null>(null);
@@ -406,6 +409,9 @@ const MainApp: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="main-content">
+        {/* Admin announcement banner (if any is live) */}
+        <AnnouncementBanner />
+
         {isDemoMode && (
           <DemoModeBanner
             onSignUp={() => {
@@ -421,6 +427,7 @@ const MainApp: React.FC = () => {
           onOpenAccountModal={handleOpenNewAccount}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
           onOpenCommandPalette={() => setPaletteOpen(true)}
+          onOpenFeedback={() => setFeedbackOpen(true)}
         />
 
         <main className="page-body">
@@ -573,6 +580,7 @@ const MainApp: React.FC = () => {
         onViewTradeDetail={handleViewTradeDetail}
         onStartTour={() => setTourOpen(true)}
         onOpenWeeklyReview={() => setWeeklyReviewOpen(true)}
+        onOpenFeedback={() => setFeedbackOpen(true)}
       />
 
       {/* First-run Product Tour */}
@@ -583,6 +591,9 @@ const MainApp: React.FC = () => {
 
       {/* Theme selector (hosted in App so the command palette can open it) */}
       <ThemeSelectorModal isOpen={themeModalOpen} onClose={() => setThemeModalOpen(false)} />
+
+      {/* Send feedback (bug reports / feature ideas -> admin inbox) */}
+      <FeedbackModal isOpen={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
 
       {/* Mobile bottom navigation + quick Log Trade FAB */}
       <MobileNav

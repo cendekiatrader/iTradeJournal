@@ -8,21 +8,32 @@ import { EmptyState } from '../components/common/EmptyState';
 import { StatCardSkeleton, TableRowSkeleton } from '../components/common/Skeleton';
 import { isSupabaseConfigured } from '../utils/supabase';
 import {
+  AdminAnnouncement,
+  AdminAnalytics,
   AdminComment,
+  AdminFeedback,
   AdminProfile,
   AdminStats,
   AdminSuspension,
   AdminUser,
   AdminUserDetail,
   checkIsAdmin,
+  createAnnouncement,
   deleteAdminComment,
   deleteAdminUser,
+  deleteAnnouncement,
+  deleteFeedback,
+  fetchAdminAnalytics,
+  fetchAdminAnnouncements,
   fetchAdminComments,
+  fetchAdminFeedback,
   fetchAdminProfiles,
   fetchAdminSuspensions,
   fetchAdminStats,
   fetchAdminUserDetail,
   fetchAdminUsers,
+  setAnnouncementActive,
+  setFeedbackStatus,
   setProfilePublic,
   setUserSuspended
 } from './adminApi';
@@ -33,18 +44,24 @@ import {
   ArrowDown,
   ArrowUp,
   BarChart3,
+  Bug,
+  CheckCheck,
   ClipboardList,
   ChevronRight,
   ExternalLink,
   Eye,
   EyeOff,
   Globe,
+  Inbox,
+  Lightbulb,
   LogOut,
+  Megaphone,
   MessageSquare,
   PauseCircle,
   PlayCircle,
   RefreshCw,
   Search,
+  Send,
   ShieldAlert,
   ShieldCheck,
   ShieldOff,
@@ -56,7 +73,7 @@ import {
 } from 'lucide-react';
 
 type AdminStatus = 'loading' | 'not_configured' | 'signed_out' | 'denied' | 'ok';
-type AdminTab = 'overview' | 'users' | 'content';
+type AdminTab = 'overview' | 'users' | 'content' | 'inbox';
 type UserSortKey = 'created_at' | 'last_sign_in_at' | 'trades_count';
 
 const fmtDateTime = (x?: string | null): string => (x ? new Date(x).toLocaleString() : '—');
@@ -106,6 +123,44 @@ const Avatar: React.FC<{ seed: string; label: string; size?: number }> = ({ seed
   </span>
 );
 
+const BarChart: React.FC<{ label: string; total: number; data: { day: string; count: number }[]; color: string }> = ({
+  label,
+  total,
+  data,
+  color
+}) => {
+  const max = Math.max(1, ...data.map((d) => d.count));
+  return (
+    <div style={panelStyle}>
+      <div style={panelHeaderStyle}>
+        <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{label}</span>
+        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{total} in 30 days</span>
+      </div>
+      <div style={{ padding: '14px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '64px' }}>
+          {data.map((d) => (
+            <div
+              key={d.day}
+              title={`${d.day}: ${d.count}`}
+              style={{
+                flex: 1,
+                height: `${Math.max(4, (d.count / max) * 100)}%`,
+                backgroundColor: color,
+                borderRadius: '2px',
+                opacity: d.count ? 1 : 0.22
+              }}
+            />
+          ))}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+          <span>{data[0]?.day || ''}</span>
+          <span>{data[data.length - 1]?.day || ''}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const panelStyle: React.CSSProperties = {
   backgroundColor: 'var(--bg-card)',
   border: '1px solid var(--border-color)',
@@ -142,6 +197,12 @@ export const AdminApp: React.FC = () => {
   const [sortKey, setSortKey] = useState<UserSortKey>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [suspensions, setSuspensions] = useState<AdminSuspension[]>([]);
+  const [feedbackItems, setFeedbackItems] = useState<AdminFeedback[]>([]);
+  const [announcements, setAnnouncements] = useState<AdminAnnouncement[]>([]);
+  const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
+  const [annTitle, setAnnTitle] = useState('');
+  const [annBody, setAnnBody] = useState('');
+  const [postingAnn, setPostingAnn] = useState(false);
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
   const [detail, setDetail] = useState<AdminUserDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -161,18 +222,24 @@ export const AdminApp: React.FC = () => {
 
   const loadAll = useCallback(async () => {
     setBusy(true);
-    const [s, u, p, c, susp] = await Promise.all([
+    const [s, u, p, c, susp, fb, ann, an] = await Promise.all([
       fetchAdminStats(),
       fetchAdminUsers(),
       fetchAdminProfiles(),
       fetchAdminComments(),
-      fetchAdminSuspensions()
+      fetchAdminSuspensions(),
+      fetchAdminFeedback(),
+      fetchAdminAnnouncements(),
+      fetchAdminAnalytics()
     ]);
     setStats(s);
     setUsers(u);
     setProfiles(p);
     setComments(c);
     setSuspensions(susp);
+    setFeedbackItems(fb);
+    setAnnouncements(ann);
+    setAnalytics(an);
     setLastUpdated(new Date());
     setBusy(false);
   }, []);
@@ -365,6 +432,77 @@ export const AdminApp: React.FC = () => {
     }
   };
 
+  const newFeedbackCount = feedbackItems.filter((f) => f.status === 'new').length;
+
+  const handlePublishAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!annTitle.trim() || !annBody.trim()) return;
+    setPostingAnn(true);
+    const ok = await createAnnouncement(annTitle.trim(), annBody.trim());
+    setPostingAnn(false);
+    if (!ok) {
+      showToast('Publish failed — is supabase_feedback_announcements.sql applied?', 'error');
+      return;
+    }
+    showToast('Announcement published.', 'success');
+    setAnnTitle('');
+    setAnnBody('');
+    loadAll();
+  };
+
+  const handleToggleAnnouncement = async (a: AdminAnnouncement) => {
+    const ok = await setAnnouncementActive(a.id, !a.active);
+    if (!ok) {
+      showToast('Update failed — is the SQL applied?', 'error');
+      return;
+    }
+    setAnnouncements((prev) => prev.map((x) => (x.id === a.id ? { ...x, active: !a.active } : x)));
+    showToast(!a.active ? 'Announcement is live again.' : 'Announcement hidden.', 'info');
+  };
+
+  const handleDeleteAnnouncement = async (a: AdminAnnouncement) => {
+    const ok = await confirm({
+      title: 'Delete this announcement?',
+      message: a.title,
+      confirmText: 'Delete',
+      variant: 'danger'
+    });
+    if (!ok) return;
+    const done = await deleteAnnouncement(a.id);
+    if (!done) {
+      showToast('Delete failed.', 'error');
+      return;
+    }
+    setAnnouncements((prev) => prev.filter((x) => x.id !== a.id));
+    showToast('Announcement deleted.', 'info');
+  };
+
+  const handleFeedbackStatus = async (f: AdminFeedback, status: string) => {
+    const ok = await setFeedbackStatus(f.id, status);
+    if (!ok) {
+      showToast('Update failed.', 'error');
+      return;
+    }
+    setFeedbackItems((prev) => prev.map((x) => (x.id === f.id ? { ...x, status } : x)));
+  };
+
+  const handleDeleteFeedback = async (f: AdminFeedback) => {
+    const ok = await confirm({
+      title: 'Delete this feedback?',
+      message: f.message.slice(0, 140),
+      confirmText: 'Delete',
+      variant: 'danger'
+    });
+    if (!ok) return;
+    const done = await deleteFeedback(f.id);
+    if (!done) {
+      showToast('Delete failed.', 'error');
+      return;
+    }
+    setFeedbackItems((prev) => prev.filter((x) => x.id !== f.id));
+    showToast('Feedback deleted.', 'info');
+  };
+
   /* ---------------- gate screens ---------------- */
 
   if (status !== 'ok') {
@@ -538,6 +676,16 @@ export const AdminApp: React.FC = () => {
               <MessageSquare size={14} /> Content
               <span className="admin-seg-count">{profiles.length + comments.length}</span>
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'inbox'}
+              className={tab === 'inbox' ? 'active' : ''}
+              onClick={() => setTab('inbox')}
+            >
+              <Inbox size={14} /> Inbox
+              {newFeedbackCount > 0 && <span className="admin-seg-count">{newFeedbackCount}</span>}
+            </button>
           </div>
         </div>
 
@@ -557,6 +705,42 @@ export const AdminApp: React.FC = () => {
                     <span className="admin-stat-icon">{s.icon}</span>
                     <div style={{ minWidth: 0 }}>
                       <div className="admin-stat-value">{s.value === undefined ? '—' : s.value}</div>
+                      <div className="admin-stat-label">{s.label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {analytics && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+                <BarChart
+                  label="New signups"
+                  total={(analytics.signups_30d || []).reduce((s, d) => s + d.count, 0)}
+                  data={analytics.signups_30d || []}
+                  color="var(--theme-secondary)"
+                />
+                <BarChart
+                  label="Trades logged"
+                  total={(analytics.trades_30d || []).reduce((s, d) => s + d.count, 0)}
+                  data={analytics.trades_30d || []}
+                  color="var(--profit-green)"
+                />
+              </div>
+            )}
+            {analytics && (
+              <div className="admin-grid" style={{ marginBottom: '16px' }}>
+                {[
+                  { label: 'Active 7d', value: analytics.active_7d },
+                  { label: 'Active 30d', value: analytics.active_30d },
+                  { label: 'Dormant >30d', value: analytics.dormant },
+                  { label: 'Total users', value: analytics.total_users }
+                ].map((s) => (
+                  <div key={s.label} className="admin-stat" style={{ padding: '10px 12px' }}>
+                    <div>
+                      <div className="admin-stat-value" style={{ fontSize: '1.05rem' }}>
+                        {s.value === undefined ? '—' : s.value}
+                      </div>
                       <div className="admin-stat-label">{s.label}</div>
                     </div>
                   </div>
@@ -615,6 +799,34 @@ export const AdminApp: React.FC = () => {
                 )}
               </div>
             </div>
+            {analytics?.top_users && analytics.top_users.length > 0 && (
+              <div style={{ ...panelStyle, marginTop: '16px' }}>
+                <div style={panelHeaderStyle}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>Top traders by volume</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>all time</span>
+                </div>
+                <div style={{ padding: '6px 8px' }}>
+                  {analytics.top_users.map((tu) => (
+                    <div key={tu.user_id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px' }}>
+                      <Avatar seed={tu.email || tu.user_id} label={initialsOf(tu.email)} size={26} />
+                      <span
+                        style={{
+                          flex: 1,
+                          fontSize: '0.8rem',
+                          minWidth: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {tu.email || tu.user_id}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', fontWeight: 700 }}>{tu.trades}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -868,6 +1080,212 @@ export const AdminApp: React.FC = () => {
                       </div>
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: 1.5 }}>
                         {c.body}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* inbox: announcements + feedback */}
+        {tab === 'inbox' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={panelStyle}>
+              <div style={panelHeaderStyle}>
+                <div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Announcements</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    Published announcements show as a banner (and in the bell) for every signed-in user.
+                  </div>
+                </div>
+                <span className="admin-seg-count">{announcements.length}</span>
+              </div>
+              <form
+                onSubmit={handlePublishAnnouncement}
+                style={{
+                  padding: '14px 16px',
+                  borderBottom: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px'
+                }}
+              >
+                <input
+                  className="input-control"
+                  placeholder="Announcement title…"
+                  value={annTitle}
+                  onChange={(e) => setAnnTitle(e.target.value)}
+                  maxLength={120}
+                  aria-label="Announcement title"
+                />
+                <textarea
+                  className="input-control"
+                  rows={3}
+                  placeholder="What should users know? (new feature, maintenance, tips…)"
+                  value={annBody}
+                  onChange={(e) => setAnnBody(e.target.value)}
+                  maxLength={600}
+                  style={{ resize: 'vertical' }}
+                  aria-label="Announcement body"
+                />
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-sm"
+                    disabled={postingAnn || !annTitle.trim() || !annBody.trim()}
+                  >
+                    <Send size={13} /> {postingAnn ? 'Publishing…' : 'Publish announcement'}
+                  </button>
+                </div>
+              </form>
+              {announcements.length === 0 ? (
+                <EmptyState
+                  compact
+                  icon={<Megaphone size={20} />}
+                  title="No announcements yet"
+                  description="Publish your first one above — users see it right away."
+                />
+              ) : (
+                <div style={{ padding: '6px 8px' }}>
+                  {announcements.map((a) => (
+                    <div
+                      key={a.id}
+                      style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px', borderRadius: '9px', flexWrap: 'wrap' }}
+                    >
+                      <Megaphone
+                        size={15}
+                        color={a.active ? 'var(--theme-secondary)' : 'var(--text-muted)'}
+                        style={{ marginTop: '3px', flexShrink: 0 }}
+                      />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span
+                            style={{
+                              fontSize: '0.84rem',
+                              fontWeight: 700,
+                              color: a.active ? 'var(--text-primary)' : 'var(--text-muted)'
+                            }}
+                          >
+                            {a.title}
+                          </span>
+                          <span
+                            className="admin-pill"
+                            style={
+                              a.active
+                                ? { color: 'var(--profit-green)', background: 'color-mix(in srgb, var(--profit-green) 14%, transparent)' }
+                                : { color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' }
+                            }
+                          >
+                            {a.active ? 'Live' : 'Hidden'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: '3px', lineHeight: 1.45 }}>
+                          {a.body}
+                        </div>
+                        <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginTop: '3px' }}>
+                          {relTime(a.created_at)}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleToggleAnnouncement(a)}>
+                          {a.active ? <EyeOff size={12} /> : <Eye size={12} />} {a.active ? 'Hide' : 'Show'}
+                        </button>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleDeleteAnnouncement(a)}
+                          style={{ color: 'var(--loss-red)', padding: '4px 7px' }}
+                          aria-label={`Delete announcement ${a.title}`}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={panelStyle}>
+              <div style={panelHeaderStyle}>
+                <div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>User feedback</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    Bug reports and feature ideas sent from inside the app.
+                  </div>
+                </div>
+                {newFeedbackCount > 0 && <span className="admin-seg-count">{newFeedbackCount} new</span>}
+              </div>
+              {feedbackItems.length === 0 ? (
+                <EmptyState
+                  compact
+                  icon={<Inbox size={20} />}
+                  title="No feedback yet"
+                  description="Users can send feedback from the user menu inside the app."
+                />
+              ) : (
+                <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {feedbackItems.map((f) => (
+                    <div key={f.id} className="admin-quote">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span
+                          className="admin-pill"
+                          style={
+                            f.category === 'bug'
+                              ? { color: 'var(--loss-red)', background: 'color-mix(in srgb, var(--loss-red) 14%, transparent)' }
+                              : f.category === 'idea'
+                              ? { color: '#f59e0b', background: 'color-mix(in srgb, #f59e0b 14%, transparent)' }
+                              : { color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' }
+                          }
+                        >
+                          {f.category === 'bug' ? <Bug size={10} /> : f.category === 'idea' ? <Lightbulb size={10} /> : <MessageSquare size={10} />}{' '}
+                          {f.category}
+                        </span>
+                        <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>{f.email || 'anonymous'}</span>
+                        <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                          {relTime(f.created_at)}
+                        </span>
+                        <span
+                          className="admin-pill"
+                          style={{
+                            marginLeft: 'auto',
+                            ...(f.status === 'new'
+                              ? { color: 'var(--theme-secondary)', background: 'color-mix(in srgb, var(--theme-secondary-strong) 16%, transparent)' }
+                              : f.status === 'resolved'
+                              ? { color: 'var(--profit-green)', background: 'color-mix(in srgb, var(--profit-green) 14%, transparent)' }
+                              : { color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' })
+                          }}
+                        >
+                          {f.status}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', marginTop: '8px', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+                        {f.message}
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
+                        {f.status !== 'new' && (
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleFeedbackStatus(f, 'new')}>
+                            Mark unread
+                          </button>
+                        )}
+                        {f.status === 'new' && (
+                          <button className="btn btn-secondary btn-sm" onClick={() => handleFeedbackStatus(f, 'read')}>
+                            <CheckCheck size={12} /> Mark read
+                          </button>
+                        )}
+                        {f.status !== 'resolved' && (
+                          <button className="btn btn-secondary btn-sm" onClick={() => handleFeedbackStatus(f, 'resolved')}>
+                            <CheckCheck size={12} /> Resolve
+                          </button>
+                        )}
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleDeleteFeedback(f)}
+                          style={{ color: 'var(--loss-red)', marginLeft: 'auto' }}
+                        >
+                          <Trash2 size={12} /> Delete
+                        </button>
                       </div>
                     </div>
                   ))}

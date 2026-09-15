@@ -3,7 +3,8 @@ import { useJournal } from '../../context/JournalContext';
 import { fetchReviewComments, ReviewComment } from '../../utils/review';
 import { isSupabaseConfigured } from '../../utils/supabase';
 import { formatCurrency } from '../../utils/formatters';
-import { Bell, ShieldAlert, MessageSquare, AlertTriangle, Check, CheckCheck, Trash2 } from 'lucide-react';
+import { Bell, ShieldAlert, MessageSquare, AlertTriangle, Check, CheckCheck, Megaphone, Trash2 } from 'lucide-react';
+import { fetchAnnouncements, Announcement } from '../../utils/feedback';
 
 interface RiskAlert {
   id: string;
@@ -66,6 +67,7 @@ export const NotificationCenter: React.FC = () => {
   const { accounts, trades } = useJournal();
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<MentorItem[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [readIds, setReadIds] = useState<string[]>(() => loadIds(READ_KEY));
   const [dismissedIds, setDismissedIds] = useState<string[]>(() => loadIds(DISMISSED_KEY));
   const [fetchTick, setFetchTick] = useState(0);
@@ -115,6 +117,19 @@ export const NotificationCenter: React.FC = () => {
       } catch {
         /* ignore */
       }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [fetchTick]);
+
+  // Fetch announcements from the admin (cloud mode only)
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    let alive = true;
+    (async () => {
+      const list = await fetchAnnouncements();
+      if (alive) setAnnouncements(list);
     })();
     return () => {
       alive = false;
@@ -206,7 +221,11 @@ export const NotificationCenter: React.FC = () => {
 
   const visibleAlerts = riskAlerts.filter((a) => !dismissedIds.includes(a.id));
   const visibleComments = comments.filter((c) => !dismissedIds.includes(`comment-${c.id}`));
-  const allVisibleIds = [...visibleAlerts.map((a) => a.id), ...visibleComments.map((c) => `comment-${c.id}`)];
+  const allVisibleIds = [
+    ...visibleAlerts.map((a) => a.id),
+    ...visibleComments.map((c) => `comment-${c.id}`),
+    ...announcements.map((a) => `ann-${a.id}`)
+  ];
   const unreadIds = allVisibleIds.filter((id) => !readIds.includes(id));
   const count = unreadIds.length;
   const totalVisible = allVisibleIds.length;
@@ -323,12 +342,49 @@ export const NotificationCenter: React.FC = () => {
           </div>
 
           <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '8px' }}>
-            {visibleAlerts.length === 0 && visibleComments.length === 0 ? (
+            {visibleAlerts.length === 0 && visibleComments.length === 0 && announcements.length === 0 ? (
               <div style={{ padding: '26px 16px', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 No notifications. Risk alerts and mentor feedback will appear here.
               </div>
             ) : (
               <>
+                {announcements.length > 0 && (
+                  <>
+                    <div style={sectionLabel}>Announcements</div>
+                    {announcements.map((a) => {
+                      const id = `ann-${a.id}`;
+                      const unread = isUnread(id);
+                      return (
+                        <div
+                          key={a.id}
+                          style={{
+                            ...rowStyle,
+                            borderLeft: `2px solid ${unread ? 'var(--theme-secondary)' : 'transparent'}`,
+                            backgroundColor: unread ? 'var(--bg-card)' : 'transparent'
+                          }}
+                        >
+                          <Megaphone size={16} color="var(--theme-secondary)" style={{ flexShrink: 0, marginTop: '1px' }} />
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div
+                              style={{
+                                fontSize: '0.8rem',
+                                fontWeight: unread ? 700 : 600,
+                                color: unread ? 'var(--text-primary)' : 'var(--text-secondary)'
+                              }}
+                            >
+                              {a.title}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: 1.45 }}>
+                              {a.body}
+                            </div>
+                          </div>
+                          {actionButtons(id, a.title)}
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+
                 {visibleAlerts.length > 0 && (
                   <>
                     <div style={sectionLabel}>Risk Alerts</div>

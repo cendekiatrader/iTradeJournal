@@ -21,6 +21,7 @@ import {
   Globe,
   Keyboard,
   Menu,
+  MessageSquarePlus,
   Eye,
   EyeOff,
   Search,
@@ -40,13 +41,15 @@ interface NavbarProps {
   onOpenAccountModal: () => void;
   onOpenMobileMenu?: () => void;
   onOpenCommandPalette?: () => void;
+  onOpenFeedback?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   onOpenTradeModal, 
   onOpenAccountModal,
   onOpenMobileMenu,
-  onOpenCommandPalette
+  onOpenCommandPalette,
+  onOpenFeedback
 }) => {
   const { 
     accounts, 
@@ -570,6 +573,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                   style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--text-strong)', fontSize: '0.78rem' }}
                 >
                   <FileSpreadsheet size={14} color="#10b981" /> Export CSV ({filteredTrades.length} Trades)
+                </button>
+
+                <button
+                  onClick={() => {
+                    setUserDropdownOpen(false);
+                    onOpenFeedback?.();
+                  }}
+                  className="btn btn-ghost btn-sm"
+                  style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--text-strong)', fontSize: '0.78rem' }}
+                >
+                  <MessageSquarePlus size={14} color="var(--theme-secondary)" /> Send Feedback
                 </button>
 
                 <button
