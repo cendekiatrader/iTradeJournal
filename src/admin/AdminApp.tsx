@@ -32,7 +32,12 @@ import {
   fetchAdminStats,
   fetchAdminUserDetail,
   fetchAdminUsers,
+  fetchAdminUserCoaching,
+  fetchMentors,
   fetchFullBackup,
+  adminSetMentor,
+  adminLinkMentor,
+  AdminUserCoaching,
   setAnnouncementActive,
   setFeedbackStatus,
   setProfilePublic,
@@ -54,6 +59,7 @@ import {
   Eye,
   EyeOff,
   Globe,
+  GraduationCap,
   Inbox,
   Lightbulb,
   LogOut,
@@ -206,6 +212,11 @@ export const AdminApp: React.FC = () => {
   const [annBody, setAnnBody] = useState('');
   const [postingAnn, setPostingAnn] = useState(false);
   const [backupBusy, setBackupBusy] = useState(false);
+  const [mentorIds, setMentorIds] = useState<Set<string>>(new Set());
+  const [detailCoaching, setDetailCoaching] = useState<AdminUserCoaching | null>(null);
+  const [linkMentorEmail, setLinkMentorEmail] = useState('');
+  const [linkStudentEmail, setLinkStudentEmail] = useState('');
+  const [coachBusy, setCoachBusy] = useState(false);
   const [lastBackup, setLastBackup] = useState<{ at: string; bytes: number; counts: Record<string, number> } | null>(() => {
     try {
       const raw = localStorage.getItem('itrade_admin_backup_summary');
@@ -233,7 +244,7 @@ export const AdminApp: React.FC = () => {
 
   const loadAll = useCallback(async () => {
     setBusy(true);
-    const [s, u, p, c, susp, fb, ann, an] = await Promise.all([
+    const [s, u, p, c, susp, fb, ann, an, mentors] = await Promise.all([
       fetchAdminStats(),
       fetchAdminUsers(),
       fetchAdminProfiles(),
@@ -241,8 +252,10 @@ export const AdminApp: React.FC = () => {
       fetchAdminSuspensions(),
       fetchAdminFeedback(),
       fetchAdminAnnouncements(),
-      fetchAdminAnalytics()
+      fetchAdminAnalytics(),
+      fetchMentors()
     ]);
+    setMentorIds(new Set(mentors.map((m) => m.user_id)));
     setStats(s);
     setUsers(u);
     setProfiles(p);
@@ -370,9 +383,11 @@ export const AdminApp: React.FC = () => {
   const openDetail = useCallback(async (u: AdminUser) => {
     setDetailUser(u);
     setDetail(null);
+    setDetailCoaching(null);
     setDetailLoading(true);
-    const d = await fetchAdminUserDetail(u.user_id);
+    const [d, coach] = await Promise.all([fetchAdminUserDetail(u.user_id), fetchAdminUserCoaching(u.user_id)]);
     setDetail(d);
+    setDetailCoaching(coach);
     setDetailLoading(false);
   }, []);
 
@@ -425,6 +440,66 @@ export const AdminApp: React.FC = () => {
     showToast('User deleted.', 'info');
     closeDetail();
     loadAll();
+  };
+
+  const refreshCoaching = async (uid: string) => {
+    const [coach, mentors] = await Promise.all([fetchAdminUserCoaching(uid), fetchMentors()]);
+    setDetailCoaching(coach);
+    setMentorIds(new Set(mentors.map((m) => m.user_id)));
+  };
+
+  const handleToggleMentor = async (u: AdminUser) => {
+    const isM = mentorIds.has(u.user_id);
+    const ok = await confirm({
+      title: isM ? `Revoke mentor role from ${u.email}?` : `Make ${u.email} a mentor?`,
+      message: isM
+        ? 'Their student links become inactive. Saved coach notes are kept.'
+        : 'They can be requested as a mentor by students and get the Coaching tab in the app.',
+      confirmText: isM ? 'Revoke' : 'Make mentor',
+      variant: isM ? 'danger' : 'info'
+    });
+    if (!ok) return;
+    setCoachBusy(true);
+    const done = await adminSetMentor(u.user_id, !isM);
+    setCoachBusy(false);
+    if (!done) {
+      showToast('Update failed — is supabase_coaching.sql applied?', 'error');
+      return;
+    }
+    showToast(!isM ? 'Mentor role granted.' : 'Mentor role revoked.', 'success');
+    refreshCoaching(u.user_id);
+  };
+
+  const handleLinkMentor = async (u: AdminUser, direction: 'as_student' | 'as_mentor') => {
+    const sEmail = direction === 'as_student' ? u.email || '' : linkStudentEmail.trim();
+    const mEmail = direction === 'as_student' ? linkMentorEmail.trim() : u.email || '';
+    if (!sEmail || !mEmail) return;
+    setCoachBusy(true);
+    const res = await adminLinkMentor(sEmail, mEmail, true);
+    setCoachBusy(false);
+    if (!res.ok) {
+      showToast(res.error || 'Link failed.', 'error');
+      return;
+    }
+    showToast('Mentor link created.', 'success');
+    setLinkMentorEmail('');
+    setLinkStudentEmail('');
+    refreshCoaching(u.user_id);
+  };
+
+  const handleUnlinkMentor = async (u: AdminUser, asMentor: boolean, otherEmail: string | null) => {
+    if (!otherEmail) return;
+    const sEmail = asMentor ? otherEmail : u.email || '';
+    const mEmail = asMentor ? u.email || '' : otherEmail;
+    setCoachBusy(true);
+    const res = await adminLinkMentor(sEmail, mEmail, false);
+    setCoachBusy(false);
+    if (!res.ok) {
+      showToast(res.error || 'Unlink failed.', 'error');
+      return;
+    }
+    showToast('Mentor link revoked.', 'info');
+    refreshCoaching(u.user_id);
   };
 
   const toggleDetailProfile = async () => {
@@ -1001,6 +1076,17 @@ export const AdminApp: React.FC = () => {
                                       New
                                     </span>
                                   )}
+                                  {mentorIds.has(u.user_id) && (
+                                    <span
+                                      className="admin-pill"
+                                      style={{
+                                        color: 'var(--theme-secondary)',
+                                        background: 'color-mix(in srgb, var(--theme-secondary-strong) 16%, transparent)'
+                                      }}
+                                    >
+                                      Mentor
+                                    </span>
+                                  )}
                                   {suspendedIds.has(u.user_id) && (
                                     <span
                                       className="admin-pill"
@@ -1539,6 +1625,108 @@ export const AdminApp: React.FC = () => {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                  )}
+
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, margin: '16px 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    Mentor / coach
+                    {mentorIds.has(detailUser.user_id) && (
+                      <span
+                        className="admin-pill"
+                        style={{ color: 'var(--profit-green)', background: 'color-mix(in srgb, var(--profit-green) 14%, transparent)' }}
+                      >
+                        Mentor
+                      </span>
+                    )}
+                  </div>
+                  <button className="btn btn-secondary btn-sm" disabled={coachBusy} onClick={() => handleToggleMentor(detailUser)}>
+                    <GraduationCap size={13} /> {mentorIds.has(detailUser.user_id) ? 'Revoke mentor role' : 'Make mentor'}
+                  </button>
+                  {detailCoaching && (
+                    <div style={{ marginTop: '10px' }}>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Mentoring (students):</div>
+                      {(detailCoaching.as_mentor || []).length === 0 ? (
+                        <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>No students.</p>
+                      ) : (
+                        (detailCoaching.as_mentor || []).map((l) => (
+                          <div key={l.link_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 0', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.78rem', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.email}</span>
+                            <span
+                              className="admin-pill"
+                              style={
+                                l.status === 'active'
+                                  ? { color: 'var(--profit-green)', background: 'color-mix(in srgb, var(--profit-green) 14%, transparent)' }
+                                  : { color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' }
+                              }
+                            >
+                              {l.status}
+                            </span>
+                            <button className="btn btn-ghost btn-sm" disabled={coachBusy} onClick={() => handleUnlinkMentor(detailUser, true, l.email)}>
+                              Unlink
+                            </button>
+                          </div>
+                        ))
+                      )}
+                      {mentorIds.has(detailUser.user_id) && (
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                          <input
+                            className="input-control"
+                            placeholder="Connect as mentor of (student email)"
+                            value={linkStudentEmail}
+                            onChange={(e) => setLinkStudentEmail(e.target.value)}
+                            style={{ flex: '1 1 220px' }}
+                            aria-label="Student email"
+                          />
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            disabled={coachBusy || !linkStudentEmail.trim()}
+                            onClick={() => handleLinkMentor(detailUser, 'as_mentor')}
+                          >
+                            Connect
+                          </button>
+                        </div>
+                      )}
+
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', margin: '12px 0 4px' }}>Mentored by:</div>
+                      {(detailCoaching.as_student || []).length === 0 ? (
+                        <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>No mentor.</p>
+                      ) : (
+                        (detailCoaching.as_student || []).map((l) => (
+                          <div key={l.link_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 0', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.78rem', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.email}</span>
+                            <span
+                              className="admin-pill"
+                              style={
+                                l.status === 'active'
+                                  ? { color: 'var(--profit-green)', background: 'color-mix(in srgb, var(--profit-green) 14%, transparent)' }
+                                  : { color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' }
+                              }
+                            >
+                              {l.status}
+                            </span>
+                            <button className="btn btn-ghost btn-sm" disabled={coachBusy} onClick={() => handleUnlinkMentor(detailUser, false, l.email)}>
+                              Unlink
+                            </button>
+                          </div>
+                        ))
+                      )}
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                        <input
+                          className="input-control"
+                          placeholder="Connect as student of (mentor email)"
+                          value={linkMentorEmail}
+                          onChange={(e) => setLinkMentorEmail(e.target.value)}
+                          style={{ flex: '1 1 220px' }}
+                          aria-label="Mentor email"
+                        />
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          disabled={coachBusy || !linkMentorEmail.trim()}
+                          onClick={() => handleLinkMentor(detailUser, 'as_student')}
+                        >
+                          Connect
+                        </button>
+                      </div>
                     </div>
                   )}
 

@@ -21,6 +21,7 @@ import {
 import { BeforeAfterSlider } from './BeforeAfterSlider';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { useConfirm } from '../common/ConfirmDialog';
+import { TradeCoachNotes } from '../coaching/TradeCoachNotes';
 import { useJournal } from '../../context/JournalContext';
 
 const prettifyField = (field: string) =>
@@ -288,6 +289,8 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               />
             </div>
           )}
+
+          <TradeCoachNotes tradeId={trade.id} />
 
           {trade.lessons && (
             <div style={{ backgroundColor: '#070a16', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>

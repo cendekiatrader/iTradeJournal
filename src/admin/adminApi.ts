@@ -436,3 +436,76 @@ export const fetchFullBackup = async (): Promise<FullBackupResult | null> => {
     return null;
   }
 };
+
+// ==========================================
+// Coaching / mentor role (admin)
+// ==========================================
+
+export interface AdminCoachingLink {
+  link_id: string;
+  user_id: string;
+  email: string | null;
+  status: string;
+}
+
+export interface AdminUserCoaching {
+  is_mentor: boolean;
+  as_mentor: AdminCoachingLink[];
+  as_student: AdminCoachingLink[];
+}
+
+export const fetchMentors = async (): Promise<{ user_id: string }[]> => {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase.from('mentors').select('user_id');
+    if (error) throw error;
+    return (data as { user_id: string }[]) || [];
+  } catch {
+    return [];
+  }
+};
+
+export const adminSetMentor = async (userId: string, isMentor: boolean): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { data, error } = await supabase.rpc('admin_set_mentor', { p_user: userId, p_mentor: isMentor });
+    if (error) throw error;
+    return Boolean(data);
+  } catch (err) {
+    console.error('admin_set_mentor failed:', err);
+    return false;
+  }
+};
+
+export const fetchAdminUserCoaching = async (userId: string): Promise<AdminUserCoaching | null> => {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase.rpc('admin_user_coaching', { p_user: userId });
+    if (error) throw error;
+    return (data as AdminUserCoaching) || null;
+  } catch (err) {
+    console.error('admin_user_coaching failed:', err);
+    return null;
+  }
+};
+
+export const adminLinkMentor = async (
+  studentEmail: string,
+  mentorEmail: string,
+  active: boolean
+): Promise<{ ok: boolean; error?: string }> => {
+  if (!supabase) return { ok: false, error: 'Offline.' };
+  try {
+    const { data, error } = await supabase.rpc('admin_link_mentor', {
+      p_student_email: studentEmail,
+      p_mentor_email: mentorEmail,
+      p_active: active
+    });
+    if (error) throw error;
+    const res = (data || {}) as { ok?: boolean; error?: string };
+    return { ok: Boolean(res.ok), error: res.error };
+  } catch (err) {
+    console.error('admin_link_mentor failed:', err);
+    return { ok: false, error: 'Link failed.' };
+  }
+};

@@ -3,8 +3,9 @@ import { useJournal } from '../../context/JournalContext';
 import { fetchReviewComments, ReviewComment } from '../../utils/review';
 import { isSupabaseConfigured } from '../../utils/supabase';
 import { formatCurrency } from '../../utils/formatters';
-import { Bell, ShieldAlert, MessageSquare, AlertTriangle, Check, CheckCheck, Megaphone, Trash2 } from 'lucide-react';
+import { Bell, ShieldAlert, MessageSquare, AlertTriangle, Check, CheckCheck, GraduationCap, Megaphone, Trash2 } from 'lucide-react';
 import { fetchAnnouncements, Announcement } from '../../utils/feedback';
+import { fetchMyCoachNotes, markNoteRead, markNotesRead, MyCoachNote } from '../../utils/coaching';
 
 interface RiskAlert {
   id: string;
@@ -68,6 +69,7 @@ export const NotificationCenter: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<MentorItem[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [coachNotes, setCoachNotes] = useState<MyCoachNote[]>([]);
   const [readIds, setReadIds] = useState<string[]>(() => loadIds(READ_KEY));
   const [dismissedIds, setDismissedIds] = useState<string[]>(() => loadIds(DISMISSED_KEY));
   const [fetchTick, setFetchTick] = useState(0);
@@ -130,6 +132,19 @@ export const NotificationCenter: React.FC = () => {
     (async () => {
       const list = await fetchAnnouncements();
       if (alive) setAnnouncements(list);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [fetchTick]);
+
+  // Coach notes written on my trades (cloud mode only)
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    let alive = true;
+    (async () => {
+      const list = await fetchMyCoachNotes();
+      if (alive) setCoachNotes(list);
     })();
     return () => {
       alive = false;
@@ -226,8 +241,10 @@ export const NotificationCenter: React.FC = () => {
     ...visibleComments.map((c) => `comment-${c.id}`),
     ...announcements.map((a) => `ann-${a.id}`)
   ];
+  const visibleNoteItems = coachNotes.filter((n) => !dismissedIds.includes(`note-${n.id}`));
+  const unreadNoteItems = visibleNoteItems.filter((n) => !n.read_at);
   const unreadIds = allVisibleIds.filter((id) => !readIds.includes(id));
-  const count = unreadIds.length;
+  const count = unreadIds.length + unreadNoteItems.length;
   const totalVisible = allVisibleIds.length;
 
   const isUnread = (id: string) => !readIds.includes(id) && !dismissedIds.includes(id);
@@ -238,6 +255,15 @@ export const NotificationCenter: React.FC = () => {
 
   const markAllRead = () => {
     setReadIds((prev) => Array.from(new Set([...prev, ...allVisibleIds])));
+    if (unreadNoteItems.length > 0) {
+      void markNotesRead();
+      setCoachNotes((prev) => prev.map((x) => ({ ...x, read_at: x.read_at || new Date().toISOString() })));
+    }
+  };
+
+  const handleReadNote = async (note: MyCoachNote) => {
+    await markNoteRead(note.id);
+    setCoachNotes((prev) => prev.map((x) => (x.id === note.id ? { ...x, read_at: new Date().toISOString() } : x)));
   };
 
   const dismiss = (id: string) => {
@@ -342,12 +368,88 @@ export const NotificationCenter: React.FC = () => {
           </div>
 
           <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '8px' }}>
-            {visibleAlerts.length === 0 && visibleComments.length === 0 && announcements.length === 0 ? (
+            {visibleAlerts.length === 0 &&
+            visibleComments.length === 0 &&
+            announcements.length === 0 &&
+            visibleNoteItems.length === 0 ? (
               <div style={{ padding: '26px 16px', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 No notifications. Risk alerts and mentor feedback will appear here.
               </div>
             ) : (
               <>
+                {visibleNoteItems.length > 0 && (
+                  <>
+                    <div style={sectionLabel}>Coach notes</div>
+                    {visibleNoteItems.map((n) => {
+                      const unread = !n.read_at;
+                      return (
+                        <div
+                          key={n.id}
+                          style={{
+                            ...rowStyle,
+                            borderLeft: `2px solid ${unread ? 'var(--theme-secondary)' : 'transparent'}`,
+                            backgroundColor: unread ? 'var(--bg-card)' : 'transparent'
+                          }}
+                        >
+                          <GraduationCap size={16} color="var(--theme-secondary)" style={{ flexShrink: 0, marginTop: '1px' }} />
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div
+                              style={{
+                                fontSize: '0.8rem',
+                                fontWeight: unread ? 700 : 600,
+                                color: unread ? 'var(--text-primary)' : 'var(--text-secondary)'
+                              }}
+                            >
+                              {n.author_role === 'admin' ? 'Coach (admin)' : 'Coach'}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '0.74rem',
+                                color: 'var(--text-secondary)',
+                                marginTop: '2px',
+                                lineHeight: 1.45,
+                                display: '-webkit-box',
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden'
+                              }}
+                            >
+                              {n.body}
+                            </div>
+                            <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '3px', fontFamily: 'var(--font-mono)' }}>
+                              {new Date(n.created_at).toLocaleString()}
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '2px', flexShrink: 0, marginLeft: 'auto' }}>
+                            {unread && (
+                              <button
+                                type="button"
+                                className="btn btn-ghost btn-icon btn-sm"
+                                style={iconBtnStyle}
+                                onClick={() => handleReadNote(n)}
+                                title="Mark as read"
+                                aria-label="Mark coach note as read"
+                              >
+                                <Check size={13} color="var(--theme-secondary)" />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-icon btn-sm"
+                              style={{ ...iconBtnStyle, opacity: 0.75 }}
+                              onClick={() => dismiss(`note-${n.id}`)}
+                              title="Delete notification"
+                              aria-label="Delete coach note notification"
+                            >
+                              <Trash2 size={13} color="var(--text-muted)" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+
                 {announcements.length > 0 && (
                   <>
                     <div style={sectionLabel}>Announcements</div>

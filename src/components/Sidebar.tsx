@@ -12,13 +12,14 @@ import {
   X,
   TrendingUp,
   Flame,
+  GraduationCap,
   BookMarked,
   LayoutGrid,
   Target
 } from 'lucide-react';
 import { useJournal } from '../context/JournalContext';
 
-export type NavTab = 'dashboard' | 'workspace' | 'calendar' | 'journal' | 'analytics' | 'playbook' | 'queue' | 'news' | 'accounts' | 'calculator';
+export type NavTab = 'dashboard' | 'workspace' | 'calendar' | 'journal' | 'analytics' | 'playbook' | 'queue' | 'news' | 'accounts' | 'calculator' | 'coaching';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -27,6 +28,7 @@ interface SidebarProps {
   onToggleCollapse: () => void;
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
+  showCoaching?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -35,7 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed, 
   onToggleCollapse,
   mobileOpen = false,
-  onCloseMobile
+  onCloseMobile,
+  showCoaching = false
 }) => {
   const { trades, playbooks, activeAccount } = useJournal();
 
@@ -46,6 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'journal', label: 'Trade Log', icon: BookOpen, badge: trades.length },
     { id: 'analytics', label: 'Analytics & Setups', icon: BarChart3, badge: null },
     { id: 'playbook', label: 'Playbook', icon: BookMarked, badge: playbooks.length },
+    ...(showCoaching ? [{ id: 'coaching' as NavTab, label: 'Coaching', icon: GraduationCap, badge: null }] : []),
     { id: 'queue', label: 'Setup Queue', icon: Target, badge: null },
     { id: 'news', label: 'Economic Calendar', icon: Flame, badge: null },
     { id: 'accounts', label: 'Account Manager', icon: WalletCards, badge: null },

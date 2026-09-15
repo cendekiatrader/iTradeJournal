@@ -43,6 +43,7 @@ const CalendarView = lazy(() => import('./components/calendar/CalendarView').the
 const AnalyticsView = lazy(() => import('./components/analytics/AnalyticsView').then((m) => ({ default: m.AnalyticsView })));
 const EconomicCalendarView = lazy(() => import('./components/news/EconomicCalendarView').then((m) => ({ default: m.EconomicCalendarView })));
 const AdminApp = lazy(() => import('./admin/AdminApp').then((m) => ({ default: m.AdminApp })));
+const CoachingView = lazy(() => import('./components/coaching/CoachingView').then((m) => ({ default: m.CoachingView })));
 const PlaybookView = lazy(() => import('./components/playbook/PlaybookView').then((m) => ({ default: m.PlaybookView })));
 const WorkspaceView = lazy(() => import('./components/workspace/WorkspaceView').then((m) => ({ default: m.WorkspaceView })));
 
@@ -405,6 +406,7 @@ const MainApp: React.FC = () => {
         onToggleCollapse={handleToggleSidebar}
         mobileOpen={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
+        showCoaching={isSupabaseConfigured() && !isDemoMode && Boolean(user)}
       />
 
       {/* Main Content Area */}
@@ -485,6 +487,10 @@ const MainApp: React.FC = () => {
 
           {activeTab === 'calculator' && (
             <RiskCalculatorView />
+          )}
+
+          {activeTab === 'coaching' && (
+            <CoachingView />
           )}
 
           {activeTab === 'queue' && (
