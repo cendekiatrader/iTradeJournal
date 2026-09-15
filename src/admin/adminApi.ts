@@ -361,3 +361,78 @@ export const fetchAdminAnalytics = async (): Promise<AdminAnalytics | null> => {
     return null;
   }
 };
+
+// ==========================================
+// Full-database backup (admin only, RLS admin_all)
+// ==========================================
+
+const BACKUP_TABLES = [
+  'accounts',
+  'trades',
+  'withdrawals',
+  'playbooks',
+  'user_settings',
+  'profiles',
+  'review_sessions',
+  'review_comments',
+  'feedback',
+  'announcements',
+  'user_flags'
+] as const;
+
+const fetchAllRows = async (table: string): Promise<Record<string, unknown>[]> => {
+  if (!supabase) return [];
+  const pageSize = 1000;
+  const rows: Record<string, unknown>[] = [];
+  let from = 0;
+  for (;;) {
+    const { data, error } = await supabase.from(table).select('*').range(from, from + pageSize - 1);
+    if (error) throw error;
+    const chunk = (data as Record<string, unknown>[]) || [];
+    rows.push(...chunk);
+    if (chunk.length < pageSize || from > 500000) break;
+    from += pageSize;
+  }
+  return rows;
+};
+
+export interface FullBackupResult {
+  payload: string;
+  bytes: number;
+  counts: Record<string, number>;
+}
+
+export const fetchFullBackup = async (): Promise<FullBackupResult | null> => {
+  if (!supabase) return null;
+  try {
+    const tables: Record<string, Record<string, unknown>[]> = {};
+    const counts: Record<string, number> = {};
+    for (const name of BACKUP_TABLES) {
+      try {
+        const rows = await fetchAllRows(name);
+        tables[name] = rows;
+        counts[name] = rows.length;
+      } catch (err) {
+        console.error(`backup: table ${name} failed:`, err);
+        tables[name] = [];
+        counts[name] = -1;
+      }
+    }
+    const payload = JSON.stringify(
+      {
+        app: 'iTradeJournal',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        exportedBy: 'admin',
+        counts,
+        tables
+      },
+      null,
+      2
+    );
+    return { payload, counts, bytes: new Blob([payload]).size };
+  } catch (err) {
+    console.error('fetchFullBackup failed:', err);
+    return null;
+  }
+};

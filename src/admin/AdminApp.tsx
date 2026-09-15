@@ -32,6 +32,7 @@ import {
   fetchAdminStats,
   fetchAdminUserDetail,
   fetchAdminUsers,
+  fetchFullBackup,
   setAnnouncementActive,
   setFeedbackStatus,
   setProfilePublic,
@@ -48,6 +49,7 @@ import {
   CheckCheck,
   ClipboardList,
   ChevronRight,
+  Download,
   ExternalLink,
   Eye,
   EyeOff,
@@ -203,6 +205,15 @@ export const AdminApp: React.FC = () => {
   const [annTitle, setAnnTitle] = useState('');
   const [annBody, setAnnBody] = useState('');
   const [postingAnn, setPostingAnn] = useState(false);
+  const [backupBusy, setBackupBusy] = useState(false);
+  const [lastBackup, setLastBackup] = useState<{ at: string; bytes: number; counts: Record<string, number> } | null>(() => {
+    try {
+      const raw = localStorage.getItem('itrade_admin_backup_summary');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
   const [detail, setDetail] = useState<AdminUserDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -501,6 +512,35 @@ export const AdminApp: React.FC = () => {
     }
     setFeedbackItems((prev) => prev.filter((x) => x.id !== f.id));
     showToast('Feedback deleted.', 'info');
+  };
+
+  const handleDownloadBackup = async () => {
+    setBackupBusy(true);
+    const res = await fetchFullBackup();
+    setBackupBusy(false);
+    if (!res) {
+      showToast('Backup failed — check your connection and admin SQL.', 'error');
+      return;
+    }
+    const blob = new Blob([res.payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `itradejournal-full-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+    const summary = { at: new Date().toLocaleString(), bytes: res.bytes, counts: res.counts };
+    setLastBackup(summary);
+    try {
+      localStorage.setItem('itrade_admin_backup_summary', JSON.stringify(summary));
+    } catch {
+      /* ignore */
+    }
+    showToast(`Backup downloaded (${(res.bytes / 1024 / 1024).toFixed(2)} MB).`, 'success');
   };
 
   /* ---------------- gate screens ---------------- */
@@ -827,6 +867,41 @@ export const AdminApp: React.FC = () => {
                 </div>
               </div>
             )}
+            <div style={{ ...panelStyle, marginTop: '16px' }}>
+              <div style={panelHeaderStyle}>
+                <div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Data backup</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    Download a full JSON snapshot of every table (all users). Keep it somewhere safe.
+                  </div>
+                </div>
+                <button className="btn btn-primary btn-sm" onClick={handleDownloadBackup} disabled={backupBusy}>
+                  <Download size={13} /> {backupBusy ? 'Preparing…' : 'Download full backup'}
+                </button>
+              </div>
+              {lastBackup ? (
+                <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                    Last snapshot: <strong>{lastBackup.at}</strong> · {(lastBackup.bytes / 1024 / 1024).toFixed(2)} MB
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {Object.entries(lastBackup.counts).map(([name, count]) => (
+                      <span
+                        key={name}
+                        className="admin-pill"
+                        style={{ color: 'var(--text-secondary)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' }}
+                      >
+                        {name}: {count < 0 ? 'n/a' : count}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ padding: '12px 16px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                  No admin backup taken yet. Runs in your browser — a few seconds for big databases.
+                </div>
+              )}
+            </div>
           </>
         )}
 
