@@ -399,19 +399,6 @@ begin
   return found;
 end $$;
 
--- Grants
-grant execute on function public.is_mentor() to authenticated;
-grant execute on function public.request_mentor(text) to authenticated;
-grant execute on function public.respond_mentor_request(uuid, boolean) to authenticated;
-grant execute on function public.admin_set_mentor(uuid, boolean) to authenticated;
-grant execute on function public.admin_link_mentor(text, text, boolean) to authenticated;
-grant execute on function public.coaching_overview() to authenticated;
-grant execute on function public.mentor_student_data(uuid) to authenticated;
-grant execute on function public.add_trade_note(text, text) to authenticated;
-grant execute on function public.mark_notes_read() to authenticated;
-grant execute on function public.mark_note_read(uuid) to authenticated;
-grant execute on function public.request_review(uuid, text) to authenticated;
-grant execute on function public.resolve_review_request(uuid) to authenticated;
 -- 15) RPC: admin melihat status mentor + links seorang user
 create or replace function public.admin_user_coaching(p_user uuid)
 returns jsonb
@@ -439,5 +426,17 @@ begin
   );
 end $$;
 
+-- Grants
+grant execute on function public.is_mentor() to authenticated;
+grant execute on function public.request_mentor(text) to authenticated;
+grant execute on function public.respond_mentor_request(uuid, boolean) to authenticated;
+grant execute on function public.admin_set_mentor(uuid, boolean) to authenticated;
+grant execute on function public.admin_link_mentor(text, text, boolean) to authenticated;
+grant execute on function public.coaching_overview() to authenticated;
+grant execute on function public.mentor_student_data(uuid) to authenticated;
+grant execute on function public.add_trade_note(text, text) to authenticated;
+grant execute on function public.mark_notes_read() to authenticated;
+grant execute on function public.mark_note_read(uuid) to authenticated;
+grant execute on function public.request_review(uuid, text) to authenticated;
+grant execute on function public.resolve_review_request(uuid) to authenticated;
 grant execute on function public.admin_user_coaching(uuid) to authenticated;
-
