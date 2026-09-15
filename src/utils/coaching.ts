@@ -73,6 +73,7 @@ export interface MyCoachNote {
   read_at: string | null;
 }
 
+
 export const fetchCoachingOverview = async (): Promise<CoachingOverview | null> => {
   if (!supabase) return null;
   try {
@@ -208,5 +209,110 @@ export const fetchTradeNotes = async (tradeId: string): Promise<StudentNote[]> =
     return (data as StudentNote[]) || [];
   } catch {
     return [];
+  }
+};
+
+// ==========================================
+// Coaching chat (2 arah) + broadcast (1 arah)
+// ==========================================
+
+export interface CoachMessage {
+  id: string;
+  link_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+  read_at: string | null;
+}
+
+export interface MentorBroadcast {
+  id: string;
+  author_id: string;
+  author_email: string | null;
+  body: string;
+  created_at: string;
+}
+
+export const fetchCoachMessages = async (linkId: string, limit = 200): Promise<CoachMessage[]> => {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase.rpc('fetch_coach_messages', { p_link_id: linkId, p_limit: limit });
+    if (error) throw error;
+    return (data as CoachMessage[]) || [];
+  } catch (err) {
+    console.error('fetch_coach_messages failed:', err);
+    return [];
+  }
+};
+
+export const sendCoachMessage = async (linkId: string, body: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { data, error } = await supabase.rpc('send_coach_message', { p_link_id: linkId, p_body: body });
+    if (error) throw error;
+    return Boolean(data);
+  } catch (err) {
+    console.error('send_coach_message failed:', err);
+    return false;
+  }
+};
+
+export const markCoachMessagesRead = async (linkId: string): Promise<number> => {
+  if (!supabase) return 0;
+  try {
+    const { data, error } = await supabase.rpc('mark_coach_messages_read', { p_link_id: linkId });
+    if (error) throw error;
+    return Number(data) || 0;
+  } catch {
+    return 0;
+  }
+};
+
+export const fetchCoachUnread = async (): Promise<Record<string, number>> => {
+  if (!supabase) return {};
+  try {
+    const { data, error } = await supabase.rpc('coach_unread_by_link');
+    if (error) throw error;
+    return (data as Record<string, number>) || {};
+  } catch {
+    return {};
+  }
+};
+
+export const fetchMentorBroadcasts = async (limit = 60): Promise<MentorBroadcast[]> => {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('mentor_broadcasts')
+      .select('id, author_id, author_email, body, created_at')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data as MentorBroadcast[]) || [];
+  } catch {
+    return [];
+  }
+};
+
+export const postMentorBroadcast = async (body: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { data, error } = await supabase.rpc('post_mentor_broadcast', { p_body: body });
+    if (error) throw error;
+    return Boolean(data);
+  } catch (err) {
+    console.error('post_mentor_broadcast failed:', err);
+    return false;
+  }
+};
+
+export const deleteMentorBroadcast = async (id: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('mentor_broadcasts').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  } catch {
+    return false;
   }
 };

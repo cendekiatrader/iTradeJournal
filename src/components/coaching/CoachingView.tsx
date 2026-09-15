@@ -9,25 +9,34 @@ import { formatCurrency } from '../../utils/formatters';
 import {
   CoachingOverview,
   CoachLink,
+  MentorBroadcast,
   ReviewItem,
   StudentData,
   StudentTrade,
   addTradeNote,
+  deleteMentorBroadcast,
+  fetchCoachUnread,
   fetchCoachingOverview,
+  fetchMentorBroadcasts,
   fetchMentorStudentData,
+  postMentorBroadcast,
   requestMentor,
   requestReview,
   resolveReviewRequest,
   respondMentorRequest
 } from '../../utils/coaching';
+import { CoachChatModal } from './CoachChatModal';
 import {
   BookOpen,
   CheckCircle2,
   GraduationCap,
   Mail,
+  Megaphone,
+  MessageCircle,
   MessageSquarePlus,
   NotebookPen,
   Send,
+  Trash2,
   UserCheck,
   UserPlus,
   X,
@@ -80,6 +89,14 @@ export const CoachingView: React.FC = () => {
   const [reviewTarget, setReviewTarget] = useState<string | null>(null);
   const [reviewNote, setReviewNote] = useState('');
 
+  const selfId = user?.id || '';
+  const [chatLink, setChatLink] = useState<CoachLink | null>(null);
+  const [unread, setUnread] = useState<Record<string, number>>({});
+  const [broadcasts, setBroadcasts] = useState<MentorBroadcast[]>([]);
+  const [broadcastsLoading, setBroadcastsLoading] = useState(true);
+  const [broadcastInput, setBroadcastInput] = useState('');
+  const [broadcastBusy, setBroadcastBusy] = useState(false);
+
   const [student, setStudent] = useState<CoachLink | null>(null);
   const [studentData, setStudentData] = useState<StudentData | null>(null);
   const [studentLoading, setStudentLoading] = useState(false);
@@ -96,9 +113,16 @@ export const CoachingView: React.FC = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const o = await fetchCoachingOverview();
+    const [o, u, b] = await Promise.all([fetchCoachingOverview(), fetchCoachUnread(), fetchMentorBroadcasts()]);
     setOverview(o);
+    setUnread(u);
+    setBroadcasts(b);
+    setBroadcastsLoading(false);
     setLoading(false);
+  }, []);
+
+  const refreshUnread = useCallback(async () => {
+    setUnread(await fetchCoachUnread());
   }, []);
 
   useEffect(() => {
@@ -163,6 +187,38 @@ export const CoachingView: React.FC = () => {
     }
   };
 
+  const handlePostBroadcast = async () => {
+    const body = broadcastInput.trim();
+    if (!body || broadcastBusy) return;
+    setBroadcastBusy(true);
+    const ok = await postMentorBroadcast(body);
+    setBroadcastBusy(false);
+    if (!ok) {
+      showToast('Could not post the broadcast.', 'error');
+      return;
+    }
+    setBroadcastInput('');
+    showToast('Broadcast posted — all members can read it.', 'success');
+    setBroadcasts(await fetchMentorBroadcasts());
+  };
+
+  const handleDeleteBroadcast = async (b: MentorBroadcast) => {
+    const ok = await confirm({
+      title: 'Delete this broadcast?',
+      message: 'It will be removed for every member.',
+      confirmText: 'Delete',
+      variant: 'danger'
+    });
+    if (!ok) return;
+    const done = await deleteMentorBroadcast(b.id);
+    if (!done) {
+      showToast('Could not delete the broadcast.', 'error');
+      return;
+    }
+    showToast('Broadcast deleted.', 'success');
+    setBroadcasts(await fetchMentorBroadcasts());
+  };
+
   const handleRequestReview = async (mentorId: string) => {
     setBusy(true);
     const ok = await requestReview(mentorId, reviewNote.trim());
@@ -200,6 +256,104 @@ export const CoachingView: React.FC = () => {
 
   const noteCount = (tradeId: string) => (studentData?.notes || []).filter((n) => n.trade_id === tradeId).length;
   const notesForTrade = noteTrade ? (studentData?.notes || []).filter((n) => n.trade_id === noteTrade.id) : [];
+
+  const chatButton = (l: CoachLink) => (
+    <button className="btn btn-secondary btn-sm" onClick={() => setChatLink(l)}>
+      <MessageCircle size={13} /> Chat
+      {(unread[l.link_id] || 0) > 0 && (
+        <span className="badge" style={{ fontSize: '0.62rem', marginLeft: '2px' }}>{unread[l.link_id]}</span>
+      )}
+    </button>
+  );
+
+  const broadcastCard = (
+    <div style={cardStyle}>
+      <div style={cardHeader}>
+        <div>
+          <div style={{ fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Megaphone size={14} color="var(--theme-secondary)" /> Mentor broadcast
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+            {overview?.is_mentor
+              ? 'One-way channel — only mentors can post, every member can read.'
+              : 'One-way channel — updates posted by mentors, readable by everyone.'}
+          </div>
+        </div>
+        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{broadcasts.length}</span>
+      </div>
+
+      {overview?.is_mentor && (
+        <div style={{ display: 'flex', gap: '8px', padding: '12px 18px', borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
+          <input
+            className="input-control"
+            placeholder="Share an update with all members…"
+            value={broadcastInput}
+            maxLength={2000}
+            onChange={(e) => setBroadcastInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handlePostBroadcast();
+              }
+            }}
+            style={{ flex: '1 1 240px' }}
+          />
+          <button className="btn btn-primary btn-sm" disabled={broadcastBusy || !broadcastInput.trim()} onClick={handlePostBroadcast}>
+            <Send size={13} /> {broadcastBusy ? 'Posting…' : 'Post'}
+          </button>
+        </div>
+      )}
+
+      {broadcastsLoading ? (
+        <div style={{ padding: '14px 18px' }}>
+          <TableRowSkeleton />
+        </div>
+      ) : broadcasts.length === 0 ? (
+        <EmptyState
+          compact
+          icon={<Megaphone size={20} />}
+          title="No broadcasts yet"
+          description={overview?.is_mentor ? 'Post the first update — every member will see it here.' : 'Updates posted by mentors will appear here.'}
+        />
+      ) : (
+        <div style={{ padding: '8px' }}>
+          {broadcasts.slice(0, 30).map((b) => (
+            <div key={b.id} style={{ padding: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              <span
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '999px',
+                  background: 'color-mix(in srgb, var(--theme-secondary) 16%, transparent)',
+                  color: 'var(--theme-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  flexShrink: 0
+                }}
+              >
+                {(b.author_email || 'M').slice(0, 1).toUpperCase()}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>{b.author_email || 'Mentor'}</span>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{relTime(b.created_at)}</span>
+                </div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '3px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{b.body}</div>
+              </div>
+              {b.author_id === selfId && (
+                <button className="btn btn-ghost btn-icon btn-sm" aria-label="Delete broadcast" title="Delete broadcast" onClick={() => handleDeleteBroadcast(b)}>
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div>
@@ -273,6 +427,7 @@ export const CoachingView: React.FC = () => {
                         {l.email}
                       </span>
                       <span className="admin-pill" style={statusPill(l.status)}>Active</span>
+                      {chatButton(l)}
                       <button className="btn btn-secondary btn-sm" onClick={() => handleOpenStudent(l)}>
                         <BookOpen size={13} /> Open journal
                       </button>
@@ -308,7 +463,10 @@ export const CoachingView: React.FC = () => {
             </div>
           )}
 
+          {overview?.is_mentor && broadcastCard}
+
           {/* student side: only for non-mentors */}
+          {!overview?.is_mentor && broadcastCard}
           {!overview?.is_mentor && (
             <>
           <div style={cardStyle}>
@@ -332,6 +490,7 @@ export const CoachingView: React.FC = () => {
                         {l.email}
                       </span>
                       <span className="admin-pill" style={statusPill(l.status)}>{l.status}</span>
+                      {l.status === 'active' && chatButton(l)}
                       {l.status === 'active' && (
                         <button
                           className="btn btn-secondary btn-sm"
@@ -626,6 +785,16 @@ export const CoachingView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {chatLink && (
+        <CoachChatModal
+          linkId={chatLink.link_id}
+          counterpart={chatLink.email || (overview?.is_mentor ? 'Student' : 'Mentor')}
+          selfId={selfId}
+          onClose={() => setChatLink(null)}
+          onActivity={refreshUnread}
+        />
       )}
     </div>
   );
