@@ -90,7 +90,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
-    const captchaToken = (window as any).turnstile?.getResponse?.() || undefined;
+    // Turnstile can THROW when the script loaded but no widget was rendered
+    // (blocked network / misconfigured widget). Never let that kill the submit
+    // handler — captcha tokens are optional for the request to proceed.
+    let captchaToken: string | undefined;
+    try {
+      captchaToken = (window as any).turnstile?.getResponse?.() || undefined;
+    } catch {
+      captchaToken = undefined;
+    }
 
     if (!isConfigured) {
       setErrorMessage('Supabase URL & Anon Key belum terpasang di .env / Vercel.');
