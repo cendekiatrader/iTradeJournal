@@ -20,6 +20,10 @@ import { useModalA11y } from '../../hooks/useModalA11y';
 
 export type AuthMode = 'signin' | 'signup' | 'forgot';
 
+// Cloudflare Turnstile SITE key is PUBLIC — safe to embed in the repo.
+// VITE_TURNSTILE_SITE_KEY (if set) overrides it.
+const TURNSTILE_SITE_KEY = '0x4AAAAAAE01cY6ALTmihFFM';
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -39,7 +43,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     isConfigured 
   } = useAuth();
   const { showToast } = useJournal();
-  const turnstileSiteKey = (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  const turnstileSiteKey = ((import.meta as any).env?.VITE_TURNSTILE_SITE_KEY as string) || TURNSTILE_SITE_KEY;
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState('');
