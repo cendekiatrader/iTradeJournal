@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useJournal } from '../../context/JournalContext';
 import { 
@@ -44,6 +44,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   } = useAuth();
   const { showToast } = useJournal();
   const turnstileSiteKey = ((import.meta as any).env?.VITE_TURNSTILE_SITE_KEY as string) || TURNSTILE_SITE_KEY;
+  const turnstileBoxRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetRef = useRef<string | null>(null);
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState('');
@@ -68,6 +70,54 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     s.defer = true;
     document.head.appendChild(s);
   }, [turnstileSiteKey]);
+
+  // Explicitly render the Turnstile widget when the modal opens. More reliable
+  // than implicit rendering, and the error callback logs widget failures
+  // (e.g. hostname not allowed) for diagnostics.
+  useEffect(() => {
+    if (!isOpen || !turnstileSiteKey) return;
+    let interval: number | undefined;
+
+    const tryRender = (): boolean => {
+      if (turnstileWidgetRef.current != null) return true;
+      const ts = (window as any).turnstile;
+      if (!ts || !turnstileBoxRef.current) return false;
+      try {
+        turnstileWidgetRef.current = ts.render(turnstileBoxRef.current, {
+          sitekey: turnstileSiteKey,
+          theme: 'dark',
+          'error-callback': (code: unknown) => {
+            console.warn('[turnstile] widget error code:', code);
+          }
+        });
+      } catch (err) {
+        console.warn('[turnstile] render failed:', err);
+      }
+      return true;
+    };
+
+    if (!tryRender()) {
+      interval = window.setInterval(() => {
+        if (tryRender() && interval !== undefined) {
+          window.clearInterval(interval);
+          interval = undefined;
+        }
+      }, 400);
+    }
+
+    return () => {
+      if (interval !== undefined) window.clearInterval(interval);
+      const ts = (window as any).turnstile;
+      if (ts && turnstileWidgetRef.current != null) {
+        try {
+          ts.remove(turnstileWidgetRef.current);
+        } catch {
+          /* ignore */
+        }
+        turnstileWidgetRef.current = null;
+      }
+    };
+  }, [isOpen, turnstileSiteKey]);
 
   if (!isOpen) return null;
 
@@ -95,7 +145,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     // handler — captcha tokens are optional for the request to proceed.
     let captchaToken: string | undefined;
     try {
-      captchaToken = (window as any).turnstile?.getResponse?.() || undefined;
+      const ts = (window as any).turnstile;
+      const widgetId = turnstileWidgetRef.current;
+      captchaToken = (widgetId != null ? ts?.getResponse?.(widgetId) : ts?.getResponse?.()) || undefined;
     } catch {
       captchaToken = undefined;
     }
@@ -411,11 +463,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             )}
 
-            {/* Cloudflare Turnstile (anti-bot) — only when configured */}
-            {turnstileSiteKey && mode !== 'forgot' && (
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="dark" />
-              </div>
+            {/* Cloudflare Turnstile (anti-bot) — explicitly rendered on modal open */}
+            {turnstileSiteKey && (
+              <div
+                ref={turnstileBoxRef}
+                style={{
+                  display: mode === 'forgot' ? 'none' : 'flex',
+                  justifyContent: 'center',
+                  minHeight: '1px'
+                }}
+              />
             )}
 
             {/* Submit Button */}
