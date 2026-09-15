@@ -308,7 +308,9 @@ export const CoachingView: React.FC = () => {
             </div>
           )}
 
-          {/* student: my mentors */}
+          {/* student side: only for non-mentors */}
+          {!overview?.is_mentor && (
+            <>
           <div style={cardStyle}>
             <div style={cardHeader}>
               <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>My mentors</div>
@@ -362,7 +364,6 @@ export const CoachingView: React.FC = () => {
             )}
           </div>
 
-          {/* student: request a mentor */}
           <div style={cardStyle}>
             <div style={cardHeader}>
               <div>
@@ -388,7 +389,6 @@ export const CoachingView: React.FC = () => {
             </form>
           </div>
 
-          {/* student's open reviews */}
           {(overview?.my_open_reviews || []).length > 0 && (
             <div style={cardStyle}>
               <div style={cardHeader}>
@@ -406,6 +406,8 @@ export const CoachingView: React.FC = () => {
                 ))}
               </div>
             </div>
+          )}
+            </>
           )}
         </div>
       )}
