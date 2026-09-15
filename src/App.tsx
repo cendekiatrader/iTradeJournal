@@ -39,6 +39,7 @@ import { Trade, TradingAccount } from './types';
 const CalendarView = lazy(() => import('./components/calendar/CalendarView').then((m) => ({ default: m.CalendarView })));
 const AnalyticsView = lazy(() => import('./components/analytics/AnalyticsView').then((m) => ({ default: m.AnalyticsView })));
 const EconomicCalendarView = lazy(() => import('./components/news/EconomicCalendarView').then((m) => ({ default: m.EconomicCalendarView })));
+const AdminApp = lazy(() => import('./admin/AdminApp').then((m) => ({ default: m.AdminApp })));
 const PlaybookView = lazy(() => import('./components/playbook/PlaybookView').then((m) => ({ default: m.PlaybookView })));
 const WorkspaceView = lazy(() => import('./components/workspace/WorkspaceView').then((m) => ({ default: m.WorkspaceView })));
 
@@ -304,6 +305,15 @@ const MainApp: React.FC = () => {
   }, [activeTab]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Dedicated admin panel route: /admin (separate page from the journal app)
+  if (window.location.pathname.startsWith('/admin')) {
+    return (
+      <Suspense fallback={<ViewLoading />}>
+        <AdminApp />
+      </Suspense>
+    );
+  }
 
   if (reviewToken) {
     return (
