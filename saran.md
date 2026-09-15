@@ -752,6 +752,20 @@ Berikut adalah daftar ide dan saran fitur potensial yang siap diwujudkan pada ta
 219. **🎣 Judas Swing & Session Manipulation Accuracy Audit**
      - *Konsep*: Audit analitik khusus model manipulasi pembukaan sesi (London Open Judas Swing / NY Open Fakeout) untuk mengukur winrate dan keandalan setup saat entry pasca sweep likuiditas Asia.
 
+220. **🧑‍🏫 Coach Notes per Trade (Fase 1 — Admin sebagai Coach)**
+     - *Konsep*: Dari panel admin (`/admin` → detail user → trade), admin bisa menulis **catatan coach** pada trade milik user mana pun. Catatan tampil di sisi user pada **Trade Detail** + masuk ke **lonceng notifikasi** (badge belum dibaca). Ini fondasi tabel komentar yang dipakai Fase 2. *Ukuran: S-M.*
+
+221. **🧑‍🏫 Role Mentor & Linking Murid (Fase 2 — Multi-Mentor)**
+     - *Konsep*: **Mentor tidak harus admin** — admin memberi *role mentor* ke akun mana pun (bisa diri sendiri, bisa mentor partner/tim). Murid mendaftarkan email/username mentor → mentor approve → terbentuk link mentor↔murid. Mentor mendapat **panel "Murid"** sendiri: lihat journal murid (read-only), komentar per trade, dan menerima **permintaan review mingguan** dari murid.
+     - *Hak akses*: **Admin** = semua user, suspend/hapus, pengumuman, backup, analytics. **Mentor** = HANYA murid yang terhubung (read-only + komentar), tidak bisa suspend/hapus/lihat user lain. Satu akun bisa dua peran (admin + mentor).
+     - *Alur*: murid kirim permintaan → mentor approve/tolak; kapan pun admin bisa cabut role mentor. *Ukuran: L.*
+
+222. **🏆 Leaderboard Komunitas Opt-in & Verified Badge**
+     - *Konsep*: Papan peringkat publik **opt-in** di halaman `/u/`, diurutkan berdasarkan **skor konsistensi** (discipline rate + profit factor + kepatuhan drawdown — bukan PnL mentah) agar tidak mendorong gambling. Admin bisa memberi **Verified badge** ke profil yang divalidasi → chip hijau di halaman publik. Mendorong user membangun track record jujur + efek marketing organik. *Ukuran: S-M.*
+
+223. **🔔 Web Push Notification (Alert Saat App Tertutup)**
+     - *Konsep*: Notifikasi browser (HP/desktop) meski app tidak dibuka: pengumuman admin, komentar mentor, dan risk alert (daily loss ≥50%, buffer drawdown menipis). Butuh service worker push handler + Edge Function pengirim (VAPID). *Ukuran: M-H.*
+
 ---
 
-*Terakhir diperbarui: 1 September 2026*
+*Terakhir diperbarui: 15 September 2026*
