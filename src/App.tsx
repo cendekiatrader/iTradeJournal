@@ -15,8 +15,9 @@ import { AccountFormModal } from './components/accounts/AccountFormModal';
 import { OnboardingAccountModal } from './components/accounts/OnboardingAccountModal';
 import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { LandingPage } from './components/landing/LandingPage';
+import { SuspendedScreen } from './components/auth/SuspendedScreen';
 import { DemoModeBanner } from './components/common/DemoModeBanner';
-import { isSupabaseConfigured } from './utils/supabase';
+import { isSupabaseConfigured, fetchMyUserFlags } from './utils/supabase';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
 import { QuickRiskDock } from './components/calculator/QuickRiskDock';
@@ -58,7 +59,7 @@ const ViewLoading: React.FC = () => (
 );
 
 const MainApp: React.FC = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     return localStorage.getItem('itrade_sidebar_collapsed') === 'true';
@@ -306,6 +307,23 @@ const MainApp: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Account suspension (managed from the admin console)
+  const [suspended, setSuspended] = useState(false);
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !user?.id) {
+      setSuspended(false);
+      return;
+    }
+    let alive = true;
+    (async () => {
+      const flags = await fetchMyUserFlags(user.id);
+      if (alive) setSuspended(Boolean(flags?.suspended));
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [user?.id]);
+
   // Dedicated admin panel route: /admin (separate page from the journal app)
   if (window.location.pathname.startsWith('/admin')) {
     return (
@@ -359,6 +377,18 @@ const MainApp: React.FC = () => {
           initialMode={authMode}
         />
       </>
+    );
+  }
+
+  // Suspended accounts see a notice instead of the journal
+  if (suspended) {
+    return (
+      <SuspendedScreen
+        email={user?.email}
+        onSignOut={() => {
+          void signOut();
+        }}
+      />
     );
   }
 

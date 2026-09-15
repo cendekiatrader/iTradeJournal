@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabase';
+import { Currency } from '../types';
 
 export interface AdminStats {
   users?: number;
@@ -38,6 +39,46 @@ export interface AdminComment {
   created_at: string;
 }
 
+export interface AdminSuspension {
+  user_id: string;
+  suspended: boolean;
+  suspended_at: string | null;
+}
+
+export interface AdminUserDetail {
+  email?: string;
+  created_at?: string;
+  last_sign_in_at?: string | null;
+  accounts_count?: number;
+  trades_count?: number;
+  trades_trashed?: number;
+  suspended?: boolean;
+  profile?: { username: string; display_name: string | null; is_public: boolean } | null;
+  accounts?: {
+    id: string;
+    name: string;
+    broker: string;
+    currency: Currency;
+    type?: string;
+    status?: string;
+    initial_balance?: number;
+    current_balance?: number;
+    created_at?: string;
+  }[];
+  trades?: {
+    id: string;
+    symbol: string;
+    direction: string;
+    entry_date: string;
+    exit_date?: string | null;
+    pnl: number;
+    status: string;
+    setup?: string;
+    session?: string;
+    deleted_at?: string | null;
+  }[];
+}
+
 export const checkIsAdmin = async (): Promise<boolean> => {
   if (!supabase) return false;
   try {
@@ -70,6 +111,59 @@ export const fetchAdminUsers = async (): Promise<AdminUser[]> => {
   } catch (err) {
     console.error('admin_list_users failed:', err);
     return [];
+  }
+};
+
+export const fetchAdminSuspensions = async (): Promise<AdminSuspension[]> => {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase.from('user_flags').select('user_id, suspended, suspended_at');
+    if (error) throw error;
+    return (data as AdminSuspension[]) || [];
+  } catch (err) {
+    console.error('admin suspensions failed:', err);
+    return [];
+  }
+};
+
+export const setUserSuspended = async (userId: string, suspended: boolean): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('user_flags').upsert({
+      user_id: userId,
+      suspended,
+      suspended_at: suspended ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('setUserSuspended failed:', err);
+    return false;
+  }
+};
+
+export const fetchAdminUserDetail = async (userId: string): Promise<AdminUserDetail | null> => {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase.rpc('admin_user_detail', { target: userId });
+    if (error) throw error;
+    return (data as AdminUserDetail) || null;
+  } catch (err) {
+    console.error('admin_user_detail failed:', err);
+    return null;
+  }
+};
+
+export const deleteAdminUser = async (userId: string): Promise<boolean> => {
+  if (!supabase) return false;
+  try {
+    const { data, error } = await supabase.rpc('admin_delete_user', { target: userId });
+    if (error) throw error;
+    return Boolean(data);
+  } catch (err) {
+    console.error('admin_delete_user failed:', err);
+    return false;
   }
 };
 

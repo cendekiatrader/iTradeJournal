@@ -11,34 +11,48 @@ import {
   AdminComment,
   AdminProfile,
   AdminStats,
+  AdminSuspension,
   AdminUser,
+  AdminUserDetail,
   checkIsAdmin,
   deleteAdminComment,
+  deleteAdminUser,
   fetchAdminComments,
   fetchAdminProfiles,
+  fetchAdminSuspensions,
   fetchAdminStats,
+  fetchAdminUserDetail,
   fetchAdminUsers,
-  setProfilePublic
+  setProfilePublic,
+  setUserSuspended
 } from './adminApi';
+import { useModalA11y } from '../hooks/useModalA11y';
+import { formatCurrency } from '../utils/formatters';
+import { Currency } from '../types';
 import {
   ArrowDown,
   ArrowUp,
   BarChart3,
   ClipboardList,
+  ChevronRight,
   ExternalLink,
   Eye,
   EyeOff,
   Globe,
   LogOut,
   MessageSquare,
+  PauseCircle,
+  PlayCircle,
   RefreshCw,
   Search,
+  ShieldAlert,
   ShieldCheck,
   ShieldOff,
   Trash2,
   UserPlus,
   Users,
-  Wallet
+  Wallet,
+  X
 } from 'lucide-react';
 
 type AdminStatus = 'loading' | 'not_configured' | 'signed_out' | 'denied' | 'ok';
@@ -127,6 +141,15 @@ export const AdminApp: React.FC = () => {
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<UserSortKey>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [suspensions, setSuspensions] = useState<AdminSuspension[]>([]);
+  const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
+  const [detail, setDetail] = useState<AdminUserDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailBusy, setDetailBusy] = useState(false);
+  const detailRef = useModalA11y(Boolean(detailUser), () => {
+    setDetailUser(null);
+    setDetail(null);
+  });
 
   useEffect(() => {
     const prev = document.title;
@@ -138,16 +161,18 @@ export const AdminApp: React.FC = () => {
 
   const loadAll = useCallback(async () => {
     setBusy(true);
-    const [s, u, p, c] = await Promise.all([
+    const [s, u, p, c, susp] = await Promise.all([
       fetchAdminStats(),
       fetchAdminUsers(),
       fetchAdminProfiles(),
-      fetchAdminComments()
+      fetchAdminComments(),
+      fetchAdminSuspensions()
     ]);
     setStats(s);
     setUsers(u);
     setProfiles(p);
     setComments(c);
+    setSuspensions(susp);
     setLastUpdated(new Date());
     setBusy(false);
   }, []);
@@ -221,7 +246,7 @@ export const AdminApp: React.FC = () => {
       )
     ) : null;
 
-  const handleToggleProfile = async (p: AdminProfile) => {
+  const handleToggleProfile = async (p: AdminProfile): Promise<boolean> => {
     const next = !p.is_public;
     if (!next) {
       const ok = await confirm({
@@ -230,15 +255,16 @@ export const AdminApp: React.FC = () => {
         confirmText: 'Unpublish',
         variant: 'danger'
       });
-      if (!ok) return;
+      if (!ok) return false;
     }
     const done = await setProfilePublic(p.id, next);
     if (done) {
       setProfiles((prev) => prev.map((x) => (x.id === p.id ? { ...x, is_public: next } : x)));
       showToast(next ? `@${p.username} published again.` : `@${p.username} unpublished.`, 'success');
-    } else {
-      showToast('Update failed — is the admin SQL applied?', 'error');
+      return true;
     }
+    showToast('Update failed — is the admin SQL applied?', 'error');
+    return false;
   };
 
   const handleDeleteComment = async (c: AdminComment) => {
@@ -255,6 +281,87 @@ export const AdminApp: React.FC = () => {
       showToast('Comment deleted.', 'info');
     } else {
       showToast('Delete failed — is the admin SQL applied?', 'error');
+    }
+  };
+
+  const suspendedIds = useMemo(
+    () => new Set(suspensions.filter((x) => x.suspended).map((x) => x.user_id)),
+    [suspensions]
+  );
+
+  const openDetail = useCallback(async (u: AdminUser) => {
+    setDetailUser(u);
+    setDetail(null);
+    setDetailLoading(true);
+    const d = await fetchAdminUserDetail(u.user_id);
+    setDetail(d);
+    setDetailLoading(false);
+  }, []);
+
+  const closeDetail = () => {
+    setDetailUser(null);
+    setDetail(null);
+  };
+
+  const handleToggleSuspended = async (u: AdminUser, next: boolean) => {
+    const ok = await confirm({
+      title: next ? `Suspend ${u.email}?` : `Unsuspend ${u.email}?`,
+      message: next
+        ? 'The user will be blocked from the journal the next time the app loads, until you unsuspend them.'
+        : 'The user will regain access to the journal.',
+      confirmText: next ? 'Suspend' : 'Unsuspend',
+      variant: next ? 'danger' : 'info'
+    });
+    if (!ok) return;
+    setDetailBusy(true);
+    const done = await setUserSuspended(u.user_id, next);
+    setDetailBusy(false);
+    if (!done) {
+      showToast('Update failed — is supabase_admin_users.sql applied?', 'error');
+      return;
+    }
+    setSuspensions((prev) => [
+      ...prev.filter((x) => x.user_id !== u.user_id),
+      { user_id: u.user_id, suspended: next, suspended_at: next ? new Date().toISOString() : null }
+    ]);
+    setDetail((d) => (d ? { ...d, suspended: next } : d));
+    showToast(next ? 'User suspended.' : 'User unsuspended.', next ? 'info' : 'success');
+  };
+
+  const handleDeleteUser = async (u: AdminUser) => {
+    const ok = await confirm({
+      title: `Delete ${u.email} permanently?`,
+      message: 'This deletes the account and ALL of its data (accounts, trades, playbooks, settings). This cannot be undone.',
+      confirmText: 'Delete permanently',
+      variant: 'danger',
+      typeToConfirm: u.email || undefined
+    });
+    if (!ok) return;
+    setDetailBusy(true);
+    const done = await deleteAdminUser(u.user_id);
+    setDetailBusy(false);
+    if (!done) {
+      showToast('Delete failed — is supabase_admin_users.sql applied?', 'error');
+      return;
+    }
+    showToast('User deleted.', 'info');
+    closeDetail();
+    loadAll();
+  };
+
+  const toggleDetailProfile = async () => {
+    if (!detailUser || !detail?.profile) return;
+    const p = detail.profile;
+    const next = !p.is_public;
+    const done = await handleToggleProfile({
+      id: detailUser.user_id,
+      username: p.username,
+      display_name: p.display_name,
+      is_public: p.is_public,
+      updated_at: null
+    });
+    if (done) {
+      setDetail((d) => (d && d.profile ? { ...d, profile: { ...d.profile, is_public: next } } : d));
     }
   };
 
@@ -346,6 +453,8 @@ export const AdminApp: React.FC = () => {
     { label: 'Mentor comments', value: stats?.comments, icon: <MessageSquare size={17} /> },
     { label: 'Public profiles', value: stats?.public_profiles, icon: <Globe size={17} /> }
   ];
+
+  const isSuspended = detailUser ? suspendedIds.has(detailUser.user_id) : false;
 
   return (
     <div className="admin-shell">
@@ -565,16 +674,17 @@ export const AdminApp: React.FC = () => {
                       <th style={{ textAlign: 'right' }} className="admin-hide-sm">
                         Accounts
                       </th>
-                      <th className="sortable" style={{ textAlign: 'right', paddingRight: '18px' }} onClick={() => toggleSort('trades_count')}>
+                      <th className="sortable" style={{ textAlign: 'right' }} onClick={() => toggleSort('trades_count')}>
                         Trades {sortIcon('trades_count')}
                       </th>
+                      <th style={{ width: '26px', paddingRight: '12px' }} aria-label="Actions" />
                     </tr>
                   </thead>
                   <tbody>
                     {filteredUsers.map((u) => {
                       const isNew = Date.now() - new Date(u.created_at).getTime() < 7 * 86400000;
                       return (
-                        <tr key={u.user_id}>
+                        <tr key={u.user_id} onClick={() => openDetail(u)} style={{ cursor: 'pointer' }} title="View details">
                           <td style={{ paddingLeft: '18px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
                               <Avatar seed={u.email || u.user_id} label={initialsOf(u.email)} />
@@ -604,6 +714,17 @@ export const AdminApp: React.FC = () => {
                                       New
                                     </span>
                                   )}
+                                  {suspendedIds.has(u.user_id) && (
+                                    <span
+                                      className="admin-pill"
+                                      style={{
+                                        color: 'var(--loss-red)',
+                                        background: 'color-mix(in srgb, var(--loss-red) 14%, transparent)'
+                                      }}
+                                    >
+                                      Suspended
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -621,8 +742,11 @@ export const AdminApp: React.FC = () => {
                           <td className="admin-hide-sm" style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
                             {u.accounts_count}
                           </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-primary)', paddingRight: '18px' }}>
+                          <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-primary)' }}>
                             {u.trades_count}
+                          </td>
+                          <td style={{ paddingRight: '12px', color: 'var(--text-muted)' }}>
+                            <ChevronRight size={14} />
                           </td>
                         </tr>
                       );
@@ -753,6 +877,241 @@ export const AdminApp: React.FC = () => {
           </div>
         )}
       </div>
+      {/* User detail — drill-down + control */}
+      {detailUser && (
+        <div className="modal-backdrop" onClick={closeDetail}>
+          <div
+            ref={detailRef}
+            className="modal-container"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`User details: ${detailUser.email}`}
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '760px' }}
+          >
+            <div className="modal-header" style={{ alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                <Avatar seed={detailUser.email || detailUser.user_id} label={initialsOf(detailUser.email)} size={38} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {detailUser.email || '(no email)'}
+                    </span>
+                    {isSuspended && (
+                      <span
+                        className="admin-pill"
+                        style={{ color: 'var(--loss-red)', background: 'color-mix(in srgb, var(--loss-red) 14%, transparent)' }}
+                      >
+                        <ShieldAlert size={10} /> Suspended
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
+                    id {detailUser.user_id}
+                  </div>
+                </div>
+              </div>
+              <button type="button" onClick={closeDetail} className="btn btn-ghost btn-icon btn-sm" aria-label="Close user details">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '16px 22px', maxHeight: '62vh', overflowY: 'auto' }}>
+              {detailLoading ? (
+                <div>
+                  {[0, 1, 2].map((i) => (
+                    <TableRowSkeleton key={i} cols={3} />
+                  ))}
+                </div>
+              ) : !detail ? (
+                <EmptyState
+                  compact
+                  icon={<UserPlus size={20} />}
+                  title="Could not load user data"
+                  description="Make sure supabase_admin_users.sql has been applied."
+                />
+              ) : (
+                <>
+                  <div className="admin-grid" style={{ marginBottom: '14px' }}>
+                    {[
+                      { label: 'Accounts', value: String(detail.accounts_count ?? 0) },
+                      { label: 'Trades', value: String(detail.trades_count ?? 0) },
+                      { label: 'In trash', value: String(detail.trades_trashed ?? 0) },
+                      { label: 'Joined', value: detail.created_at ? new Date(detail.created_at).toLocaleDateString() : '—' },
+                      { label: 'Last sign-in', value: detail.last_sign_in_at ? relTime(detail.last_sign_in_at) : 'never' }
+                    ].map((s) => (
+                      <div key={s.label} className="admin-stat" style={{ padding: '10px 12px' }}>
+                        <div>
+                          <div className="admin-stat-value" style={{ fontSize: '1.05rem' }}>
+                            {s.value}
+                          </div>
+                          <div className="admin-stat-label">{s.label}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, margin: '14px 0 8px' }}>Accounts</div>
+                  {(detail.accounts || []).length === 0 ? (
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>No accounts.</p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {(detail.accounts || []).map((a) => (
+                        <div
+                          key={a.id}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            gap: '10px',
+                            alignItems: 'center',
+                            padding: '9px 12px',
+                            borderRadius: '9px',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-subtle)',
+                            flexWrap: 'wrap'
+                          }}
+                        >
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 700 }}>{a.name}</div>
+                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                              {a.broker || '—'} · {a.type || '—'}
+                              {a.status ? ` · ${a.status}` : ''}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 700 }}>
+                              {formatCurrency(a.current_balance ?? 0, (a.currency || 'USD') as Currency)}
+                            </div>
+                            <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)' }}>
+                              from {formatCurrency(a.initial_balance ?? 0, (a.currency || 'USD') as Currency)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, margin: '16px 0 8px' }}>
+                    Recent trades ({detail.trades?.length ?? 0})
+                  </div>
+                  {(detail.trades || []).length === 0 ? (
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>No trades.</p>
+                  ) : (
+                    <div style={{ overflowX: 'auto', border: '1px solid var(--border-subtle)', borderRadius: '10px' }}>
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th style={{ paddingLeft: '12px' }}>Symbol</th>
+                            <th>Dir</th>
+                            <th>Entry</th>
+                            <th style={{ textAlign: 'right' }}>PnL</th>
+                            <th style={{ textAlign: 'right', paddingRight: '12px' }}>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(detail.trades || []).map((tr) => (
+                            <tr key={tr.id} style={tr.deleted_at ? { opacity: 0.55 } : undefined}>
+                              <td style={{ paddingLeft: '12px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                                {tr.symbol}
+                              </td>
+                              <td>{tr.direction}</td>
+                              <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
+                                {tr.entry_date ? new Date(tr.entry_date).toLocaleDateString() : '—'}
+                              </td>
+                              <td
+                                style={{
+                                  textAlign: 'right',
+                                  fontFamily: 'var(--font-mono)',
+                                  fontWeight: 700,
+                                  color: tr.pnl > 0 ? 'var(--profit-green)' : tr.pnl < 0 ? 'var(--loss-red)' : 'var(--text-secondary)'
+                                }}
+                              >
+                                {tr.pnl > 0 ? '+' : ''}
+                                {formatCurrency(tr.pnl, 'USD')}
+                              </td>
+                              <td style={{ textAlign: 'right', paddingRight: '12px' }}>
+                                {tr.deleted_at ? (
+                                  <span
+                                    className="admin-pill"
+                                    style={{ color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' }}
+                                  >
+                                    Trashed
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.7rem' }}>{tr.status}</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, margin: '16px 0 8px' }}>Public profile</div>
+                  {detail.profile ? (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.84rem', fontWeight: 700 }}>@{detail.profile.username}</span>
+                        <span
+                          className="admin-pill"
+                          style={
+                            detail.profile.is_public
+                              ? { color: 'var(--profit-green)', background: 'color-mix(in srgb, var(--profit-green) 14%, transparent)' }
+                              : { color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' }
+                          }
+                        >
+                          {detail.profile.is_public ? 'Public' : 'Private'}
+                        </span>
+                      </div>
+                      <button className="btn btn-secondary btn-sm" onClick={toggleDetailProfile} disabled={detailBusy}>
+                        {detail.profile.is_public ? <EyeOff size={13} /> : <Eye size={13} />}{' '}
+                        {detail.profile.is_public ? 'Unpublish' : 'Publish'}
+                      </button>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>No public profile set up.</p>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  disabled={detailBusy || detailUser.user_id === user?.id}
+                  onClick={() => handleToggleSuspended(detailUser, !(detail?.suspended ?? isSuspended))}
+                  title={detailUser.user_id === user?.id ? 'You cannot suspend your own account' : undefined}
+                >
+                  {(detail?.suspended ?? isSuspended) ? (
+                    <>
+                      <PlayCircle size={13} /> Unsuspend
+                    </>
+                  ) : (
+                    <>
+                      <PauseCircle size={13} /> Suspend
+                    </>
+                  )}
+                </button>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  style={{ color: 'var(--loss-red)' }}
+                  disabled={detailBusy || detailUser.user_id === user?.id}
+                  onClick={() => handleDeleteUser(detailUser)}
+                  title={detailUser.user_id === user?.id ? 'You cannot delete your own account' : 'Delete user and all their data'}
+                >
+                  <Trash2 size={13} /> Delete user
+                </button>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={closeDetail}>
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Toast />
     </div>
   );

@@ -401,6 +401,21 @@ export const uploadImageToStorage = async (file: File | Blob, filename: string):
 // ==========================================
 // User Profile & Public Portfolio
 // ==========================================
+export const fetchMyUserFlags = async (userId: string): Promise<{ suspended: boolean } | null> => {
+  if (!supabase || !userId) return null;
+  try {
+    const { data, error } = await supabase
+      .from('user_flags')
+      .select('suspended')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) return null; // table may not exist yet — treat as not suspended
+    return data ? { suspended: Boolean(data.suspended) } : null;
+  } catch {
+    return null;
+  }
+};
+
 export const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
   if (!supabase || !userId) return null;
   try {
