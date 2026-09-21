@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useJournal } from '../../context/JournalContext';
 import { useModalA11y } from '../../hooks/useModalA11y';
-import { NavTab } from '../Sidebar';
+import type { NavTab } from '../navigation/navCatalog';
 import { exportTradesToCSV } from '../../utils/storage';
 import { getUiPrefs, setUiPref } from '../../utils/uiPrefs';
 import { useNavPrefs, isTabVisible } from '../../utils/navPrefs';

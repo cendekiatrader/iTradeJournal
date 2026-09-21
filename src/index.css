@@ -173,7 +173,10 @@ html, body {
   color: var(--text-primary);
   font-family: var(--font-sans);
   min-height: 100vh;
-  overflow-x: hidden;
+  /* `clip` instead of `hidden`: an overflow value here turns <body> into a scroll
+     container, which silently breaks every `position: sticky` descendant (sidebar
+     menu, sticky navbar). clip still hides sideways overflow. */
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -604,18 +607,39 @@ textarea.input-control {
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 20px 12px;
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1), padding 0.22s ease;
   user-select: none;
-  overflow-x: hidden;
+  /* `clip` (not `hidden`) keeps labels from spilling during the collapse animation
+     WITHOUT turning the sidebar into a scroll container, which would break the
+     sticky .sidebar-inner below. */
+  overflow-x: clip;
   position: relative;
   z-index: 50;
+}
+
+/* Sticky, viewport-height shell. Without it the sidebar stretches to the height of the
+   page (justify-content: space-between on a stretched flex column), so the navigation
+   and the account card slid down whenever a long module was open. */
+.sidebar-inner {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 20px 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
 .app-sidebar.collapsed {
   width: 68px;
   min-width: 68px;
+}
+
+.app-sidebar.collapsed .sidebar-inner {
   padding: 16px 8px;
 }
 
@@ -686,7 +710,12 @@ textarea.input-control {
   .app-sidebar.collapsed {
     width: 280px !important;
     min-width: 280px !important;
+  }
+
+  .sidebar-inner {
     padding: 20px 14px !important;
+    position: relative !important;
+    height: 100% !important;
   }
 
   .app-sidebar.collapsed .sidebar-label,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
-import { NAV_META, NavTab } from './Sidebar';
-import { NAV_MODULES, getNavPrefs, subscribeNavPrefs, isTabVisible, type NavPrefs } from '../utils/navPrefs';
+import { NAV_META, NAV_MODULES, type NavTab } from './navigation/navCatalog';
+import { getNavPrefs, subscribeNavPrefs, isTabVisible, type NavPrefs } from '../utils/navPrefs';
 
 interface MobileNavProps {
   activeTab: NavTab;

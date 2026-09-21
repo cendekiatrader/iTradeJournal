@@ -6,10 +6,10 @@ import { useConfirm } from '../common/ConfirmDialog';
 import { ThemeSelectorModal } from '../common/ThemeSelectorModal';
 import { ProfileSettingsModal } from '../profile/ProfileSettingsModal';
 import { KeyboardShortcutsModal } from '../common/KeyboardShortcutsModal';
-import { NAV_MODULES, DEFAULT_HIDDEN_TABS, getNavPrefs, setTabHidden, showAllTabs, resetNavPrefs, subscribeNavPrefs, type NavPrefs } from '../../utils/navPrefs';
+import { DEFAULT_HIDDEN_TABS, getNavPrefs, setTabHidden, showAllTabs, resetNavPrefs, subscribeNavPrefs, type NavPrefs } from '../../utils/navPrefs';
 import { getUiPrefs, setUiPref, type UiPrefs } from '../../utils/uiPrefs';
 import { exportDatabaseToJSON } from '../../utils/storage';
-import { NAV_META, type NavTab } from '../Sidebar';
+import { NAV_META, NAV_MODULES, type NavTab } from '../navigation/navCatalog';
 import {
   User as UserIcon,
   Palette,
