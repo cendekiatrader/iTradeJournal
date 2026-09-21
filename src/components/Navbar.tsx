@@ -12,8 +12,7 @@ import {
   Menu,
   Eye,
   EyeOff,
-  Search,
-  Settings as SettingsIcon
+  Search
 } from 'lucide-react';
 import { AuthModal, AuthMode } from './auth/AuthModal';
 import { NotificationCenter } from './common/NotificationCenter';
@@ -23,15 +22,13 @@ interface NavbarProps {
   onOpenAccountModal: () => void;
   onOpenMobileMenu?: () => void;
   onOpenCommandPalette?: () => void;
-  onOpenSettings?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   onOpenTradeModal, 
   onOpenAccountModal,
   onOpenMobileMenu,
-  onOpenCommandPalette,
-  onOpenSettings
+  onOpenCommandPalette
 }) => {
   const { 
     accounts, 
@@ -62,9 +59,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const userInitial = (user?.user_metadata?.full_name || user?.email || 'U')[0].toUpperCase();
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Trader';
 
   return (
     <header className="app-navbar" style={{
@@ -129,45 +123,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Right: User Profile (with integrated Data/Export & Shortcuts) & + Log Trade */}
       <div className="navbar-right-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto', flexShrink: 0 }}>
         
-        {/* Profile & Settings (the full user menu now lives in the Settings tab) */}
-        {user ? (
-          <button
-            type="button"
-            onClick={() => onOpenSettings?.()}
-            className="btn btn-secondary btn-sm"
-            title={`${userName} — account, appearance, modules & data`}
-            aria-label="Open settings"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '5px 10px',
-              borderRadius: '8px',
-              backgroundColor: 'var(--bg-panel)',
-              borderColor: 'var(--bg-chip)'
-            }}
-          >
-            <div style={{
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--theme-secondary-strong), #8b5cf6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              flexShrink: 0
-            }}>
-              {userInitial}
-            </div>
-            <span className="navbar-user-name" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {userName}
-            </span>
-            <SettingsIcon size={13} color="var(--text-secondary)" />
-          </button>
-        ) : (
+        {/* Signed-out visitors get a Sign In entry here; signed-in users reach their account
+            through the Settings tab (sidebar item, S shortcut or the command palette). */}
+        {!user && (
           <button
             onClick={() => {
               setAuthMode('signin');

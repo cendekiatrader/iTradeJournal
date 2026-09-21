@@ -448,7 +448,6 @@ const MainApp: React.FC = () => {
           onOpenAccountModal={handleOpenNewAccount}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
           onOpenCommandPalette={() => setPaletteOpen(true)}
-          onOpenSettings={() => goToTab('settings')}
         />
 
         <main className="page-body">
