@@ -244,6 +244,12 @@ html, body {
   .page-body {
     padding: 16px;
   }
+
+  /* Workspace grid tracks are set inline (preset-dependent widths up to 460px),
+     which overflows a phone viewport and clips every panel. Force one shrinkable column. */
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 }
 
 /* Card Styling */
