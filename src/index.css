@@ -818,6 +818,35 @@ textarea.input-control {
 }
 
 @media (max-width: 560px) {
+  /* Modal: input & grup input boleh menyusut (select panjang tidak memaksa lebar) */
+  .modal-container input,
+  .modal-container select,
+  .modal-container textarea,
+  .modal-container .input-group,
+  .modal-container .input-control {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .modal-container select {
+    width: 100% !important;
+  }
+
+  /* Form Log Trade: grid 2 kolom jadi 1 kolom (minmax(0,1fr) supaya bisa menyusut) */
+  .tf-grid-2,
+  .tf-grid-auto {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .tf-outcome {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .tf-exit-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    row-gap: 6px !important;
+  }
+
   /* Modal: header boleh wrap supaya nilai panjang tidak terpotong */
   .modal-header,
   .trade-modal-header {

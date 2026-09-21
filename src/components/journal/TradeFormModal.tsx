@@ -570,7 +570,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
         {/* Modal Form Body */}
         <form onSubmit={handleSubmit} className="modal-body">
           {/* Account & Symbol Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+          <div className="tf-grid-auto" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '16px' }}>
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Trading Account *</label>
               <select
@@ -639,7 +639,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
           </div>
 
           {/* Direction & Status Tabs */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+          <div className="tf-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
             {/* Direction Selector */}
             <div>
               <label className="input-label" style={{ marginBottom: '6px', display: 'block' }}>Direction</label>
@@ -690,7 +690,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             {/* Status Selector */}
             <div>
               <label className="input-label" style={{ marginBottom: '6px', display: 'block' }}>Trade Outcome</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
+              <div className="tf-outcome" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
                 {(['WIN', 'LOSS', 'BREAKEVEN', 'OPEN'] as TradeStatus[]).map((st) => (
                   <button
                     type="button"
@@ -736,7 +736,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div className="tf-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               <div className="input-group" style={{ margin: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <label className="input-label" style={{ margin: 0 }}>Opened At *</label>
@@ -974,6 +974,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 {partialExits.map((exit, idx) => (
                   <div 
                     key={exit.id} 
+                    className="tf-exit-row"
                     style={{
                       display: 'grid',
                       gridTemplateColumns: '80px 1.2fr 1fr 1fr auto',
@@ -1323,7 +1324,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               </label>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="tf-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {/* Before Screenshot */}
               <div>
                 <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#93c5fd', display: 'block', marginBottom: '4px' }}>
