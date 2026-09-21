@@ -4,6 +4,7 @@ import { useModalA11y } from '../../hooks/useModalA11y';
 import { NavTab } from '../Sidebar';
 import { exportTradesToCSV } from '../../utils/storage';
 import { getUiPrefs, setUiPref } from '../../utils/uiPrefs';
+import { useNavPrefs, isTabVisible } from '../../utils/navPrefs';
 import { Trade } from '../../types';
 import {
   Search,
@@ -27,7 +28,8 @@ import {
   Moon,
   NotebookPen,
   MessageSquarePlus,
-  Zap
+  Zap,
+  Settings as SettingsIcon
 } from 'lucide-react';
 
 interface CommandPaletteProps {
@@ -65,7 +67,8 @@ const PAGES: Array<{ id: NavTab; label: string; hint: string; icon: React.ReactN
   { id: 'queue', label: 'Setup Queue', hint: '', icon: <Target size={15} /> },
   { id: 'news', label: 'Economic Calendar', hint: 'E', icon: <Flame size={15} /> },
   { id: 'accounts', label: 'Account Manager', hint: 'M', icon: <WalletCards size={15} /> },
-  { id: 'calculator', label: 'Position Size Calc', hint: 'C', icon: <Calculator size={15} /> }
+  { id: 'calculator', label: 'Position Size Calc', hint: 'C', icon: <Calculator size={15} /> },
+  { id: 'settings', label: 'Settings', hint: 'S', icon: <SettingsIcon size={15} /> }
 ];
 
 export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
@@ -81,6 +84,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
     showToast,
     customFieldDefs
   } = useJournal();
+
+  const navPrefs = useNavPrefs();
 
   const [query, setQuery] = useState('');
   const [highlighted, setHighlighted] = useState(0);
@@ -227,7 +232,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
       }
     );
 
-    PAGES.forEach((page) => {
+    // Progressive disclosure: hidden modules never show up as a jump target
+    PAGES.filter((page) => isTabVisible(page.id, navPrefs)).forEach((page) => {
       list.push({
         id: `page-${page.id}`,
         label: page.label,
@@ -278,7 +284,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
 
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trades, accounts, filteredTrades.length, isStealthMode, customFieldDefs.length]);
+  }, [trades, accounts, filteredTrades.length, isStealthMode, customFieldDefs.length, navPrefs.hidden.join(',')]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();

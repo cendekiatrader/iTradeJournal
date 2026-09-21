@@ -30,7 +30,8 @@ const SHORTCUTS: ShortcutItem[] = [
   { key: 'A', description: 'Go to Analytics & Setups', category: 'Navigation' },
   { key: 'E', description: 'Go to the Economic Calendar & News', category: 'Navigation' },
   { key: 'C', description: 'Go to the Position Size Calculator', category: 'Navigation' },
-  { key: 'M', description: 'Go to the Account Manager', category: 'Navigation' }
+  { key: 'M', description: 'Go to the Account Manager', category: 'Navigation' },
+  { key: 'S', description: 'Go to Settings (profile, appearance, modules, data)', category: 'Navigation' }
 ];
 
 export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen, onClose }) => {
@@ -66,7 +67,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                 Pro Trader Keyboard Shortcuts
               </h2>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                Navigasi kilat dan pencatatan trade super cepat tanpa klik mouse
+                Jump between pages and log trades without touching the mouse. Shortcuts only work for modules that are currently shown in the navigation.
               </p>
             </div>
           </div>

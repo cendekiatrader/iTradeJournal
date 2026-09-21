@@ -29,7 +29,7 @@ const STEPS: TourStep[] = [
   },
   {
     title: 'Pro shortcuts',
-    body: 'Press ? for the full cheat sheet, Ctrl+K for the command palette, and N / D / J / A / C to jump between pages.'
+    body: 'Press ? for the full cheat sheet, Ctrl+K for the command palette, and D / J / M / S to jump between pages.'
   }
 ];
 
@@ -41,15 +41,20 @@ interface ProductTourProps {
 export const ProductTour: React.FC<ProductTourProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  // Steps pointing at something the user has hidden (progressive disclosure) are dropped,
+  // so the tour never highlights an element that is not in the DOM.
+  const [steps, setSteps] = useState<TourStep[]>(STEPS);
 
   useEffect(() => {
-    if (isOpen) setStep(0);
+    if (!isOpen) return;
+    setSteps(STEPS.filter(s => !s.target || document.querySelector(s.target)));
+    setStep(0);
   }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
     const compute = () => {
-      const target = STEPS[step]?.target;
+      const target = steps[step]?.target;
       if (!target) {
         setRect(null);
         return;
@@ -64,12 +69,12 @@ export const ProductTour: React.FC<ProductTourProps> = ({ isOpen, onClose }) => 
       window.removeEventListener('resize', compute);
       window.clearInterval(interval);
     };
-  }, [isOpen, step]);
+  }, [isOpen, step, steps]);
 
-  if (!isOpen || STEPS.length === 0) return null;
+  if (!isOpen || steps.length === 0) return null;
 
-  const current = STEPS[step];
-  const isLast = step === STEPS.length - 1;
+  const current = steps[step];
+  const isLast = step === steps.length - 1;
   const pad = 6;
 
   const tooltipWidth = 340;
@@ -118,7 +123,7 @@ export const ProductTour: React.FC<ProductTourProps> = ({ isOpen, onClose }) => 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Compass size={16} color="var(--theme-primary)" />
             <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--theme-secondary)' }}>
-              Tour · {step + 1}/{STEPS.length}
+              Tour · {step + 1}/{steps.length}
             </span>
           </div>
           <button
@@ -143,7 +148,7 @@ export const ProductTour: React.FC<ProductTourProps> = ({ isOpen, onClose }) => 
             className="btn btn-primary btn-sm"
             onClick={() => {
               if (isLast) onClose();
-              else setStep((s) => Math.min(STEPS.length - 1, s + 1));
+              else setStep((s) => Math.min(steps.length - 1, s + 1));
             }}
           >
             {isLast ? 'Done' : 'Next'}

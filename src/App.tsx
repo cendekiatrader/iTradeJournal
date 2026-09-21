@@ -3,7 +3,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { JournalProvider, useJournal } from './context/JournalContext';
 import { Navbar } from './components/Navbar';
-import { Sidebar, NavTab } from './components/Sidebar';
+import { Sidebar, NavTab, NAV_META } from './components/Sidebar';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { WeeklyReviewModal } from './components/review/WeeklyReviewModal';
 import { JournalView } from './components/journal/JournalView';
@@ -34,10 +34,12 @@ import { ThemeSelectorModal } from './components/common/ThemeSelectorModal';
 import { MobileNav } from './components/MobileNav';
 import { SetupQueueView } from './components/queue/SetupQueueView';
 import { ReviewView } from './components/review/ReviewView';
+import { SettingsView } from './components/settings/SettingsView';
 import { TradePrefill } from './types';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
+import { getNavPrefs, isTabVisible } from './utils/navPrefs';
 
 const CalendarView = lazy(() => import('./components/calendar/CalendarView').then((m) => ({ default: m.CalendarView })));
 const AnalyticsView = lazy(() => import('./components/analytics/AnalyticsView').then((m) => ({ default: m.AnalyticsView })));
@@ -157,31 +159,34 @@ const MainApp: React.FC = () => {
         handleOpenNewTrade();
       } else if (e.key === 'd' || e.key === 'D') {
         e.preventDefault();
-        setActiveTab('dashboard');
+        goToTab('dashboard');
       } else if (e.key === 'w' || e.key === 'W') {
         e.preventDefault();
-        setActiveTab('workspace');
+        goToTab('workspace');
       } else if (e.key === 'j' || e.key === 'J') {
         e.preventDefault();
-        setActiveTab('journal');
+        goToTab('journal');
       } else if (e.key === 'p' || e.key === 'P') {
         e.preventDefault();
-        setActiveTab('playbook');
+        goToTab('playbook');
       } else if (e.key === 'a' || e.key === 'A') {
         e.preventDefault();
-        setActiveTab('analytics');
+        goToTab('analytics');
       } else if (e.key === 'e' || e.key === 'E') {
         e.preventDefault();
-        setActiveTab('news');
+        goToTab('news');
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
-        setActiveTab('calculator');
+        goToTab('calculator');
       } else if (e.key === 'm' || e.key === 'M') {
         e.preventDefault();
-        setActiveTab('accounts');
+        goToTab('accounts');
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        goToTab('settings');
       } else if (e.key === 'q' || e.key === 'Q') {
         e.preventDefault();
-        setActiveTab('queue');
+        goToTab('queue');
       } else if (e.key === 'Escape') {
         setTradeFormOpen(false);
         setDetailTrade(null);
@@ -265,10 +270,10 @@ const MainApp: React.FC = () => {
         handleOpenNewTrade();
         window.history.replaceState(null, '', window.location.pathname);
       } else if (hash === '#calculator') {
-        setActiveTab('calculator');
+        goToTab('calculator');
         window.history.replaceState(null, '', window.location.pathname);
       } else if (hash === '#queue') {
-        setActiveTab('queue');
+        goToTab('queue');
         window.history.replaceState(null, '', window.location.pathname);
       }
 
@@ -310,6 +315,20 @@ const MainApp: React.FC = () => {
   }, [activeTab]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  /**
+   * Single navigation entry point: refuses to jump to a module the user has hidden
+   * (progressive disclosure) and points them at Settings instead.
+   */
+  const goToTab = (tab: NavTab) => {
+    if (tab !== 'settings' && !isTabVisible(tab, getNavPrefs())) {
+      const label = NAV_META[tab]?.label || tab;
+      showToast(`${label} is hidden. Turn it back on in Settings → Navigation & Modules.`, 'info');
+      setActiveTab('settings');
+      return;
+    }
+    setActiveTab(tab);
+  };
 
   // Account suspension (managed from the admin console)
   const [suspended, setSuspended] = useState(false);
@@ -401,7 +420,7 @@ const MainApp: React.FC = () => {
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={goToTab}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
         mobileOpen={mobileMenuOpen}
@@ -429,7 +448,7 @@ const MainApp: React.FC = () => {
           onOpenAccountModal={handleOpenNewAccount}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
           onOpenCommandPalette={() => setPaletteOpen(true)}
-          onOpenFeedback={() => setFeedbackOpen(true)}
+          onOpenSettings={() => goToTab('settings')}
         />
 
         <main className="page-body">
@@ -439,8 +458,8 @@ const MainApp: React.FC = () => {
             <DashboardView
               onOpenTradeModal={handleOpenNewTrade}
               onViewTradeDetail={handleViewTradeDetail}
-              onNavigateToJournal={() => setActiveTab('journal')}
-              onNavigateToNews={() => setActiveTab('news')}
+              onNavigateToJournal={() => goToTab('journal')}
+              onNavigateToNews={() => goToTab('news')}
               onOpenWeeklyReview={() => setWeeklyReviewOpen(true)}
             />
           )}
@@ -500,6 +519,13 @@ const MainApp: React.FC = () => {
                 setEditingTrade(null);
                 setTradeFormOpen(true);
               }}
+            />
+          )}
+
+          {activeTab === 'settings' && (
+            <SettingsView
+              onOpenFeedback={() => setFeedbackOpen(true)}
+              onSelectTab={goToTab}
             />
           )}
             </ErrorBoundary>
@@ -578,7 +604,7 @@ const MainApp: React.FC = () => {
         isOpen={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         activeTab={activeTab}
-        onNavigate={setActiveTab}
+        onNavigate={goToTab}
         onOpenTradeModal={handleOpenNewTrade}
         onOpenAccountModal={handleOpenNewAccount}
         onOpenShortcuts={() => setShortcutsModalOpen(true)}
@@ -604,7 +630,7 @@ const MainApp: React.FC = () => {
       {/* Mobile bottom navigation + quick Log Trade FAB */}
       <MobileNav
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={goToTab}
         onOpenTradeModal={handleOpenNewTrade}
       />
 

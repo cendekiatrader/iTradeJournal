@@ -1,6 +1,7 @@
-import React from 'react';
-import { LayoutDashboard, BookOpen, BarChart3, Target, Plus } from 'lucide-react';
-import { NavTab } from './Sidebar';
+import React, { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { NAV_META, NavTab } from './Sidebar';
+import { NAV_MODULES, getNavPrefs, subscribeNavPrefs, isTabVisible, type NavPrefs } from '../utils/navPrefs';
 
 interface MobileNavProps {
   activeTab: NavTab;
@@ -8,24 +9,33 @@ interface MobileNavProps {
   onOpenTradeModal: () => void;
 }
 
-const ITEMS: Array<{ id: NavTab; label: string; icon: React.ReactNode }> = [
-  { id: 'dashboard', label: 'Home', icon: <LayoutDashboard size={20} /> },
-  { id: 'journal', label: 'Journal', icon: <BookOpen size={20} /> },
-  { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} /> },
-  { id: 'queue', label: 'Queue', icon: <Target size={20} /> }
-];
+/** Preferred bottom-bar slots, in order. Hidden modules are skipped, next ones take their place. */
+const MOBILE_ORDER: NavTab[] = ['dashboard', 'journal', 'accounts', 'calendar'];
+
+const SLOTS = 4;
 
 export const MobileNav: React.FC<MobileNavProps> = ({ activeTab, onSelectTab, onOpenTradeModal }) => {
-  const [left, right] = [ITEMS.slice(0, 2), ITEMS.slice(2)];
+  const [navPrefs, setNavPrefs] = useState<NavPrefs>(getNavPrefs);
+  useEffect(() => subscribeNavPrefs(setNavPrefs), []);
 
-  const renderItem = (item: (typeof ITEMS)[number]) => {
-    const isActive = activeTab === item.id;
+  const visible = (id: NavTab) => isTabVisible(id, navPrefs) && id !== 'coaching' && id !== 'settings';
+
+  const items = [
+    ...MOBILE_ORDER.filter(visible),
+    ...NAV_MODULES.map(m => m.id).filter(id => !MOBILE_ORDER.includes(id) && visible(id))
+  ].slice(0, SLOTS);
+
+  const [left, right] = [items.slice(0, 2), items.slice(2)];
+
+  const renderItem = (id: NavTab) => {
+    const isActive = activeTab === id;
+    const Icon = NAV_META[id].icon;
     return (
       <button
-        key={item.id}
+        key={id}
         type="button"
-        onClick={() => onSelectTab(item.id)}
-        aria-label={item.label}
+        onClick={() => onSelectTab(id)}
+        aria-label={NAV_META[id].label}
         aria-current={isActive ? 'page' : undefined}
         style={{
           flex: 1,
@@ -42,8 +52,8 @@ export const MobileNav: React.FC<MobileNavProps> = ({ activeTab, onSelectTab, on
           padding: '6px 0'
         }}
       >
-        {item.icon}
-        {item.label}
+        <Icon size={20} />
+        {NAV_META[id].label.split(' ')[0]}
       </button>
     );
   };
