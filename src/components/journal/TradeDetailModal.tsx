@@ -74,16 +74,18 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
     <div className="modal-backdrop" onClick={onClose}>
       <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Trade Details" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '750px' }}>
         {/* Header with Trade Status Banner */}
-        <div style={{
+        <div className="trade-modal-header" style={{
           padding: '20px 24px',
           borderBottom: '1px solid var(--border-color)',
           background: isWin ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), var(--bg-card))' : isLoss ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), var(--bg-card))' : 'var(--bg-card)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start'
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          rowGap: '10px'
         }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                 {trade.symbol}
               </h2>
@@ -96,7 +98,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
               <span style={{ fontFamily: 'var(--font-mono)' }}>{formatDateTimeDDMMYYYY(trade.entryDate)}</span>
               <span>•</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -108,7 +110,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
             </div>
           </div>
 
-          <div style={{ textAlign: 'right' }}>
+          <div className="trade-modal-pnl" style={{ textAlign: 'right' }}>
             <div style={{
               fontSize: '1.4rem',
               fontWeight: 800,

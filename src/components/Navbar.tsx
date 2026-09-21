@@ -213,14 +213,14 @@ export const Navbar: React.FC<NavbarProps> = ({
       padding: '0 24px',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-start',
       position: 'sticky',
       top: 0,
       zIndex: 100,
       gap: '12px'
     }}>
-      {/* Left: Brand Logo & Mobile Menu & Account Selector */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      {/* Left: Brand Logo & Mobile Menu */}
+      <div className="navbar-left-group" style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
         {onOpenMobileMenu && (
           <button
             type="button"
@@ -262,182 +262,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--bg-chip)' }} />
-
-        {/* Account Selector (Single-Line Compact) */}
-        <div ref={accountRef} className="navbar-account-switcher" style={{ position: 'relative' }}>
-          <button
-            onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-            aria-haspopup="menu"
-            aria-expanded={accountDropdownOpen}
-            aria-label={`Select trading account (current: ${activeAccount ? activeAccount.name : 'All Accounts'})`}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              backgroundColor: 'var(--bg-panel)',
-              border: '1px solid var(--bg-chip)',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <div style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: activeAccount?.colorTag || 'var(--theme-secondary-strong)',
-              boxShadow: `0 0 6px ${activeAccount?.colorTag || 'var(--theme-secondary-strong)'}`
-            }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
-              <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {activeAccount ? activeAccount.name : 'All Accounts'}
-              </span>
-              <span style={{ color: 'var(--text-muted)' }}>•</span>
-              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--profit-green)', fontWeight: 700 }}>
-                {activeAccount 
-                  ? formatCurrency(activeAccount.currentBalance, activeAccount.currency, true)
-                  : formatCurrency(totalPortfolioBalance, 'USD', true)}
-              </span>
-            </div>
-            <ChevronDown size={14} color="var(--text-secondary)" />
-          </button>
-
-          {/* Account Dropdown Menu */}
-          {accountDropdownOpen && (
-            <div style={{
-              position: 'absolute',
-              top: 'calc(100% + 6px)',
-              left: 0,
-              width: '300px',
-              backgroundColor: 'var(--bg-panel)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '12px',
-              boxShadow: '0 12px 30px rgba(0,0,0,0.7)',
-              padding: '8px',
-              zIndex: 200,
-              animation: 'fadeIn 0.15s ease'
-            }}>
-              <div style={{ padding: '6px 10px', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                Select Trading Portfolio
-              </div>
-
-              {/* All Accounts Option */}
-              <button
-                onClick={() => {
-                  setActiveAccountId('all');
-                  setAccountDropdownOpen(false);
-                }}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '9px 12px',
-                  borderRadius: '8px',
-                  backgroundColor: activeAccountId === 'all' ? 'var(--bg-chip)' : 'transparent',
-                  border: 'none',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'background 0.15s'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Layers size={16} color="var(--theme-secondary-strong)" />
-                  <div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>All Accounts (Portfolio)</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Combined analytics & metrics</div>
-                  </div>
-                </div>
-                {activeAccountId === 'all' && <Check size={14} color="var(--theme-secondary-strong)" />}
-              </button>
-
-              <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '4px 0' }} />
-
-              {/* Individual Accounts List */}
-              <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                {accounts.map(acc => (
-                  <button
-                    key={acc.id}
-                    onClick={() => {
-                      setActiveAccountId(acc.id);
-                      setAccountDropdownOpen(false);
-                    }}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      backgroundColor: activeAccountId === acc.id ? '#1a2336' : 'transparent',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      marginBottom: '2px',
-                      transition: 'background 0.15s'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: acc.colorTag
-                      }} />
-                      <div>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{acc.name}</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                          {acc.broker} • {acc.type}
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.78rem', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--profit-green)' }}>
-                        {formatCurrency(acc.currentBalance, acc.currency)}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '4px 0' }} />
-
-              {/* Add New Account Button */}
-              <button
-                onClick={() => {
-                  setAccountDropdownOpen(false);
-                  onOpenAccountModal();
-                }}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  padding: '7px 10px',
-                  borderRadius: '6px',
-                  backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent)',
-                  color: 'var(--theme-secondary)',
-                  border: '1px dashed var(--theme-secondary-strong)',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                <Plus size={14} /> Add New Account
-              </button>
-            </div>
-          )}
-        </div>
+        <div className="navbar-divider" style={{ width: '1px', height: '24px', backgroundColor: 'var(--bg-chip)', flexShrink: 0 }} />
       </div>
 
       {/* Right: User Profile (with integrated Data/Export & Shortcuts) & + Log Trade */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="navbar-right-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto', flexShrink: 0 }}>
         
         {/* User Profile Dropdown */}
         {user ? (
@@ -480,7 +309,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {userDropdownOpen && (
-              <div style={{
+              <div className="nav-user-menu" style={{
                 position: 'absolute',
                 top: 'calc(100% + 6px)',
                 right: 0,
@@ -690,7 +519,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           onClick={toggleStealthMode}
-          className="btn btn-secondary btn-icon btn-sm"
+          className="btn btn-secondary btn-icon btn-sm navbar-stealth-btn"
           title={isStealthMode ? 'Show Balance (Stealth Mode Active)' : 'Hide Balance (Stealth Mode)'}
           aria-label={isStealthMode ? 'Show balances (stealth mode is on)' : 'Hide balances (stealth mode)'}
           aria-pressed={isStealthMode}
@@ -715,6 +544,179 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="hide-on-mobile">Log Trade</span>
           <kbd className="kbd-hint hide-on-mobile" style={{ backgroundColor: 'rgba(255,255,255,0.16)', borderColor: 'rgba(255,255,255,0.25)', color: '#ffffff' }}>N</kbd>
         </button>
+      </div>
+
+      {/* Account Selector (Single-Line Compact) */}
+      <div ref={accountRef} className="navbar-account-switcher" style={{ position: 'relative' }}>
+        <button
+          onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+          aria-haspopup="menu"
+          aria-expanded={accountDropdownOpen}
+          aria-label={`Select trading account (current: ${activeAccount ? activeAccount.name : 'All Accounts'})`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: 'var(--bg-panel)',
+            border: '1px solid var(--bg-chip)',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: activeAccount?.colorTag || 'var(--theme-secondary-strong)',
+            boxShadow: `0 0 6px ${activeAccount?.colorTag || 'var(--theme-secondary-strong)'}`
+          }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
+            <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {activeAccount ? activeAccount.name : 'All Accounts'}
+            </span>
+            <span style={{ color: 'var(--text-muted)' }}>•</span>
+            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--profit-green)', fontWeight: 700 }}>
+              {activeAccount 
+                ? formatCurrency(activeAccount.currentBalance, activeAccount.currency, true)
+                : formatCurrency(totalPortfolioBalance, 'USD', true)}
+            </span>
+          </div>
+          <ChevronDown size={14} color="var(--text-secondary)" />
+        </button>
+
+        {/* Account Dropdown Menu */}
+        {accountDropdownOpen && (
+          <div
+            className="navbar-account-menu"
+            style={{
+              position: 'absolute',
+            top: 'calc(100% + 6px)',
+            left: 0,
+            width: '300px',
+            backgroundColor: 'var(--bg-panel)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '12px',
+            boxShadow: '0 12px 30px rgba(0,0,0,0.7)',
+            padding: '8px',
+            zIndex: 200,
+            animation: 'fadeIn 0.15s ease'
+          }}>
+            <div style={{ padding: '6px 10px', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+              Select Trading Portfolio
+            </div>
+
+            {/* All Accounts Option */}
+            <button
+              onClick={() => {
+                setActiveAccountId('all');
+                setAccountDropdownOpen(false);
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '9px 12px',
+                borderRadius: '8px',
+                backgroundColor: activeAccountId === 'all' ? 'var(--bg-chip)' : 'transparent',
+                border: 'none',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'background 0.15s'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Layers size={16} color="var(--theme-secondary-strong)" />
+                <div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>All Accounts (Portfolio)</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Combined analytics & metrics</div>
+                </div>
+              </div>
+              {activeAccountId === 'all' && <Check size={14} color="var(--theme-secondary-strong)" />}
+            </button>
+
+            <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '4px 0' }} />
+
+            {/* Individual Accounts List */}
+            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+              {accounts.map(acc => (
+                <button
+                  key={acc.id}
+                  onClick={() => {
+                    setActiveAccountId(acc.id);
+                    setAccountDropdownOpen(false);
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    backgroundColor: activeAccountId === acc.id ? '#1a2336' : 'transparent',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    marginBottom: '2px',
+                    transition: 'background 0.15s'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: acc.colorTag
+                    }} />
+                    <div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{acc.name}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                        {acc.broker} • {acc.type}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.78rem', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--profit-green)' }}>
+                      {formatCurrency(acc.currentBalance, acc.currency)}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '4px 0' }} />
+
+            {/* Add New Account Button */}
+            <button
+              onClick={() => {
+                setAccountDropdownOpen(false);
+                onOpenAccountModal();
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '7px 10px',
+                borderRadius: '6px',
+                backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent)',
+                color: 'var(--theme-secondary)',
+                border: '1px dashed var(--theme-secondary-strong)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Plus size={14} /> Add New Account
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Keyboard Shortcuts Modal */}

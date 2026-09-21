@@ -696,6 +696,86 @@ textarea.input-control {
     gap: 8px !important;
   }
 
+  /* Navbar mobile: baris 1 = logo + aksi, baris 2 = pemilih akun full-width */
+  .app-navbar {
+    align-items: flex-start !important;
+  }
+
+  .navbar-left-group {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 10px !important;
+  }
+
+  .navbar-left-group .navbar-logo-text span {
+    font-size: 1.02rem !important;
+  }
+
+  .navbar-right-group {
+    margin-left: auto !important;
+  }
+
+  .navbar-account-switcher {
+    order: 9 !important;
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    margin-top: 2px !important;
+  }
+
+  .navbar-account-switcher > button {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .navbar-divider {
+    display: none !important;
+  }
+
+  .navbar-account-menu {
+    width: min(300px, calc(100vw - 28px)) !important;
+  }
+
+  /* Install prompt: pill kompak di kiri, di ATAS quick-risk dock */
+  .pwa-install-prompt {
+    left: 12px !important;
+    right: auto !important;
+    bottom: calc(150px + env(safe-area-inset-bottom)) !important;
+    max-width: min(300px, calc(100vw - 24px)) !important;
+    padding: 8px 10px !important;
+    border-radius: 14px !important;
+    gap: 8px !important;
+  }
+
+  .pwa-install-desc {
+    display: none !important;
+  }
+
+  .pwa-install-prompt .pwa-install-icon {
+    display: none !important;
+  }
+
+  .pwa-install-prompt .pwa-install-title {
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+    margin-bottom: 0 !important;
+  }
+
+  .pwa-install-prompt .btn-sm {
+    padding: 6px 10px !important;
+  }
+
+  /* Panel dropdown navbar: tempel ke viewport (jangan keluar layar) */
+  .nav-notif-panel,
+  .nav-user-menu {
+    position: fixed !important;
+    top: 104px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-height: calc(100vh - 190px) !important;
+    overflow-y: auto !important;
+  }
+
   .page-body {
     padding: 12px 14px !important;
   }
@@ -733,6 +813,29 @@ textarea.input-control {
   }
 
   .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 560px) {
+  /* Modal: header boleh wrap supaya nilai panjang tidak terpotong */
+  .modal-header,
+  .trade-modal-header {
+    flex-wrap: wrap !important;
+    row-gap: 8px !important;
+  }
+
+  .trade-modal-pnl {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .navbar-left-group .navbar-logo-text span {
+    font-size: 0.92rem !important;
+  }
+
+  .navbar-stealth-btn {
     display: none !important;
   }
 }
@@ -925,6 +1028,13 @@ button:focus:not(:focus-visible) {
   color: var(--text-secondary);
   line-height: 1.4;
 }
+
+/* ==========================================================
+   Navbar layout order (desktop: brand | account | actions)
+   ========================================================== */
+.navbar-left-group { order: 1; }
+.navbar-account-switcher { order: 2; }
+.navbar-right-group { order: 3; }
 
 /* ==========================================================
    Mobile bottom navigation + Quick Log FAB

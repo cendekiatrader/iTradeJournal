@@ -78,6 +78,7 @@ export const PWAInstallPrompt: React.FC = () => {
 
   return (
     <div
+      className="pwa-install-prompt"
       style={{
         position: 'fixed',
         bottom: '20px',
@@ -96,6 +97,7 @@ export const PWAInstallPrompt: React.FC = () => {
       }}
     >
       <div
+        className="pwa-install-icon"
         style={{
           width: '42px',
           height: '42px',
@@ -112,14 +114,14 @@ export const PWAInstallPrompt: React.FC = () => {
       </div>
 
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>
-          Install App di HP / Laptop
+        <div className="pwa-install-title" style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>
+          Install the app
         </div>
-        <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+        <div className="pwa-install-desc" style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
           {isIOS ? (
             <span>Tap the <strong>Share [↑]</strong> icon then choose <strong>Add to Home Screen</strong></span>
           ) : (
-            <span>Akses cepat full-screen seperti aplikasi resmi tanpa browser!</span>
+            <span>Get a fast, full-screen app experience without the browser.</span>
           )}
         </div>
       </div>

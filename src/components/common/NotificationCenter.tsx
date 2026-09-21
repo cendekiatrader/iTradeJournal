@@ -324,6 +324,7 @@ export const NotificationCenter: React.FC = () => {
 
       {open && (
         <div
+          className="nav-notif-panel"
           style={{
             position: 'absolute',
             top: 'calc(100% + 6px)',
