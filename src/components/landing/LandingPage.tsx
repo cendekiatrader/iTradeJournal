@@ -394,23 +394,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenDemo
         className="landing-hero-pad"
         style={{ position: 'relative', zIndex: 2, maxWidth: '860px', margin: '0 auto', padding: '64px 24px 30px', textAlign: 'center' }}
       >
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '6px 14px',
-            borderRadius: '999px',
-            fontSize: '0.74rem',
-            fontWeight: 700,
-            letterSpacing: '0.02em',
-            color: 'var(--theme-secondary)',
-            backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 10%, transparent)',
-            border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)'
-          }}
-        >
-          <Sparkles size={13} /> {t.badge}
-        </span>
         <h1
           style={{
             marginTop: '22px',
