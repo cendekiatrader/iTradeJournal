@@ -307,14 +307,14 @@ export const JournalView: React.FC<JournalViewProps> = ({
             onClick={() => setReportModalOpen(true)} 
             className="btn btn-secondary btn-sm"
           >
-            <FileText size={15} color="#38bdf8" /> Export PDF Report
+            <FileText size={15} color="var(--theme-secondary)" /> Export PDF Report
           </button>
 
           <button 
             onClick={() => exportTradesToCSV(filteredTrades, accountsMap, customFieldDefs)} 
             className="btn btn-secondary btn-sm"
           >
-            <FileSpreadsheet size={15} color="#10b981" /> Export CSV
+            <FileSpreadsheet size={15} color="var(--profit-green)" /> Export CSV
           </button>
 
           <button
@@ -347,7 +347,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
           </div>
 
           {/* Quick Status Filter Tabs */}
-          <div style={{ display: 'flex', backgroundColor: '#070a16', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', backgroundColor: 'var(--bg-main)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
             {['all', 'WIN', 'LOSS', 'BREAKEVEN', 'OPEN'].map((st) => (
               <button
                 key={st}
@@ -398,7 +398,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
           </button>
 
           {(filters.searchQuery || filters.status !== 'all' || filters.direction !== 'all' || filters.assetClass !== 'all' || filters.setup !== 'all' || filters.session !== 'all' || filters.startDate || filters.endDate) && (
-            <button onClick={resetFilters} className="btn btn-ghost btn-sm" style={{ color: '#ef4444' }}>
+            <button onClick={resetFilters} className="btn btn-ghost btn-sm" style={{ color: 'var(--loss-red)' }}>
               <RefreshCw size={13} /> Reset
             </button>
           )}
@@ -592,7 +592,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
       {/* Bulk Action Bar if items selected */}
       {selectedTradeIds.length > 0 && (
         <div style={{
-          backgroundColor: '#17223b',
+          backgroundColor: 'var(--bg-main)', boxShadow: 'var(--neo-inset)',
           border: '1px solid #2e446d',
           borderRadius: '10px',
           padding: '10px 16px',
@@ -716,7 +716,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
                       }}
                     >
                       <td style={{ padding: cellPad }} onClick={(e) => toggleSelectTrade(trade.id, e)}>
-                        {isSelected ? <CheckSquare size={16} color="var(--theme-secondary-strong)" /> : <Square size={16} color="#475569" />}
+                        {isSelected ? <CheckSquare size={16} color="var(--theme-secondary-strong)" /> : <Square size={16} color="var(--text-muted)" />}
                       </td>
                       <td style={{ padding: cellPad, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                         <div style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
@@ -863,7 +863,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
                             title="Delete Trade"
                             aria-label="Delete Trade"
                           >
-                            <Trash2 size={14} color="#ef4444" />
+                            <Trash2 size={14} color="var(--loss-red)" />
                           </button>
                         </div>
                       </td>

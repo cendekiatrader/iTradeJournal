@@ -116,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 style={{
                   padding: '6px',
                   borderRadius: '8px',
-                  backgroundColor: '#0e1627',
+                  backgroundColor: 'var(--bg-main)',
                   border: '1px solid #1c2a3f',
                   color: isCollapsed ? 'var(--theme-secondary)' : 'var(--text-secondary)',
                   cursor: 'pointer'
@@ -140,8 +140,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div
                 title={isCollapsed ? `${activeAccount.name} (${activeAccount.type})` : undefined}
                 style={{
-                  background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8))',
-                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-main)',
+                  boxShadow: 'var(--neo-inset)',
+                  border: 'none',
                   borderRadius: '12px',
                   padding: isCollapsed ? '10px 4px' : '12px',
                   display: 'flex',

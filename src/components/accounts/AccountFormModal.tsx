@@ -227,8 +227,8 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
           </div>
 
           {/* Prop Firm Limits Section */}
-          <div style={{ backgroundColor: '#060913', padding: '14px', borderRadius: '10px', border: '1px solid #1c273a', marginBottom: '16px' }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#93c5fd', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid #1c273a', marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--theme-secondary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Target size={14} /> Optional: Prop Challenge & Risk Targets
             </div>
 
@@ -305,8 +305,8 @@ export const AccountFormModal: React.FC<AccountFormModalProps> = ({
           </div>
 
           {/* Fees, Commission & Tax Settings Section */}
-          <div style={{ backgroundColor: '#060913', padding: '14px', borderRadius: '10px', border: '1px solid #1c273a', marginBottom: '16px' }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#34d399', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid #1c273a', marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--profit-green-light)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Wallet size={14} /> Fee, Commission & Tax Settings (Optional)
             </div>
 

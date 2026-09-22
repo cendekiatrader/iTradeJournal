@@ -263,7 +263,7 @@ export const WeeklyReviewModal: React.FC<WeeklyReviewModalProps> = ({ isOpen, on
           {step === 2 && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <AlertTriangle size={16} color="#f59e0b" />
+                <AlertTriangle size={16} color="var(--accent-amber)" />
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Where you lost ground</span>
               </div>
               {week.worst.length === 0 ? (
@@ -278,7 +278,7 @@ export const WeeklyReviewModal: React.FC<WeeklyReviewModalProps> = ({ isOpen, on
                   </p>
                 )}
                 {week.overtradingDay && (
-                  <p style={{ fontSize: '0.8rem', color: '#f59e0b' }}>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--accent-amber)' }}>
                     ⚠ Overtrading signal: {week.overtradingDay[1]} trades on {week.overtradingDay[0]} (far above your daily average).
                   </p>
                 )}

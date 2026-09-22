@@ -95,7 +95,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
               <span style={{ color: 'var(--text-secondary)' }}>Target Profit per Bulan (%):</span>
-              <span style={{ fontWeight: 700, color: '#34d399', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontWeight: 700, color: 'var(--profit-green-light)', fontFamily: 'var(--font-mono)' }}>
                 +{returnRate}% / bln
               </span>
             </div>
@@ -114,7 +114,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
               <span style={{ color: 'var(--text-secondary)' }}>Period Length (Months):</span>
-              <span style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontWeight: 700, color: 'var(--theme-secondary)', fontFamily: 'var(--font-mono)' }}>
                 {periodsCount} Bulan
               </span>
             </div>
@@ -133,7 +133,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
               <span style={{ color: 'var(--text-secondary)' }}>Rencana Tarik Profit (% WD):</span>
-              <span style={{ fontWeight: 700, color: '#f59e0b', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontWeight: 700, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)' }}>
                 {withdrawalRate}% WD
               </span>
             </div>
@@ -152,19 +152,19 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
 
       {/* Summary KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
-        <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), #090e1c)' }}>
+        <div className="card" style={{ padding: '16px', background: 'var(--bg-main)' }}>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Final Portfolio Balance</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--profit-green)', marginTop: '4px' }}>
             {formatCurrency(tableData.finalBalance, currency)}
           </div>
-          <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--profit-green-light)', marginTop: '2px' }}>
             +{formatPercent(((tableData.finalBalance - startingPrincipal) / startingPrincipal) * 100)} Growth
           </div>
         </div>
 
-        <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent), #090e1c)' }}>
+        <div className="card" style={{ padding: '16px', background: 'var(--bg-main)' }}>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Banked Payouts</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#38bdf8', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--theme-secondary)', marginTop: '4px' }}>
             {formatCurrency(tableData.totalWithdrawn, currency)}
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -172,9 +172,9 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           </div>
         </div>
 
-        <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08), #090e1c)' }}>
+        <div className="card" style={{ padding: '16px', background: 'var(--bg-main)' }}>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Profit Tercipta</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fbbf24', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-amber)', marginTop: '4px' }}>
             {formatCurrency(tableData.totalProfit, currency)}
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -182,9 +182,9 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
           </div>
         </div>
 
-        <div className="card" style={{ padding: '16px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.08), #090e1c)' }}>
+        <div className="card" style={{ padding: '16px', background: 'var(--bg-main)' }}>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Multiple Factor</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#c084fc', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-purple)', marginTop: '4px' }}>
             {tableData.multiplier.toFixed(2)}x
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -212,8 +212,8 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
               <tr style={{ borderBottom: '1px solid var(--bg-chip)', color: 'var(--text-secondary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 8px' }}>Bulan</th>
                 <th style={{ padding: '10px 8px' }}>Starting Balance</th>
-                <th style={{ padding: '10px 8px', color: '#34d399' }}>Profit (+{returnRate}%)</th>
-                <th style={{ padding: '10px 8px', color: '#f59e0b' }}>Tarik Tunai ({withdrawalRate}%)</th>
+                <th style={{ padding: '10px 8px', color: 'var(--profit-green-light)' }}>Profit (+{returnRate}%)</th>
+                <th style={{ padding: '10px 8px', color: 'var(--accent-amber)' }}>Tarik Tunai ({withdrawalRate}%)</th>
                 <th style={{ padding: '10px 8px', textAlign: 'right' }}>Ending Balance</th>
                 <th style={{ padding: '10px 8px', textAlign: 'right' }}>Akumulasi WD</th>
               </tr>
@@ -221,13 +221,13 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
             <tbody>
               {tableData.rows.map((row) => (
                 <tr key={row.period} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                  <td style={{ padding: '10px 8px', fontWeight: 700, color: '#38bdf8' }}>
+                  <td style={{ padding: '10px 8px', fontWeight: 700, color: 'var(--theme-secondary)' }}>
                     Bulan ke-{row.period}
                   </td>
                   <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                     {formatCurrency(row.startBalance, currency)}
                   </td>
-                  <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: '#10b981', fontWeight: 600 }}>
+                  <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: 'var(--profit-green)', fontWeight: 600 }}>
                     +{formatCurrency(row.grossProfit, currency)}
                   </td>
                   <td style={{ padding: '10px 8px', fontFamily: 'var(--font-mono)', color: row.withdrawal > 0 ? '#fbbf24' : 'var(--text-muted)' }}>
@@ -236,7 +236,7 @@ export const CompoundingPlanner: React.FC<CompoundingPlannerProps> = ({
                   <td style={{ padding: '10px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {formatCurrency(row.endBalance, currency)}
                   </td>
-                  <td style={{ padding: '10px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: '#38bdf8', fontWeight: 600 }}>
+                  <td style={{ padding: '10px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--theme-secondary)', fontWeight: 600 }}>
                     {formatCurrency(row.cumulativeWithdrawn, currency)}
                   </td>
                 </tr>

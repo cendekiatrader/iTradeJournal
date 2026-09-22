@@ -352,7 +352,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenFeedback, onSe
                   showToast('Signed out successfully.', 'info');
                 }}
                 className="btn btn-secondary btn-sm"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.4)' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: 'var(--loss-red)', borderColor: 'rgba(239, 68, 68, 0.4)' }}
               >
                 <LogOut size={14} /> Log Out
               </button>
@@ -382,7 +382,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenFeedback, onSe
               className="btn btn-secondary btn-sm"
               style={{ fontSize: '0.76rem' }}
             >
-              Change Theme
+              Dark / Light
             </button>
           }
         />
@@ -612,7 +612,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenFeedback, onSe
               type="button"
               onClick={handleResetAll}
               className="btn btn-sm"
-              style={{ fontSize: '0.76rem', color: '#f87171', backgroundColor: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)' }}
+              style={{ fontSize: '0.76rem', color: 'var(--loss-red)', backgroundColor: 'var(--bg-main)', border: '1px solid rgba(239, 68, 68, 0.4)' }}
             >
               Reset
             </button>

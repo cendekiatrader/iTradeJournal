@@ -35,8 +35,9 @@ const NavMenuButton: React.FC<NavMenuButtonProps> = ({ id, label, icon: Icon, ba
       width: '100%',
       padding: isCollapsed ? '10px 0' : '10px 12px',
       borderRadius: '10px',
-      backgroundColor: isActive ? '#131b2e' : 'transparent',
-      border: isActive ? '1px solid var(--border-color)' : '1px solid transparent',
+      backgroundColor: isActive ? 'var(--bg-main)' : 'transparent',
+      boxShadow: isActive ? 'var(--neo-inset)' : 'none',
+      border: 'none',
       color: isActive ? 'var(--theme-secondary)' : 'var(--text-secondary)',
       fontSize: '0.875rem',
       fontWeight: isActive ? 600 : 500,
@@ -55,7 +56,8 @@ const NavMenuButton: React.FC<NavMenuButtonProps> = ({ id, label, icon: Icon, ba
       <span className="sidebar-badge" style={{
         fontSize: '0.68rem',
         fontFamily: 'var(--font-mono)',
-        backgroundColor: isActive ? 'color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)' : 'var(--bg-chip)',
+        backgroundColor: isActive ? 'var(--bg-main)' : 'var(--bg-main)',
+        boxShadow: isActive ? 'var(--neo-inset-sm)' : 'none',
         color: isActive ? 'var(--theme-secondary)' : 'var(--text-secondary)',
         padding: '2px 6px',
         borderRadius: '4px',
@@ -118,7 +120,7 @@ export const NavMenu: React.FC<NavMenuProps> = ({ activeTab, onSelectTab, isColl
           />
         ))}
 
-        <div style={{ height: '1px', backgroundColor: '#141d2e', margin: '8px 4px' }} />
+        <div style={{ height: '1px', backgroundColor: 'var(--border-subtle)', margin: '8px 4px' }} />
 
         <NavMenuButton
           id={SETTINGS_MODULE.id}

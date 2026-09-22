@@ -84,7 +84,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
     return (
       <div style={{
         minHeight: '100vh',
-        backgroundColor: '#070b14',
+        backgroundColor: 'var(--bg-main)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -92,7 +92,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
         gap: '16px',
         color: 'var(--text-secondary)'
       }}>
-        <div style={{
+        <div className="loading-ring" style={{
           width: '40px',
           height: '40px',
           borderRadius: '50%',
@@ -109,7 +109,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
     return (
       <div style={{
         minHeight: '100vh',
-        backgroundColor: '#070b14',
+        backgroundColor: 'var(--bg-main)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -121,14 +121,14 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
           width: '64px',
           height: '64px',
           borderRadius: '20px',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          backgroundColor: 'var(--bg-main)',
           border: '1px solid rgba(239, 68, 68, 0.25)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: '16px'
         }}>
-          <Lock size={28} color="#ef4444" />
+          <Lock size={28} color="var(--loss-red)" />
         </div>
         <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
           Profil Tidak Ditemukan / Privat
@@ -145,11 +145,11 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#070b14', color: 'var(--text-primary)', paddingBottom: '60px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)', paddingBottom: '60px' }}>
       {/* Top Navbar */}
       <header style={{
         borderBottom: '1px solid #1a2333',
-        backgroundColor: '#0a0f1d',
+        backgroundColor: 'var(--bg-main)',
         padding: '12px 24px',
         display: 'flex',
         alignItems: 'center',
@@ -168,13 +168,13 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
             <TrendingUp size={18} color="#ffffff" />
           </div>
           <span style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-            iTrade<span style={{ color: '#10b981' }}>Journal</span>
+            iTrade<span style={{ color: 'var(--profit-green)' }}>Journal</span>
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button onClick={handleCopy} className="btn btn-secondary btn-sm" style={{ gap: '6px' }}>
-            {copied ? <Check size={14} color="#10b981" /> : <Share2 size={14} />}
+            {copied ? <Check size={14} color="var(--profit-green)" /> : <Share2 size={14} />}
             <span>{copied ? 'Link Copied' : 'Share Profile'}</span>
           </button>
           <button onClick={onBackToApp} className="btn btn-primary btn-sm">
@@ -241,13 +241,13 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                     gap: '4px',
                     padding: '3px 9px',
                     borderRadius: '20px',
-                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    backgroundColor: 'var(--bg-main)',
                     border: '1px solid rgba(16, 185, 129, 0.35)',
-                    color: '#34d399',
+                    color: 'var(--profit-green-light)',
                     fontSize: '0.72rem',
                     fontWeight: 700
                   }}>
-                    <ShieldCheck size={13} color="#10b981" />
+                    <ShieldCheck size={13} color="var(--profit-green)" />
                     <span>Verified Trader</span>
                   </span>
                 </div>
@@ -328,7 +328,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
 
           <div className="card" style={{ padding: '16px' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Avg RR Ratio</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#38bdf8', marginTop: '4px' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--theme-secondary)', marginTop: '4px' }}>
               1 : {metrics.avgRR.toFixed(2)}
             </div>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -338,7 +338,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
 
           <div className="card" style={{ padding: '16px' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Best Trade</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--profit-green)', marginTop: '4px' }}>
               {profile.hideDollarAmounts 
                 ? `+${Math.max(...filteredTrades.map(t => t.pnlPercent), 0).toFixed(2)}%` 
                 : formatCurrency(metrics.bestTrade, 'USD')}
@@ -391,9 +391,10 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                       padding: '4px 10px',
                       fontSize: '0.75rem',
                       borderRadius: '8px',
-                      backgroundColor: selectedAsset === asset ? '#1e3a8a' : '#0c1326',
-                      borderColor: selectedAsset === asset ? 'var(--theme-secondary-strong)' : 'var(--border-color)',
-                      color: selectedAsset === asset ? '#93c5fd' : 'var(--text-secondary)'
+                      backgroundColor: 'var(--bg-main)',
+                      boxShadow: selectedAsset === asset ? 'var(--neo-outset-sm)' : 'none',
+                      border: 'none',
+                      color: selectedAsset === asset ? 'var(--theme-secondary)' : 'var(--text-secondary)'
                     }}
                   >
                     {asset === 'all' ? 'All Assets' : asset}
@@ -459,7 +460,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
                           </span>
                         </td>
 
-                        <td style={{ padding: '12px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 600, color: '#38bdf8' }}>
+                        <td style={{ padding: '12px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--theme-secondary)' }}>
                           {t.rrAchieved ? `${t.rrAchieved.toFixed(1)}R` : '-'}
                         </td>
 
@@ -490,7 +491,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ username, 
           marginTop: '36px',
           padding: '28px',
           borderRadius: '20px',
-          background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent), rgba(16, 185, 129, 0.08))',
+          background: 'var(--bg-main)',
           border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)',
           textAlign: 'center'
         }}>

@@ -96,7 +96,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              backgroundColor: 'var(--bg-main)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -122,7 +122,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="modal-body">
           {/* Account Balance Banner */}
-          <div style={{ backgroundColor: '#060913', padding: '14px 18px', borderRadius: '12px', border: '1px solid #1c273a', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px 18px', borderRadius: '12px', border: '1px solid #1c273a', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Available Account Balance</span>
               <div style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
@@ -217,7 +217,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             </div>
 
             {accountWithdrawals.length === 0 ? (
-              <div style={{ padding: '16px', backgroundColor: '#070a16', borderRadius: '8px', textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              <div style={{ padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                 No past withdrawals recorded for this account.
               </div>
             ) : (
@@ -227,7 +227,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
                     key={wd.id}
                     style={{
                       padding: '10px 14px',
-                      backgroundColor: '#070a16',
+                      backgroundColor: 'var(--bg-main)',
                       border: '1px solid #192538',
                       borderRadius: '8px',
                       display: 'flex',
@@ -258,7 +258,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
                         }
                       }}
                       className="btn btn-ghost btn-icon btn-sm"
-                      style={{ color: '#ef4444' }}
+                      style={{ color: 'var(--loss-red)' }}
                       title="Delete Withdrawal"
                       aria-label="Delete Withdrawal"
                     >

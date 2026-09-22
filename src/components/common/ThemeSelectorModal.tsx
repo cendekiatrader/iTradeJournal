@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTheme, THEMES, ThemeId } from '../../context/ThemeContext';
-import { X, Palette, Check, Sparkles } from 'lucide-react';
+import { X, Sun, Moon, Check } from 'lucide-react';
 import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface ThemeSelectorModalProps {
@@ -8,6 +8,11 @@ interface ThemeSelectorModalProps {
   onClose: () => void;
 }
 
+/**
+ * Neumorphic theme picker — exactly two modes: Dark & Light.
+ * Every option card shares the page background colour and is separated only by
+ * dual shadows (outset = unselected, inset = selected).
+ */
 export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, onClose }) => {
   const { theme, setTheme } = useTheme();
 
@@ -15,37 +20,38 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
 
   if (!isOpen) return null;
 
-  const handleSelectTheme = (themeId: ThemeId) => {
+  const handleSelect = (themeId: ThemeId) => {
     setTheme(themeId);
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div ref={modalRef} 
-        className="modal-container" role="dialog" aria-modal="true" aria-label="Theme Selector" tabIndex={-1} 
-        onClick={(e) => e.stopPropagation()} 
-        style={{ maxWidth: '560px' }}
+      <div ref={modalRef}
+        className="modal-container" role="dialog" aria-modal="true" aria-label="Mode Terang / Gelap" tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: '520px' }}
       >
         {/* Header */}
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
+            <div className="neo-outset" style={{
               width: '36px',
               height: '36px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #a855f7, var(--theme-secondary-strong))',
+              borderRadius: '12px',
+              background: 'var(--bg-main)',
+              color: 'var(--theme-primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Palette size={20} color="#ffffff" />
+              {theme === 'light' ? <Sun size={19} /> : <Moon size={19} />}
             </div>
             <div>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                Institutional Accent Themes
+                Mode Tampilan
               </h2>
               <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
-                Pick a luxurious accent theme that matches your taste
+                Dua mode saja: Dark &amp; Light. Semua permukaan satu warna, kedalaman dari bayangan.
               </p>
             </div>
           </div>
@@ -55,102 +61,78 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ isOpen, 
           </button>
         </div>
 
-        {/* Modal Body: Theme Cards */}
+        {/* Body: two mode cards */}
         <div className="modal-body" style={{ padding: '20px 24px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             {THEMES.map((item) => {
               const isSelected = theme === item.id;
+              const Icon = item.id === 'light' ? Sun : Moon;
 
               return (
-                <div
+                <button
                   key={item.id}
-                  onClick={() => handleSelectTheme(item.id)}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => handleSelect(item.id)}
+                  className={isSelected ? 'neo-inset' : 'neo-outset'}
                   style={{
-                    padding: '14px 18px',
-                    borderRadius: '14px',
-                    backgroundColor: isSelected ? `${item.primaryColor}14` : '#070b16',
-                    border: isSelected ? `2px solid ${item.primaryColor}` : '1px solid var(--bg-chip)',
-                    boxShadow: isSelected ? `0 0 20px ${item.glowColor}` : 'none',
+                    padding: '18px 16px',
+                    borderRadius: '18px',
+                    backgroundColor: 'var(--bg-main)',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
+                    gap: '10px',
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease'
+                    border: 'none',
+                    transition: 'box-shadow 0.2s ease, transform 0.2s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    {/* Swatch Bubble */}
-                    <div style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '12px',
-                      background: `linear-gradient(135deg, ${item.primaryColor}, ${item.secondaryColor})`,
-                      boxShadow: `0 4px 14px ${item.glowColor}`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid rgba(255,255,255,0.2)',
-                      flexShrink: 0
-                    }}>
-                      <Sparkles size={20} color="#ffffff" />
-                    </div>
+                  <span style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '14px',
+                    background: 'var(--bg-main)',
+                    boxShadow: isSelected
+                      ? 'inset 3px 3px 6px var(--neo-dark), inset -3px -3px 6px var(--neo-light)'
+                      : 'inset -3px -3px 6px var(--neo-dark), inset 3px 3px 6px var(--neo-light)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--theme-primary)'
+                  }}>
+                    <Icon size={22} />
+                  </span>
 
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                          {item.name}
-                        </span>
-                        <span style={{
-                          fontSize: '0.66rem',
-                          fontWeight: 800,
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          backgroundColor: `${item.primaryColor}25`,
-                          color: item.primaryColor,
-                          border: `1px solid ${item.primaryColor}40`
-                        }}>
-                          {item.badge}
-                        </span>
-                      </div>
-                      <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '2px', display: 'block' }}>
-                        {item.subtitle}
-                      </span>
-                    </div>
-                  </div>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {item.name}
+                  </span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.4 }}>
+                    {item.subtitle}
+                  </span>
 
-                  {/* Active Indicator */}
-                  <div>
-                    {isSelected ? (
-                      <div style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '50%',
-                        backgroundColor: item.primaryColor,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#ffffff',
-                        boxShadow: `0 0 10px ${item.primaryColor}`
-                      }}>
-                        <Check size={16} strokeWidth={3} />
-                      </div>
-                    ) : (
-                      <div style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '50%',
-                        border: '2px solid #334155'
-                      }} />
-                    )}
-                  </div>
-                </div>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontSize: '0.66rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.05em',
+                    padding: '3px 9px',
+                    borderRadius: '20px',
+                    color: isSelected ? 'var(--theme-primary)' : 'var(--text-muted)'
+                  }}>
+                    {isSelected ? <Check size={12} strokeWidth={3} /> : null}
+                    {isSelected ? 'AKTIF' : item.badge}
+                  </span>
+                </button>
               );
             })}
           </div>
 
           <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={onClose} className="btn btn-primary" style={{ padding: '8px 24px' }}>
-              Terapkan Tema
+              Selesai
             </button>
           </div>
         </div>

@@ -235,7 +235,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: 'linear-gradient(180deg, #0f172a, var(--bg-card))'
+          background: 'var(--bg-main)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
@@ -273,7 +273,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             padding: '4px',
-            backgroundColor: '#070a16',
+            backgroundColor: 'var(--bg-main)', boxShadow: 'var(--neo-inset)',
             borderBottom: '1px solid var(--border-color)'
           }}>
             <button
@@ -322,10 +322,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               alignItems: 'center',
               gap: '8px',
               padding: '10px 14px',
-              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              backgroundColor: 'var(--bg-main)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '8px',
-              color: '#f87171',
+              color: 'var(--loss-red)',
               fontSize: '0.8rem',
               marginBottom: '16px'
             }}>
@@ -340,10 +340,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               alignItems: 'center',
               gap: '8px',
               padding: '10px 14px',
-              backgroundColor: 'rgba(16, 185, 129, 0.12)',
+              backgroundColor: 'var(--bg-main)',
               border: '1px solid rgba(16, 185, 129, 0.3)',
               borderRadius: '8px',
-              color: '#34d399',
+              color: 'var(--profit-green-light)',
               fontSize: '0.8rem',
               marginBottom: '16px'
             }}>
@@ -549,9 +549,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '10px',
-                  backgroundColor: 'rgba(88, 101, 242, 0.12)',
+                  backgroundColor: 'var(--bg-main)',
                   borderColor: 'rgba(88, 101, 242, 0.35)',
-                  color: '#ffffff',
+                  color: 'var(--theme-secondary)',
                   fontSize: '0.85rem',
                   fontWeight: 600
                 }}
@@ -577,7 +577,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           color: 'var(--text-muted)',
           fontSize: '0.72rem'
         }}>
-          <ShieldCheck size={14} color="#10b981" />
+          <ShieldCheck size={14} color="var(--profit-green)" />
           <span>256-Bit Encrypted Database</span>
         </div>
       </div>

@@ -52,7 +52,7 @@ const WorkspaceView = lazy(() => import('./components/workspace/WorkspaceView').
 
 const ViewLoading: React.FC = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '90px 20px', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
-    <div style={{
+    <div className="loading-ring" style={{
       width: '18px',
       height: '18px',
       border: '2px solid var(--border-color)',

@@ -168,14 +168,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     <div style={{
       border: `1px solid ${isFocused ? 'var(--border-focus)' : 'var(--border-color)'}`,
       borderRadius: 'var(--radius-md)',
-      backgroundColor: '#050814',
+      backgroundColor: 'var(--bg-main)',
       overflow: 'hidden',
       transition: 'border-color 0.2s, box-shadow 0.2s',
       boxShadow: isFocused ? '0 0 0 2px rgba(59, 130, 246, 0.2)' : 'none'
     }}>
       {/* Rich Editor Toolbar */}
       <div style={{
-        backgroundColor: '#0b1020',
+        backgroundColor: 'var(--bg-main)',
         borderBottom: '1px solid var(--border-color)',
         padding: '6px 8px',
         display: 'flex',
@@ -193,7 +193,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Undo (Ctrl+Z)"
         >
-          <Undo size={14} color="#94a3b8" />
+          <Undo size={14} color="var(--text-secondary)" />
         </button>
         <button
           type="button"
@@ -203,7 +203,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Redo (Ctrl+Y)"
         >
-          <Redo size={14} color="#94a3b8" />
+          <Redo size={14} color="var(--text-secondary)" />
         </button>
 
         <div style={{ width: '1px', height: '18px', backgroundColor: 'var(--border-color)', margin: '0 2px' }} />
@@ -214,7 +214,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => executeCommand('formatBlock', '<h3>')}
           className="btn btn-ghost btn-icon btn-sm"
           title="Heading (H3)"
-          style={{ padding: '5px', fontWeight: 700, fontSize: '0.75rem', color: '#cbd5e1' }}
+          style={{ padding: '5px', fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-primary)' }}
         >
           H1
         </button>
@@ -223,7 +223,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => executeCommand('formatBlock', '<h4>')}
           className="btn btn-ghost btn-icon btn-sm"
           title="Subheading (H4)"
-          style={{ padding: '5px', fontWeight: 700, fontSize: '0.75rem', color: '#cbd5e1' }}
+          style={{ padding: '5px', fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-primary)' }}
         >
           H2
         </button>
@@ -232,7 +232,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => executeCommand('formatBlock', '<p>')}
           className="btn btn-ghost btn-icon btn-sm"
           title="Paragraph"
-          style={{ padding: '5px', fontSize: '0.75rem', color: '#cbd5e1' }}
+          style={{ padding: '5px', fontSize: '0.75rem', color: 'var(--text-primary)' }}
         >
           P
         </button>
@@ -248,7 +248,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Bold (Ctrl+B)"
         >
-          <Bold size={14} color="#cbd5e1" />
+          <Bold size={14} color="var(--text-primary)" />
         </button>
         <button
           type="button"
@@ -258,7 +258,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Italic (Ctrl+I)"
         >
-          <Italic size={14} color="#cbd5e1" />
+          <Italic size={14} color="var(--text-primary)" />
         </button>
         <button
           type="button"
@@ -268,7 +268,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Underline (Ctrl+U)"
         >
-          <Underline size={14} color="#cbd5e1" />
+          <Underline size={14} color="var(--text-primary)" />
         </button>
         <button
           type="button"
@@ -278,7 +278,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Strikethrough"
         >
-          <Strikethrough size={14} color="#cbd5e1" />
+          <Strikethrough size={14} color="var(--text-primary)" />
         </button>
 
         <div style={{ width: '1px', height: '18px', backgroundColor: 'var(--border-color)', margin: '0 2px' }} />
@@ -292,7 +292,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Bullet List"
         >
-          <List size={14} color="#cbd5e1" />
+          <List size={14} color="var(--text-primary)" />
         </button>
         <button
           type="button"
@@ -302,7 +302,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Numbered List"
         >
-          <ListOrdered size={14} color="#cbd5e1" />
+          <ListOrdered size={14} color="var(--text-primary)" />
         </button>
         <button
           type="button"
@@ -312,7 +312,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           style={{ padding: '5px' }}
           aria-label="Quote Block"
         >
-          <Quote size={14} color="#cbd5e1" />
+          <Quote size={14} color="var(--text-primary)" />
         </button>
 
         <div style={{ width: '1px', height: '18px', backgroundColor: 'var(--border-color)', margin: '0 2px' }} />
@@ -323,7 +323,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => insertHighlight('rgba(16, 185, 129, 0.2)', '#10b981')}
           className="btn btn-ghost btn-sm"
           title="Highlight Bullish Green"
-          style={{ padding: '3px 6px', fontSize: '0.7rem', color: '#34d399', backgroundColor: 'rgba(16, 185, 129, 0.12)' }}
+          style={{ padding: '3px 6px', fontSize: '0.7rem', color: 'var(--profit-green-light)', backgroundColor: 'var(--bg-main)' }}
         >
           Bullish
         </button>
@@ -332,7 +332,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => insertHighlight('rgba(239, 68, 68, 0.2)', '#ef4444')}
           className="btn btn-ghost btn-sm"
           title="Highlight Bearish Red"
-          style={{ padding: '3px 6px', fontSize: '0.7rem', color: '#f87171', backgroundColor: 'rgba(239, 68, 68, 0.12)' }}
+          style={{ padding: '3px 6px', fontSize: '0.7rem', color: 'var(--loss-red)', backgroundColor: 'var(--bg-main)' }}
         >
           Bearish
         </button>
@@ -341,7 +341,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => insertHighlight('rgba(59, 130, 246, 0.2)', '#60a5fa')}
           className="btn btn-ghost btn-sm"
           title="Highlight Blue Note"
-          style={{ padding: '3px 6px', fontSize: '0.7rem', color: '#60a5fa', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}
+          style={{ padding: '3px 6px', fontSize: '0.7rem', color: 'var(--theme-secondary)', backgroundColor: 'var(--bg-main)' }}
         >
           Setup
         </button>
@@ -353,10 +353,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           className="btn btn-secondary btn-sm"
-          style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '5px', backgroundColor: '#162238', borderColor: '#2b3d5c', color: '#93c5fd' }}
+          style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '5px', backgroundColor: 'var(--bg-main)', boxShadow: 'var(--neo-inset)', borderColor: '#2b3d5c', color: 'var(--theme-secondary)' }}
           title="Upload or Paste screenshot (Ctrl+V)"
         >
-          <ImageIcon size={14} color="#38bdf8" />
+          <ImageIcon size={14} color="var(--theme-secondary)" />
           <span>Upload / Paste Image</span>
         </button>
         <input
@@ -386,7 +386,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         style={{
           minHeight,
           padding: '14px 16px',
-          color: '#f8fafc',
+          color: 'var(--text-primary)',
           outline: 'none',
           fontSize: '0.875rem',
           lineHeight: '1.6',
@@ -398,7 +398,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       {/* Editor Footer / Info Bar */}
       <div style={{
         padding: '6px 14px',
-        backgroundColor: '#070b16',
+        backgroundColor: 'var(--bg-main)',
         borderTop: '1px solid #141d2e',
         display: 'flex',
         justifyContent: 'space-between',

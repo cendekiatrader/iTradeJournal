@@ -118,7 +118,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
               <FileText size={20} color="#ffffff" />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 Executive PDF Audit Report Generator
               </h2>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
@@ -140,7 +140,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
         {/* Customization Toolbar (Screen Only) */}
         <div className="no-print" style={{
           padding: '12px 20px',
-          backgroundColor: '#070b16',
+          backgroundColor: 'var(--bg-main)',
           borderBottom: '1px solid var(--bg-chip)',
           display: 'flex',
           justifyContent: 'space-between',
@@ -150,7 +150,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
         }}>
           {/* Filter Range */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Periode:</span>
+            <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>Periode:</span>
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value as any)}
@@ -171,7 +171,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             className="btn btn-secondary btn-sm"
             style={{ fontSize: '0.76rem', padding: '4px 10px' }}
           >
-            {hideDollar ? <EyeOff size={14} color="#f59e0b" /> : <Eye size={14} color="#10b981" />}
+            {hideDollar ? <EyeOff size={14} color="var(--accent-amber)" /> : <Eye size={14} color="var(--profit-green)" />}
             <span>{hideDollar ? 'Privacy Mode: values hidden (***)' : 'Full Mode: show values ($)'}</span>
           </button>
         </div>
@@ -181,8 +181,8 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             ======================================================== */}
         <div className="executive-print-area" style={{
           padding: '36px 40px',
-          backgroundColor: '#0b0f1d',
-          color: '#f8fafc',
+          backgroundColor: 'var(--bg-main)',
+          color: 'var(--text-primary)',
           borderRadius: '0 0 16px 16px'
         }}>
           {/* Header Banner */}
@@ -196,40 +196,40 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <span style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: '#38bdf8' }}>
-                  iTrade<span style={{ color: '#10b981' }}>Journal</span>
+                <span style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--theme-secondary)' }}>
+                  iTrade<span style={{ color: 'var(--profit-green)' }}>Journal</span>
                 </span>
                 <span style={{
                   fontSize: '0.68rem',
                   fontWeight: 800,
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                  color: '#34d399',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--profit-green-light)',
                   border: '1px solid rgba(16, 185, 129, 0.4)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}>
-                  <ShieldCheck size={12} color="#10b981" /> VERIFIED AUDIT REPORT
+                  <ShieldCheck size={12} color="var(--profit-green)" /> VERIFIED AUDIT REPORT
                 </span>
               </div>
 
-              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#f8fafc' }}>
+              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 Executive Performance & Portfolio Audit
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
                 Account: <strong>{activeAccount?.name || 'All Accounts'}</strong> ({activeAccount?.broker || 'Multi-Broker'}) • Currency: <strong>{currentCurrency}</strong>
               </div>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>ID Audit:</div>
-              <div style={{ fontSize: '0.84rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>ID Audit:</div>
+              <div style={{ fontSize: '0.84rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--theme-secondary)' }}>
                 {auditId}
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px' }}>Report Date:</div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1' }}>
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Report Date:</div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                 {reportDate}
               </div>
             </div>
@@ -242,20 +242,20 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             alignItems: 'center',
             padding: '14px 18px',
             borderRadius: '12px',
-            backgroundColor: '#070b16',
+            backgroundColor: 'var(--bg-main)',
             border: '1px solid var(--bg-chip)',
             marginBottom: '24px'
           }}>
             <div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase' }}>Nama Trader / Pemegang Portofolio</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Nama Trader / Pemegang Portofolio</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
                 {traderName}
               </div>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase' }}>Total Posisi Tereksekusi</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#38bdf8', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Total Posisi Tereksekusi</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--theme-secondary)', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
                 {reportMetrics.totalTrades} Transaksi
               </div>
             </div>
@@ -268,8 +268,8 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             gap: '12px',
             marginBottom: '24px'
           }}>
-            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid var(--bg-chip)' }}>
-              <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Net Cumulative Return</span>
+            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--bg-chip)' }}>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Net Cumulative Return</span>
               <div style={{
                 fontSize: '1.25rem',
                 fontWeight: 800,
@@ -281,23 +281,23 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
               </div>
             </div>
 
-            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid var(--bg-chip)' }}>
-              <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Win Rate (%)</span>
+            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--bg-chip)' }}>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Win Rate (%)</span>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: reportMetrics.winRate >= 50 ? '#34d399' : '#f87171', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
                 {reportMetrics.winRate.toFixed(1)}%
               </div>
             </div>
 
-            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid var(--bg-chip)' }}>
-              <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Profit Factor</span>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--bg-chip)' }}>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Profit Factor</span>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--theme-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
                 {reportMetrics.profitFactor.toFixed(2)}
               </div>
             </div>
 
-            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: '#070b16', border: '1px solid var(--bg-chip)' }}>
-              <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Average Risk-to-Reward</span>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--bg-chip)' }}>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Average Risk-to-Reward</span>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
                 1 : {reportMetrics.avgRR.toFixed(2)}
               </div>
             </div>
@@ -307,27 +307,27 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
           <div style={{
             padding: '14px 18px',
             borderRadius: '10px',
-            backgroundColor: '#070b16',
+            backgroundColor: 'var(--bg-main)',
             border: '1px solid var(--bg-chip)',
             marginBottom: '24px'
           }}>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
               Executive Statement & Risk Debrief
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
               {traderNote}
             </div>
           </div>
 
           {/* Transaction History Table */}
           <div style={{ marginBottom: '24px' }}>
-            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#f8fafc', marginBottom: '10px' }}>
+            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '10px' }}>
               Closed Transactions ({reportTrades.length} executions)
             </div>
 
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--bg-chip)', color: '#94a3b8', textAlign: 'left' }}>
+                <tr style={{ borderBottom: '1px solid var(--bg-chip)', color: 'var(--text-secondary)', textAlign: 'left' }}>
                   <th style={{ padding: '8px 6px' }}>Time</th>
                   <th style={{ padding: '8px 6px' }}>Symbol</th>
                   <th style={{ padding: '8px 6px' }}>Tipe</th>
@@ -342,19 +342,19 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
                   const isWin = t.status === 'WIN' || t.pnl > 0;
                   return (
                     <tr key={t.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                      <td style={{ padding: '7px 6px', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+                      <td style={{ padding: '7px 6px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
                         {formatDateTimeDDMMYYYY(t.entryDate).split(' ')[0]}
                       </td>
-                      <td style={{ padding: '7px 6px', fontWeight: 700, color: '#f8fafc' }}>
+                      <td style={{ padding: '7px 6px', fontWeight: 700, color: 'var(--text-primary)' }}>
                         {t.symbol}
                       </td>
                       <td style={{ padding: '7px 6px', fontWeight: 600, color: (t.direction === 'LONG' || (t.direction as any) === 'BUY') ? '#10b981' : '#ef4444' }}>
                         {t.direction}
                       </td>
-                      <td style={{ padding: '7px 6px', color: '#cbd5e1' }}>
+                      <td style={{ padding: '7px 6px', color: 'var(--text-primary)' }}>
                         {t.setup}
                       </td>
-                      <td style={{ padding: '7px 6px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>
+                      <td style={{ padding: '7px 6px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--theme-secondary)' }}>
                         {t.rrAchieved ? `1:${t.rrAchieved}` : '-'}
                       </td>
                       <td style={{
@@ -384,7 +384,7 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
               </tbody>
             </table>
             {reportTrades.length > 25 && (
-              <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#64748b', marginTop: '8px' }}>
+              <div style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '8px' }}>
                 * Showing 25 of {reportTrades.length} transactions in the printed summary.
               </div>
             )}
@@ -398,13 +398,13 @@ export const ExecutiveReportModal: React.FC<ExecutiveReportModalProps> = ({ isOp
             paddingTop: '16px',
             borderTop: '1px solid var(--bg-chip)',
             fontSize: '0.7rem',
-            color: '#64748b'
+            color: 'var(--text-muted)'
           }}>
             <div>
               Generated autonomously via <strong>iTradeJournal Enterprise Terminal</strong>
             </div>
             <div>
-              Status: <span style={{ color: '#10b981', fontWeight: 700 }}>VERIFIED DIGITAL RECORD</span>
+              Status: <span style={{ color: 'var(--profit-green)', fontWeight: 700 }}>VERIFIED DIGITAL RECORD</span>
             </div>
           </div>
         </div>

@@ -1,18 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useJournal } from '../context/JournalContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../utils/formatters';
 import { 
   TrendingUp,
   Plus, 
-  ChevronDown, 
-  Layers, 
-  Check, 
+  ChevronDown,
+  Layers,
+  Check,
   LogIn,
   Menu,
   Eye,
   EyeOff,
-  Search
+  Search,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { AuthModal, AuthMode } from './auth/AuthModal';
 import { NotificationCenter } from './common/NotificationCenter';
@@ -40,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   } = useJournal();
 
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -86,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             style={{
               padding: '8px',
               borderRadius: '8px',
-              backgroundColor: '#0d1527',
+              backgroundColor: 'var(--bg-main)',
               border: '1px solid #1e2c44',
               color: 'var(--text-secondary)',
               cursor: 'pointer'
@@ -136,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              backgroundColor: '#0e1628',
+              backgroundColor: 'var(--bg-main)',
               borderColor: '#243750',
               color: 'var(--theme-secondary)',
               fontWeight: 600
@@ -161,6 +165,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             <kbd className="kbd-hint">ctrl K</kbd>
           </button>
         )}
+
+        {/* Dark / Light mode toggle (only two modes exist) */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="btn btn-secondary btn-icon btn-sm"
+          title={theme === 'dark' ? 'Switch to Light mode' : 'Switch to Dark mode'}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          style={{ color: 'var(--theme-primary)', padding: '7px 10px' }}
+        >
+          {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
 
         {/* Notification Center (risk alerts + mentor feedback) */}
         <NotificationCenter />
@@ -192,7 +208,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <Plus size={16} strokeWidth={2.5} />
           <span className="hide-on-mobile">Log Trade</span>
-          <kbd className="kbd-hint hide-on-mobile" style={{ backgroundColor: 'rgba(255,255,255,0.16)', borderColor: 'rgba(255,255,255,0.25)', color: '#ffffff' }}>N</kbd>
+          <kbd className="kbd-hint hide-on-mobile" style={{ backgroundColor: 'var(--bg-main)', borderColor: 'rgba(255,255,255,0.25)', color: '#ffffff' }}>N</kbd>
         </button>
       </div>
 
@@ -307,7 +323,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     justifyContent: 'space-between',
                     padding: '8px 12px',
                     borderRadius: '8px',
-                    backgroundColor: activeAccountId === acc.id ? '#1a2336' : 'transparent',
+                    backgroundColor: 'var(--bg-main)',
+                    boxShadow: activeAccountId === acc.id ? 'var(--neo-inset)' : 'none',
                     border: 'none',
                     color: 'var(--text-primary)',
                     cursor: 'pointer',

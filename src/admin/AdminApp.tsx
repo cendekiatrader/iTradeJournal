@@ -1396,7 +1396,7 @@ export const AdminApp: React.FC = () => {
                             f.category === 'bug'
                               ? { color: 'var(--loss-red)', background: 'color-mix(in srgb, var(--loss-red) 14%, transparent)' }
                               : f.category === 'idea'
-                              ? { color: '#f59e0b', background: 'color-mix(in srgb, #f59e0b 14%, transparent)' }
+                              ? { color: 'var(--accent-amber)', background: 'color-mix(in srgb, #f59e0b 14%, transparent)' }
                               : { color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' }
                           }
                         >

@@ -87,7 +87,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                   <div style={{
                     fontSize: '0.74rem',
                     fontWeight: 700,
-                    color: '#93c5fd',
+                    color: 'var(--theme-secondary)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '8px'
@@ -99,7 +99,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '6px',
-                    backgroundColor: '#070b16',
+                    backgroundColor: 'var(--bg-main)',
                     borderRadius: '10px',
                     border: '1px solid var(--bg-chip)',
                     padding: '8px 12px'
@@ -125,7 +125,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                           backgroundColor: 'var(--bg-chip)',
                           border: '1px solid #334155',
                           boxShadow: '0 2px 0 #0f172a',
-                          color: '#38bdf8',
+                          color: 'var(--theme-secondary)',
                           fontSize: '0.76rem',
                           fontWeight: 700,
                           fontFamily: 'var(--font-mono)'

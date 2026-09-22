@@ -178,7 +178,7 @@ export const AnalyticsView: React.FC = () => {
 
       {/* Long vs Short Direction Comparison Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <div className="card" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), #090e1c)' }}>
+        <div className="card" style={{ background: 'var(--bg-main)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--profit-green)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <TrendingUp size={18} /> LONG (Buy) Performance
@@ -211,7 +211,7 @@ export const AnalyticsView: React.FC = () => {
           </div>
         </div>
 
-        <div className="card" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08), #090e1c)' }}>
+        <div className="card" style={{ background: 'var(--bg-main)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--loss-red)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <TrendingDown size={18} /> SHORT (Sell) Performance
@@ -292,7 +292,7 @@ export const AnalyticsView: React.FC = () => {
                   <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                     {strat.avgRR > 0 ? `1:${strat.avgRR.toFixed(2)}` : '-'}
                   </td>
-                  <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>
+                  <td style={{ padding: '12px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', color: 'var(--theme-secondary)' }}>
                     {strat.avgHoldingFormatted}
                   </td>
                   <td style={{
@@ -330,7 +330,7 @@ export const AnalyticsView: React.FC = () => {
                   key={idx}
                   style={{
                     padding: '12px 14px',
-                    backgroundColor: '#060913',
+                    backgroundColor: 'var(--bg-main)',
                     border: '1px solid #1a2538',
                     borderRadius: '8px',
                     display: 'flex',
@@ -365,7 +365,7 @@ export const AnalyticsView: React.FC = () => {
         <div className="card">
           <div className="card-header">
             <div className="card-title">
-              <Clock size={18} color="#f59e0b" />
+              <Clock size={18} color="var(--accent-amber)" />
               <span>Trading Session Distribution</span>
             </div>
           </div>
@@ -376,7 +376,7 @@ export const AnalyticsView: React.FC = () => {
                 key={idx}
                 style={{
                   padding: '12px 14px',
-                  backgroundColor: '#060913',
+                  backgroundColor: 'var(--bg-main)',
                   border: '1px solid #1a2538',
                   borderRadius: '8px',
                   display: 'flex',

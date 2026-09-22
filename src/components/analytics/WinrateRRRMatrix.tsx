@@ -23,7 +23,7 @@ export const WinrateRRRMatrix: React.FC = () => {
       const intensity = Math.min(1, Math.abs(exp) / Math.abs(minExp));
       return {
         backgroundColor: `rgba(239, 68, 68, ${0.05 + intensity * 0.25})`,
-        color: '#f87171',
+        color: 'var(--loss-red)',
         border: '1px solid rgba(239, 68, 68, 0.15)',
       };
     } else if (exp > 0) {
@@ -36,7 +36,7 @@ export const WinrateRRRMatrix: React.FC = () => {
       };
     } else {
       return {
-        backgroundColor: 'rgba(148, 163, 184, 0.05)',
+        backgroundColor: 'var(--bg-main)',
         color: 'var(--text-secondary)',
         border: '1px solid rgba(148, 163, 184, 0.1)',
       };
@@ -62,7 +62,7 @@ export const WinrateRRRMatrix: React.FC = () => {
             Profit Edge
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'rgba(239, 68, 68, 0.3)', border: '1px solid rgba(239, 68, 68, 0.5)' }}></span>
+            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'var(--bg-main)', border: '1px solid rgba(239, 68, 68, 0.5)' }}></span>
             Bleeding Edge
           </div>
         </div>
@@ -119,7 +119,7 @@ export const WinrateRRRMatrix: React.FC = () => {
 
       <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 5%, transparent)', borderRadius: '10px', border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 15%, transparent)', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
         <Zap size={18} color="var(--theme-secondary)" style={{ flexShrink: 0, marginTop: '2px' }} />
-        <div style={{ fontSize: '0.8rem', color: '#93c5fd', lineHeight: 1.6 }}>
+        <div style={{ fontSize: '0.8rem', color: 'var(--theme-secondary)', lineHeight: 1.6 }}>
           <strong>Edge Sustainability Insight:</strong> Expectancy formula: <code>E = (Winrate × RRR) - Lossrate</code>. Red areas mark Winrate/RRR combinations that slowly bleed your capital (*Bleeding Edge*), while dark green marks the *Cash Cow Zone* (high expectancy per trade).
         </div>
       </div>

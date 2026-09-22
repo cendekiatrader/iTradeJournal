@@ -114,14 +114,14 @@ export const MarketSessionClock: React.FC = () => {
                   fontWeight: 800,
                   padding: '2px 8px',
                   borderRadius: '12px',
-                  backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                  color: '#f87171',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--loss-red)',
                   border: '1px solid rgba(239, 68, 68, 0.4)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}>
-                  <Flame size={12} color="#ef4444" /> OVERLAP PEAK 🔥
+                  <Flame size={12} color="var(--loss-red)" /> OVERLAP PEAK 🔥
                 </span>
               )}
             </h3>
@@ -136,11 +136,11 @@ export const MarketSessionClock: React.FC = () => {
           <div style={{
             padding: '6px 12px',
             borderRadius: '8px',
-            backgroundColor: '#070b16',
+            backgroundColor: 'var(--bg-main)',
             border: '1px solid var(--bg-chip)',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.8rem',
-            color: '#38bdf8',
+            color: 'var(--theme-secondary)',
             fontWeight: 700
           }}>
             {localTimeStr} WIB
@@ -148,7 +148,7 @@ export const MarketSessionClock: React.FC = () => {
           <div style={{
             padding: '6px 12px',
             borderRadius: '8px',
-            backgroundColor: '#070b16',
+            backgroundColor: 'var(--bg-main)',
             border: '1px solid var(--bg-chip)',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.8rem',
@@ -171,8 +171,11 @@ export const MarketSessionClock: React.FC = () => {
               style={{
                 padding: '12px 14px',
                 borderRadius: '12px',
-                backgroundColor: open ? (killzone ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.08)') : '#070b16',
-                border: open ? (killzone ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(16, 185, 129, 0.35)') : '1px solid #1a2538',
+                backgroundColor: 'var(--bg-main)',
+                boxShadow: open
+                  ? 'var(--neo-inset), inset 0 0 0 1px ' + (killzone ? 'rgba(239, 68, 68, 0.55)' : 'rgba(16, 185, 129, 0.5)')
+                  : 'var(--neo-inset)',
+                border: 'none',
                 transition: '0.2s'
               }}
             >
@@ -189,8 +192,8 @@ export const MarketSessionClock: React.FC = () => {
                   fontWeight: 700,
                   padding: '2px 6px',
                   borderRadius: '4px',
-                  backgroundColor: open ? (killzone ? '#ef4444' : '#10b981') : 'var(--bg-chip)',
-                  color: '#ffffff',
+                  backgroundColor: open ? (killzone ? 'var(--loss-red)' : 'var(--profit-green)') : 'var(--bg-main)',
+                  color: open ? 'var(--bg-main)' : 'var(--text-muted)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'

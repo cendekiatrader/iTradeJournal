@@ -10,9 +10,9 @@ export const Toast: React.FC = () => {
   const iconFor = (type: string) => {
     switch (type) {
       case 'success':
-        return <CheckCircle2 size={18} color="#10b981" />;
+        return <CheckCircle2 size={18} color="var(--profit-green)" />;
       case 'error':
-        return <AlertTriangle size={18} color="#ef4444" />;
+        return <AlertTriangle size={18} color="var(--loss-red)" />;
       default:
         return <Info size={18} color="var(--theme-secondary-strong)" />;
     }

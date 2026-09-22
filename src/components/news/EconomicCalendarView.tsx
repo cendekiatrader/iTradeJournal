@@ -156,15 +156,15 @@ export const EconomicCalendarView: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Flame size={24} color="#ef4444" />
+            <Flame size={24} color="var(--loss-red)" />
             <span>Economic Calendar & News Radar</span>
             <span style={{
               fontSize: '0.7rem',
               fontWeight: 700,
               padding: '2px 8px',
               borderRadius: '20px',
-              backgroundColor: 'rgba(239, 68, 68, 0.15)',
-              color: '#f87171',
+              backgroundColor: 'var(--bg-main)',
+              color: 'var(--loss-red)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               display: 'inline-flex',
               alignItems: 'center',
@@ -186,7 +186,7 @@ export const EconomicCalendarView: React.FC = () => {
           gap: '8px',
           padding: '8px 16px',
           borderRadius: '12px',
-          backgroundColor: '#0c1326',
+          backgroundColor: 'var(--bg-main)',
           border: '1px solid var(--border-color)'
         }}>
           <Clock size={16} color="var(--theme-secondary-strong)" />
@@ -201,7 +201,7 @@ export const EconomicCalendarView: React.FC = () => {
       <div style={{
         padding: '18px 20px',
         borderRadius: '16px',
-        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+        backgroundColor: 'var(--bg-main)',
         border: '1px solid rgba(239, 68, 68, 0.3)',
         marginBottom: '24px',
         display: 'flex',
@@ -212,17 +212,17 @@ export const EconomicCalendarView: React.FC = () => {
           width: '40px',
           height: '40px',
           borderRadius: '12px',
-          backgroundColor: 'rgba(239, 68, 68, 0.2)',
+          backgroundColor: 'var(--bg-main)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0
         }}>
-          <ShieldAlert size={22} color="#ef4444" />
+          <ShieldAlert size={22} color="var(--loss-red)" />
         </div>
 
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f87171', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--loss-red)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>Risk Management Protocol Around Red-Folder (High Impact) News</span>
           </div>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-strong)', marginTop: '4px', lineHeight: 1.5 }}>
@@ -290,7 +290,7 @@ export const EconomicCalendarView: React.FC = () => {
               gap: '6px'
             }}
           >
-            <Flame size={13} color="#ef4444" />
+            <Flame size={13} color="var(--loss-red)" />
             <span>High Impact Only (Red Folder)</span>
           </button>
         </div>
@@ -319,7 +319,7 @@ export const EconomicCalendarView: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="card" style={{ padding: '20px' }}>
             <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Zap size={17} color="#f59e0b" />
+              <Zap size={17} color="var(--accent-amber)" />
               <span>Katalog Berita Berdampak Terbesar</span>
             </h3>
 
@@ -330,14 +330,14 @@ export const EconomicCalendarView: React.FC = () => {
                   style={{
                     padding: '12px',
                     borderRadius: '10px',
-                    backgroundColor: '#070b16',
+                    backgroundColor: 'var(--bg-main)',
                     border: '1px solid var(--bg-chip)'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '1rem' }}>{news.flag}</span>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--theme-secondary)', fontFamily: 'var(--font-mono)' }}>
                         {news.currency}
                       </span>
                     </div>
@@ -346,8 +346,8 @@ export const EconomicCalendarView: React.FC = () => {
                       fontWeight: 700,
                       padding: '2px 6px',
                       borderRadius: '4px',
-                      backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                      color: '#f87171',
+                      backgroundColor: 'var(--bg-main)',
+                      color: 'var(--loss-red)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px'
@@ -370,7 +370,7 @@ export const EconomicCalendarView: React.FC = () => {
           </div>
 
           {/* Quick News Trading Rules Card */}
-          <div className="card" style={{ padding: '20px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent), #090e1c)' }}>
+          <div className="card" style={{ padding: '20px', background: 'var(--bg-main)' }}>
             <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--theme-secondary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Info size={16} />
               <span>3 Golden Rules Around News:</span>

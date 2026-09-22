@@ -388,7 +388,7 @@ export const NotificationCenter: React.FC = () => {
                           key={n.id}
                           style={{
                             ...rowStyle,
-                            borderLeft: `2px solid ${unread ? 'var(--theme-secondary)' : 'transparent'}`,
+                            boxShadow: unread ? 'inset 2px 0 0 var(--theme-secondary)' : 'none',
                             backgroundColor: unread ? 'var(--bg-card)' : 'transparent'
                           }}
                         >
@@ -462,7 +462,7 @@ export const NotificationCenter: React.FC = () => {
                           key={a.id}
                           style={{
                             ...rowStyle,
-                            borderLeft: `2px solid ${unread ? 'var(--theme-secondary)' : 'transparent'}`,
+                            boxShadow: unread ? 'inset 2px 0 0 var(--theme-secondary)' : 'none',
                             backgroundColor: unread ? 'var(--bg-card)' : 'transparent'
                           }}
                         >
@@ -498,14 +498,14 @@ export const NotificationCenter: React.FC = () => {
                           key={a.id}
                           style={{
                             ...rowStyle,
-                            borderLeft: `2px solid ${unread ? 'var(--theme-secondary)' : 'transparent'}`,
+                            boxShadow: unread ? 'inset 2px 0 0 var(--theme-secondary)' : 'none',
                             backgroundColor: unread ? 'var(--bg-card)' : 'transparent'
                           }}
                         >
                           {a.severity === 'critical' ? (
                             <ShieldAlert size={16} color="var(--loss-red)" style={{ flexShrink: 0, marginTop: '1px' }} />
                           ) : (
-                            <AlertTriangle size={16} color="#f59e0b" style={{ flexShrink: 0, marginTop: '1px' }} />
+                            <AlertTriangle size={16} color="var(--accent-amber)" style={{ flexShrink: 0, marginTop: '1px' }} />
                           )}
                           <div style={{ minWidth: 0, flex: 1 }}>
                             <div
@@ -537,7 +537,7 @@ export const NotificationCenter: React.FC = () => {
                           key={c.id}
                           style={{
                             ...rowStyle,
-                            borderLeft: `2px solid ${unread ? 'var(--theme-secondary)' : 'transparent'}`,
+                            boxShadow: unread ? 'inset 2px 0 0 var(--theme-secondary)' : 'none',
                             backgroundColor: unread ? 'var(--bg-card)' : 'transparent'
                           }}
                         >

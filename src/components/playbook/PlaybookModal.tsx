@@ -287,7 +287,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                     type="button"
                     onClick={() => handleRemoveItem(setRules, idx)}
                     className="btn btn-ghost btn-icon btn-sm"
-                    style={{ color: '#ef4444' }}
+                    style={{ color: 'var(--loss-red)' }}
                     aria-label="Remove rule"
                   >
                     <Trash2 size={14} />
@@ -307,7 +307,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                 type="button"
                 onClick={() => handleAddItem(setConfluences)}
                 className="btn btn-ghost btn-sm"
-                style={{ fontSize: '0.72rem', color: '#34d399' }}
+                style={{ fontSize: '0.72rem', color: 'var(--profit-green-light)' }}
               >
                 + Add Confluence
               </button>
@@ -327,7 +327,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                     type="button"
                     onClick={() => handleRemoveItem(setConfluences, idx)}
                     className="btn btn-ghost btn-icon btn-sm"
-                    style={{ color: '#ef4444' }}
+                    style={{ color: 'var(--loss-red)' }}
                     aria-label="Remove confluence"
                   >
                     <Trash2 size={14} />
@@ -340,14 +340,14 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
           {/* Mistakes to Avoid */}
           <div style={{ marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label className="input-label" style={{ margin: 0, color: '#f87171' }}>
+              <label className="input-label" style={{ margin: 0, color: 'var(--loss-red)' }}>
                 Mistakes to Avoid (Anti-Pattern / Trap)
               </label>
               <button
                 type="button"
                 onClick={() => handleAddItem(setMistakesToAvoid)}
                 className="btn btn-ghost btn-sm"
-                style={{ fontSize: '0.72rem', color: '#f87171' }}
+                style={{ fontSize: '0.72rem', color: 'var(--loss-red)' }}
               >
                 + Add Restriction
               </button>
@@ -367,7 +367,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
                     type="button"
                     onClick={() => handleRemoveItem(setMistakesToAvoid, idx)}
                     className="btn btn-ghost btn-icon btn-sm"
-                    style={{ color: '#ef4444' }}
+                    style={{ color: 'var(--loss-red)' }}
                     aria-label="Remove mistake"
                   >
                     <Trash2 size={14} />
@@ -384,7 +384,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
-                <span style={{ fontSize: '0.74rem', color: '#93c5fd', display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.74rem', color: 'var(--theme-secondary)', display: 'block', marginBottom: '4px', fontWeight: 600 }}>
                   1. Setup Model (Before)
                 </span>
                 <input
@@ -404,7 +404,7 @@ export const PlaybookModal: React.FC<PlaybookModalProps> = ({
               </div>
 
               <div>
-                <span style={{ fontSize: '0.74rem', color: '#34d399', display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.74rem', color: 'var(--profit-green-light)', display: 'block', marginBottom: '4px', fontWeight: 600 }}>
                   2. Outcome Eksekusi (After)
                 </span>
                 <input

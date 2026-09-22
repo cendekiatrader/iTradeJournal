@@ -233,7 +233,7 @@ export const SetupQueueView: React.FC<SetupQueueViewProps> = ({ onExecute }) => 
         </div>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <div style={{ display: 'flex', backgroundColor: '#0c152a', border: '1px solid #1c273e', borderRadius: '9px', padding: '3px' }}>
+          <div style={{ display: 'flex', backgroundColor: 'var(--bg-main)', border: '1px solid #1c273e', borderRadius: '9px', padding: '3px' }}>
             {(['ACTIVE', 'ALL'] as const).map((f) => (
               <button
                 key={f}
@@ -355,7 +355,7 @@ export const SetupQueueView: React.FC<SetupQueueViewProps> = ({ onExecute }) => 
                   { label: 'Stop', value: item.stopLevel },
                   { label: 'Target', value: item.targetLevel }
                 ].map((lv) => (
-                  <div key={lv.label} style={{ backgroundColor: '#060913', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '7px 9px' }}>
+                  <div key={lv.label} style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '7px 9px' }}>
                     <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>{lv.label}</div>
                     <div style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: lv.value !== undefined ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                       {lv.value !== undefined && !isNaN(lv.value) ? lv.value : '—'}
@@ -379,7 +379,7 @@ export const SetupQueueView: React.FC<SetupQueueViewProps> = ({ onExecute }) => 
               {hasRichContent(item.notes) && (
                 <div
                   className="rich-notes-content"
-                  style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '12px', borderLeft: '2px solid var(--border-color)', paddingLeft: '8px' }}
+                  style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '12px', boxShadow: 'inset 2px 0 0 var(--theme-secondary)', paddingLeft: '8px' }}
                   dangerouslySetInnerHTML={{ __html: item.notes || '' }}
                 />
               )}

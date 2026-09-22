@@ -523,7 +523,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                 </button>
               </span>
             )}
-            <div style={{ display: 'flex', backgroundColor: '#0c152a', border: '1px solid #1c273e', borderRadius: '9px', padding: '3px', gap: '2px' }}>
+            <div style={{ display: 'flex', backgroundColor: 'var(--bg-main)', border: '1px solid #1c273e', borderRadius: '9px', padding: '3px', gap: '2px' }}>
               <button
                 type="button"
                 aria-pressed={formView === 'quick'}
@@ -626,9 +626,10 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                   fontSize: '0.72rem',
                   padding: '3px 8px',
                   borderRadius: '6px',
-                  backgroundColor: symbol === sym ? '#2563eb' : '#101626',
-                  color: symbol === sym ? '#ffffff' : 'var(--text-secondary)',
-                  border: '1px solid #23324d',
+                  backgroundColor: 'var(--bg-main)',
+                  boxShadow: symbol === sym ? 'var(--neo-outset-sm)' : 'none',
+                  color: symbol === sym ? 'var(--theme-primary)' : 'var(--text-secondary)',
+                  border: 'none',
                   cursor: 'pointer',
                   fontFamily: 'var(--font-mono)'
                 }}
@@ -723,9 +724,9 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
 
           {formView === 'full' && (<>
           {/* Opened At & Closed At Execution Timestamps */}
-          <div style={{ backgroundColor: '#070b18', padding: '14px', borderRadius: '10px', border: '1px solid #1c283f', marginBottom: '16px' }}>
+          <div style={{ backgroundColor: 'var(--bg-main)', boxShadow: 'var(--neo-inset)', padding: '14px', borderRadius: '10px', border: '1px solid #1c283f', marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#93c5fd', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--theme-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Clock size={15} />
                 <span>Execution Timeline</span>
               </div>
@@ -784,7 +785,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             justifyContent: 'space-between',
             padding: '10px 14px',
             borderRadius: '10px',
-            backgroundColor: '#0a1224',
+            backgroundColor: 'var(--bg-main)',
             border: '1px solid #1e2c48',
             marginBottom: '14px',
             flexWrap: 'wrap',
@@ -825,9 +826,10 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     borderRadius: '6px',
-                    backgroundColor: riskPercentPreset === pct ? '#2563eb' : '#0c152a',
-                    border: riskPercentPreset === pct ? '1px solid var(--theme-secondary-strong)' : '1px solid #1c273e',
-                    color: riskPercentPreset === pct ? '#ffffff' : 'var(--text-secondary)',
+                    backgroundColor: 'var(--bg-main)',
+                    boxShadow: riskPercentPreset === pct ? 'var(--neo-outset-sm)' : 'none',
+                    border: 'none',
+                    color: riskPercentPreset === pct ? 'var(--theme-primary)' : 'var(--text-secondary)',
                     cursor: 'pointer'
                   }}
                 >
@@ -844,7 +846,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                     padding: '5px 12px',
                     fontSize: '0.75rem',
                     fontWeight: 700,
-                    backgroundColor: 'rgba(16, 185, 129, 0.18)',
+                    backgroundColor: 'var(--bg-main)',
                     borderColor: 'rgba(16, 185, 129, 0.4)',
                     color: 'var(--profit-green)',
                     gap: '4px'
@@ -858,7 +860,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
           </div>
 
           {/* Pricing & Execution Metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '16px', backgroundColor: '#060913', padding: '14px', borderRadius: '10px', border: '1px solid #1c273a' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '16px', backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid #1c273a' }}>
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Entry Price *</label>
               <input
@@ -935,7 +937,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
           {formView === 'full' && (<>
           {/* Partial Close / Multi-Exit Section */}
           <div style={{
-            backgroundColor: '#070c1a',
+            backgroundColor: 'var(--bg-main)', boxShadow: 'var(--neo-inset)',
             padding: '14px',
             borderRadius: '10px',
             border: '1px solid #1c2a44',
@@ -980,7 +982,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       gridTemplateColumns: '80px 1.2fr 1fr 1fr auto',
                       gap: '8px',
                       alignItems: 'center',
-                      backgroundColor: '#0a1022',
+                      backgroundColor: 'var(--bg-main)',
                       padding: '8px 10px',
                       borderRadius: '8px',
                       border: '1px solid var(--bg-chip)'
@@ -1101,13 +1103,13 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
 
           {/* R:R Preview Banner */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', backgroundColor: 'color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent)', borderRadius: '8px', border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 20%, transparent)', marginBottom: '16px', fontSize: '0.78rem' }}>
-            <span style={{ color: '#93c5fd' }}>
-              Planned R:R: <strong style={{ color: '#ffffff', fontFamily: 'var(--font-mono)' }}>1 : {plannedRR}</strong>
+            <span style={{ color: 'var(--theme-secondary)' }}>
+              Planned R:R: <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>1 : {plannedRR}</strong>
             </span>
-            <span style={{ color: '#93c5fd' }}>
+            <span style={{ color: 'var(--theme-secondary)' }}>
               Realized R:R: <strong style={{ color: achievedRR >= 0 ? 'var(--profit-green)' : 'var(--loss-red)', fontFamily: 'var(--font-mono)' }}>1 : {achievedRR}</strong>
               {enablePartialExits && partialExits.length > 0 && (
-                <span style={{ marginLeft: '6px', fontSize: '0.68rem', color: '#38bdf8' }}>(Weighted)</span>
+                <span style={{ marginLeft: '6px', fontSize: '0.68rem', color: 'var(--theme-secondary)' }}>(Weighted)</span>
               )}
             </span>
           </div>
@@ -1133,7 +1135,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                 <label className="input-label" style={{ margin: 0 }}>Strategy / Setup Model</label>
                 {playbooks.length > 0 && (
-                  <span style={{ fontSize: '0.68rem', color: '#f59e0b', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--accent-amber)', fontWeight: 600 }}>
                     ⭐ {playbooks.length} Playbooks
                   </span>
                 )}
@@ -1223,9 +1225,10 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
                       fontSize: '0.72rem',
                       padding: '4px 9px',
                       borderRadius: '6px',
-                      backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.2)' : '#070a16',
+                      backgroundColor: 'var(--bg-main)',
+                      boxShadow: isSelected ? 'var(--neo-outset-sm)' : 'none',
                       color: isSelected ? 'var(--profit-green)' : 'var(--text-secondary)',
-                      border: `1px solid ${isSelected ? 'var(--profit-green)' : 'var(--bg-chip)'}`,
+                      border: 'none',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -1327,7 +1330,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
             <div className="tf-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {/* Before Screenshot */}
               <div>
-                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#93c5fd', display: 'block', marginBottom: '4px' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--theme-secondary)', display: 'block', marginBottom: '4px' }}>
                   1. Before (Setup / Plan Chart)
                 </span>
                 <input
@@ -1347,7 +1350,7 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
 
               {/* After Screenshot */}
               <div>
-                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#34d399', display: 'block', marginBottom: '4px' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--profit-green-light)', display: 'block', marginBottom: '4px' }}>
                   2. After (Execution / Outcome Chart)
                 </span>
                 <input

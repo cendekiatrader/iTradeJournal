@@ -137,7 +137,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
         style={{ maxWidth: '520px' }}
       >
         {/* Header */}
-        <div className="modal-header" style={{ background: 'linear-gradient(180deg, #0f172a, var(--bg-card))' }}>
+        <div className="modal-header" style={{ background: 'var(--bg-main)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '36px',
@@ -230,7 +230,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 <div style={{
                   padding: '12px 14px',
                   borderRadius: '12px',
-                  backgroundColor: '#070a16',
+                  backgroundColor: 'var(--bg-main)',
                   border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)',
                   display: 'flex',
                   alignItems: 'center',
@@ -258,7 +258,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                     className="btn btn-secondary btn-sm"
                     style={{ gap: '6px', padding: '6px 12px', whiteSpace: 'nowrap' }}
                   >
-                    {copied ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                    {copied ? <Check size={14} color="var(--profit-green)" /> : <Copy size={14} />}
                     <span>{copied ? 'Copied' : 'Copy'}</span>
                   </button>
 
@@ -356,7 +356,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
               <div style={{
                 padding: '12px 14px',
                 borderRadius: '12px',
-                backgroundColor: '#090e1c',
+                backgroundColor: 'var(--bg-main)',
                 border: '1px solid var(--border-color)',
                 display: 'flex',
                 flexDirection: 'column',

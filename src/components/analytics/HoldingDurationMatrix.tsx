@@ -79,10 +79,10 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
     });
 
     const definitions: { id: string; name: string; label: string; icon: any; color: string }[] = [
-      { id: 'scalp', name: 'Scalping', label: '< 15 Menit', icon: Zap, color: '#38bdf8' },
-      { id: 'intraday', name: 'Intraday Focus', label: '15m – 4 Jam', icon: Target, color: '#10b981' },
-      { id: 'daytrade', name: 'Extended Day Trade', label: '4 Jam – 24 Jam', icon: Clock, color: '#f59e0b' },
-      { id: 'swing', name: 'Multi-Day Swing', label: '> 1 Hari', icon: Hourglass, color: '#a855f7' }
+      { id: 'scalp', name: 'Scalping', label: '< 15 Menit', icon: Zap, color: 'var(--theme-secondary)' },
+      { id: 'intraday', name: 'Intraday Focus', label: '15m – 4 Jam', icon: Target, color: 'var(--profit-green)' },
+      { id: 'daytrade', name: 'Extended Day Trade', label: '4 Jam – 24 Jam', icon: Clock, color: 'var(--accent-amber)' },
+      { id: 'swing', name: 'Multi-Day Swing', label: '> 1 Hari', icon: Hourglass, color: 'var(--accent-purple)' }
     ];
 
     return definitions.map(def => {
@@ -130,7 +130,7 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
         <div>
           <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Clock size={20} color="#38bdf8" />
+            <Clock size={20} color="var(--theme-secondary)" />
             <span>Trade Holding Duration & Time Edge Matrix</span>
           </h3>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -142,14 +142,14 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
           <div style={{
             padding: '6px 14px',
             borderRadius: '10px',
-            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            backgroundColor: 'var(--bg-main)',
             border: '1px solid rgba(16, 185, 129, 0.35)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px'
           }}>
-            <Sparkles size={15} color="#10b981" />
-            <span style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 700 }}>
+            <Sparkles size={15} color="var(--profit-green)" />
+            <span style={{ fontSize: '0.78rem', color: 'var(--profit-green-light)', fontWeight: 700 }}>
               Sharpest Edge: <strong>{bestBracket.name} ({bestBracket.timeframeLabel})</strong>
             </span>
           </div>
@@ -168,7 +168,7 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
               style={{
                 padding: '16px',
                 borderRadius: '14px',
-                backgroundColor: '#070b16',
+                backgroundColor: 'var(--bg-main)',
                 border: '1px solid var(--bg-chip)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -237,7 +237,7 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
 
                   <div>
                     <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Profit Factor</span>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#38bdf8' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--theme-secondary)' }}>
                       {bracket.trades > 0 ? bracket.profitFactor.toFixed(2) : '-'}
                     </span>
                   </div>
@@ -249,12 +249,12 @@ export const HoldingDurationMatrix: React.FC<HoldingDurationMatrixProps> = ({
                 {bracket.trades === 0 ? (
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Belum ada data eksekusi</span>
                 ) : bracket.pnl > 0 && bracket.winRate >= 55 ? (
-                  <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <ShieldCheck size={13} color="#10b981" /> High-Performing Edge
+                  <span style={{ fontSize: '0.72rem', color: 'var(--profit-green-light)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <ShieldCheck size={13} color="var(--profit-green)" /> High-Performing Edge
                   </span>
                 ) : bracket.pnl < 0 ? (
-                  <span style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <AlertTriangle size={13} color="#f87171" /> Potential Drag / Negative Edge
+                  <span style={{ fontSize: '0.72rem', color: 'var(--loss-red)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertTriangle size={13} color="var(--loss-red)" /> Potential Drag / Negative Edge
                   </span>
                 ) : (
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>

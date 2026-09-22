@@ -63,7 +63,7 @@ const cardHeader: React.CSSProperties = {
 
 const statusPill = (status: string): React.CSSProperties => {
   if (status === 'active') return { color: 'var(--profit-green)', background: 'color-mix(in srgb, var(--profit-green) 14%, transparent)' };
-  if (status === 'pending') return { color: '#f59e0b', background: 'color-mix(in srgb, #f59e0b 14%, transparent)' };
+  if (status === 'pending') return { color: 'var(--accent-amber)', background: 'color-mix(in srgb, #f59e0b 14%, transparent)' };
   return { color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' };
 };
 

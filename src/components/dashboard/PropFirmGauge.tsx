@@ -29,20 +29,20 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
   const isDrawdownRisk = ddBufferPercent < 40;
 
   return (
-    <div className="card" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, #0d1424, var(--bg-sidebar))', borderColor: '#23334d' }}>
+    <div className="card" style={{ marginBottom: '24px', background: 'var(--bg-main)', borderColor: '#23334d' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Award size={18} color="#f59e0b" />
+          <Award size={18} color="var(--accent-amber)" />
           <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             Prop Firm Objective Tracker ({account.name})
           </span>
         </div>
         {isTargetAchieved ? (
-          <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', color: 'var(--profit-green)', border: '1px solid var(--profit-green)' }}>
+          <span className="badge" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--profit-green)', border: '1px solid var(--profit-green)' }}>
             <CheckCircle2 size={12} /> Target Passed! 🎉
           </span>
         ) : (
-          <span className="badge" style={{ backgroundColor: 'var(--bg-chip)', color: '#93c5fd' }}>
+          <span className="badge" style={{ backgroundColor: 'var(--bg-chip)', color: 'var(--theme-secondary)' }}>
             Phase Evaluation
           </span>
         )}
@@ -50,7 +50,7 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {/* Profit Target Progress */}
-        <div style={{ backgroundColor: '#060913', padding: '16px', borderRadius: '10px', border: '1px solid #1a2538' }}>
+        <div style={{ backgroundColor: 'var(--bg-main)', padding: '16px', borderRadius: '10px', border: '1px solid #1a2538' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
               <Target size={14} color="var(--theme-secondary-strong)" />
@@ -78,7 +78,7 @@ export const PropFirmGauge: React.FC<PropFirmGaugeProps> = ({ account, metrics }
         </div>
 
         {/* Max Drawdown Limit Gauge */}
-        <div style={{ backgroundColor: '#060913', padding: '16px', borderRadius: '10px', border: '1px solid #1a2538' }}>
+        <div style={{ backgroundColor: 'var(--bg-main)', padding: '16px', borderRadius: '10px', border: '1px solid #1a2538' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
               <ShieldAlert size={14} color={isDrawdownRisk ? '#ef4444' : '#10b981'} />

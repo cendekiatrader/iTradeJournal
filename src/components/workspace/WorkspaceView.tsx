@@ -700,8 +700,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
             <span style={{
               fontSize: '0.7rem',
               fontWeight: 800,
-              backgroundColor: 'rgba(56, 189, 248, 0.15)',
-              color: '#38bdf8',
+              backgroundColor: 'var(--bg-main)',
+              color: 'var(--theme-secondary)',
               border: '1px solid rgba(56, 189, 248, 0.3)',
               padding: '2px 8px',
               borderRadius: '6px'
@@ -840,7 +840,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
               <div style={{ padding: '12px', backgroundColor: 'var(--bg-sidebar)', borderRadius: '10px', border: '1px solid var(--bg-chip)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                   <div>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#93c5fd', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--theme-secondary)', textTransform: 'uppercase' }}>
                       Live TradingView Charts
                     </span>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
@@ -937,7 +937,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
 
               {/* Module Checklist Grid */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#93c5fd', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--theme-secondary)', textTransform: 'uppercase' }}>
                   Workspace Modules
                 </span>
 

@@ -68,7 +68,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
       </div>
 
       {/* Portfolio Aggregated Summary Card */}
-      <div className="card" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, #0f172a, #060913)', borderColor: '#23334d' }}>
+      <div className="card" style={{ marginBottom: '24px', background: 'var(--bg-main)', borderColor: '#23334d' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
@@ -89,7 +89,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                 from {formatCurrency(totalPortfolioInitial, 'USD')} initial
               </span>
               {totalPortfolioWithdrawn > 0 && (
-                <span className="badge flex items-center gap-1.5" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--profit-green)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <span className="badge flex items-center gap-1.5" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--profit-green)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                   <DollarSign size={13} /> Total Paid Out: {formatCurrency(totalPortfolioWithdrawn, 'USD')}
                 </span>
               )}
@@ -156,11 +156,11 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                    <span className="badge" style={{ backgroundColor: '#131e33', color: '#93c5fd', fontSize: '0.7rem' }}>
+                    <span className="badge" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--theme-secondary)', fontSize: '0.7rem' }}>
                       {acc.type}
                     </span>
                     {accTotalWithdrawn > 0 && (
-                      <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--profit-green)', fontSize: '0.68rem', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                      <span className="badge" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--profit-green)', fontSize: '0.68rem', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                         Paid: {formatCurrency(accTotalWithdrawn, acc.currency)}
                       </span>
                     )}
@@ -168,7 +168,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                 </div>
 
                 {/* Balance & Profit */}
-                <div style={{ backgroundColor: '#060913', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538', marginBottom: '14px' }}>
+                <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538', marginBottom: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <div>
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Current Balance</span>
@@ -196,21 +196,21 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
 
                 {/* Account Stats Strip */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px', textAlign: 'center' }}>
-                  <div style={{ padding: '8px', backgroundColor: '#070a16', borderRadius: '8px', border: '1px solid #141e2e' }}>
+                  <div style={{ padding: '8px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid #141e2e' }}>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Trades</div>
                     <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                       {accTrades.length}
                     </div>
                   </div>
 
-                  <div style={{ padding: '8px', backgroundColor: '#070a16', borderRadius: '8px', border: '1px solid #141e2e' }}>
+                  <div style={{ padding: '8px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid #141e2e' }}>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Win Rate</div>
                     <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: winRate >= 50 ? 'var(--profit-green)' : 'var(--text-secondary)' }}>
                       {winRate.toFixed(0)}%
                     </div>
                   </div>
 
-                  <div style={{ padding: '8px', backgroundColor: '#070a16', borderRadius: '8px', border: '1px solid #141e2e' }}>
+                  <div style={{ padding: '8px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid #141e2e' }}>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Initial</div>
                     <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-strong)' }}>
                       {formatCurrency(acc.initialBalance, acc.currency, true)}
@@ -239,7 +239,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                         <span>Deductions (Comm/Swap/Tax):</span>
-                        <span style={{ color: '#f87171', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                        <span style={{ color: 'var(--loss-red)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
                           -{formatCurrency(totalDeductions, acc.currency)}
                         </span>
                       </div>
@@ -284,7 +284,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                     gap: '4px',
                     borderColor: 'rgba(16, 185, 129, 0.3)',
                     color: 'var(--profit-green)',
-                    backgroundColor: 'rgba(16, 185, 129, 0.08)'
+                    backgroundColor: 'var(--bg-main)'
                   }}
                   title="Withdraw / Log Payout"
                 >
@@ -314,7 +314,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                     }
                   }}
                   className="btn btn-ghost btn-icon btn-sm"
-                  style={{ color: '#ef4444' }}
+                  style={{ color: 'var(--loss-red)' }}
                   title="Delete Account"
                   aria-label="Delete Account"
                 >

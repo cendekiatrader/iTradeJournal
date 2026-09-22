@@ -345,9 +345,10 @@ export const QuickRiskDock: React.FC = () => {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: '6px 10px',
-              backgroundColor: 'var(--bg-sidebar)',
+              backgroundColor: 'var(--bg-main)',
+              boxShadow: 'var(--neo-inset)',
               borderRadius: '8px',
-              border: '1px solid #1a2538',
+              border: 'none',
               marginBottom: '10px',
               fontSize: '0.74rem'
             }}>
@@ -365,8 +366,9 @@ export const QuickRiskDock: React.FC = () => {
                       borderRadius: '4px',
                       fontSize: '0.7rem',
                       fontWeight: 700,
-                      backgroundColor: riskPercent === r ? 'var(--theme-secondary-strong)' : 'var(--bg-chip)',
-                      color: riskPercent === r ? '#ffffff' : 'var(--text-secondary)',
+                      backgroundColor: 'var(--bg-main)',
+                      boxShadow: riskPercent === r ? 'var(--neo-outset-sm)' : 'none',
+                      color: riskPercent === r ? 'var(--theme-primary)' : 'var(--text-secondary)',
                       border: 'none',
                       cursor: 'pointer'
                     }}
@@ -396,9 +398,10 @@ export const QuickRiskDock: React.FC = () => {
                     borderRadius: '6px',
                     fontSize: '0.7rem',
                     fontWeight: 600,
-                    backgroundColor: instrument === ast ? 'var(--bg-chip)' : 'transparent',
-                    color: instrument === ast ? 'var(--theme-secondary)' : 'var(--text-muted)',
-                    border: `1px solid ${instrument === ast ? 'var(--theme-secondary-strong)' : 'var(--bg-chip)'}`,
+                    backgroundColor: 'var(--bg-main)',
+                    boxShadow: instrument === ast ? 'var(--neo-outset-sm)' : 'none',
+                    color: instrument === ast ? 'var(--theme-primary)' : 'var(--text-muted)',
+                    border: 'none',
                     cursor: 'pointer'
                   }}
                 >
@@ -451,16 +454,17 @@ export const QuickRiskDock: React.FC = () => {
             {/* Result Box */}
             <div style={{
               padding: '10px',
-              backgroundColor: 'var(--bg-sidebar)',
+              backgroundColor: 'var(--bg-main)',
+              boxShadow: 'var(--neo-inset)',
               borderRadius: '8px',
-              border: '1px solid color-mix(in srgb, var(--theme-secondary-strong) 30%, transparent)',
+              border: 'none',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               marginBottom: '10px'
             }}>
               <div>
-                <span style={{ fontSize: '0.68rem', color: '#93c5fd', textTransform: 'uppercase', display: 'block', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--theme-secondary)', textTransform: 'uppercase', display: 'block', fontWeight: 600 }}>
                   Recommended {unitLabelSingular}
                 </span>
                 <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--profit-green)', fontFamily: 'var(--font-mono)' }}>
@@ -474,7 +478,7 @@ export const QuickRiskDock: React.FC = () => {
                 className="btn btn-secondary btn-sm"
                 style={{ padding: '6px 10px', fontSize: '0.75rem', gap: '4px' }}
               >
-                {copied ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+                {copied ? <Check size={13} color="var(--profit-green)" /> : <Copy size={13} />}
                 <span>{copied ? 'Copied' : `Copy ${unitLabelSingular}`}</span>
               </button>
             </div>

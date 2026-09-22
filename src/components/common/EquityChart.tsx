@@ -68,7 +68,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         color: 'var(--text-secondary)',
-        backgroundColor: '#070b18',
+        backgroundColor: 'var(--bg-main)',
         borderRadius: '12px',
         border: '1px dashed var(--border-color)'
       }}>
@@ -114,7 +114,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
                 y1={y}
                 x2="800"
                 y2={y}
-                stroke="#172236"
+                stroke="var(--border-subtle)"
                 strokeDasharray="4 4"
                 strokeWidth="1"
               />
@@ -216,7 +216,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
             top: '0px',
             left: `${Math.min(80, Math.max(20, (activePoint.x / 800) * 100))}%`,
             transform: 'translateX(-50%)',
-            backgroundColor: '#0c1527',
+            backgroundColor: 'var(--bg-main)',
             border: '1px solid #1e3a5f',
             padding: '8px 14px',
             borderRadius: '10px',

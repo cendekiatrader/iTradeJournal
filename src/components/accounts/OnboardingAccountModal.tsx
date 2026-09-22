@@ -43,7 +43,7 @@ export const OnboardingAccountModal: React.FC<OnboardingAccountModalProps> = ({
 
   return (
     <div className="modal-backdrop" style={{ zIndex: 1000, backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)' }}>
-      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Create First Trading Account" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', padding: '28px', borderRadius: '18px', border: '1px solid #25334d', backgroundColor: '#0b1222' }}>
+      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-label="Create First Trading Account" tabIndex={-1} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', padding: '28px', borderRadius: '18px', border: '1px solid #25334d', backgroundColor: 'var(--bg-main)' }}>
         
         {/* Header with Icon */}
         <div style={{ textAlign: 'center', marginBottom: '22px' }}>

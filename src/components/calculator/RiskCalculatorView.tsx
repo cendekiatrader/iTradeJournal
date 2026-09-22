@@ -99,7 +99,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
         </div>
 
         {/* Tab Switcher */}
-        <div style={{ display: 'flex', gap: '6px', backgroundColor: '#070b16', padding: '4px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
+        <div style={{ display: 'flex', gap: '6px', backgroundColor: 'var(--bg-main)', padding: '4px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
           <button
             type="button"
             onClick={() => setActiveSubTab('lot')}
@@ -316,7 +316,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
         </div>
 
         {/* Calculated Result Card */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'linear-gradient(135deg, #0d1424, #070a16)', borderColor: '#263750' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--bg-main)', borderColor: '#263750' }}>
           <div>
             <div className="card-header">
               <div className="card-title">
@@ -326,7 +326,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
             </div>
 
             {/* Big Position Size Display */}
-            <div style={{ backgroundColor: '#060913', padding: '20px', borderRadius: '12px', border: '1px solid #1a2538', textAlign: 'center', marginBottom: '16px' }}>
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '20px', borderRadius: '12px', border: '1px solid #1a2538', textAlign: 'center', marginBottom: '16px' }}>
               <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Recommended Position Size ({unitLabel})
               </span>
@@ -353,21 +353,21 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
 
             {/* Risk / Reward Metrics Breakdown */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '8px', border: '1px solid #192436' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid #192436' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Planned Risk Amount</span>
                 <span style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--loss-red)' }}>
                   -${riskAmount.toFixed(2)} ({riskPercent}%)
                 </span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '8px', border: '1px solid #192436' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid #192436' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Potential Reward Amount</span>
                 <span style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--profit-green)' }}>
                   +${potentialReward.toFixed(2)}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '8px', border: '1px solid #192436' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid #192436' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Risk to Reward (R:R)</span>
                 <span style={{ fontSize: '0.95rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: rrRatio >= 2 ? 'var(--profit-green)' : '#f59e0b' }}>
                   1 : {rrRatio}

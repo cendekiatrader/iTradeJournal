@@ -152,10 +152,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
       },
       {
         id: 'action-theme',
-        label: 'Change theme',
+        label: 'Toggle Dark / Light mode',
         group: 'Actions',
         icon: <Palette size={15} />,
-        keywords: 'color design appearance',
+        keywords: 'dark light mode theme appearance toggle',
         run: () => {
           onClose();
           props.onOpenThemeModal();

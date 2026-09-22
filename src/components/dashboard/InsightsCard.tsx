@@ -16,7 +16,7 @@ export const InsightsCard: React.FC<InsightsCardProps> = ({ trades }) => {
     <div className="card" style={{ marginBottom: '24px' }}>
       <div className="card-header">
         <div className="card-title">
-          <Sparkles size={18} color="#f59e0b" />
+          <Sparkles size={18} color="var(--accent-amber)" />
           <span>Auto Insights</span>
         </div>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>

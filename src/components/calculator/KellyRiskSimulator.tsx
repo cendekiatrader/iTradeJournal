@@ -60,7 +60,7 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       id: 'quarter',
       name: 'Quarter-Kelly (Institutional Safe)',
       riskPercent: quarterKelly,
-      color: '#10b981',
+      color: 'var(--profit-green)',
       badge: 'RECOMMENDED',
       description: 'Optimal growth with very low volatility & minimal drawdown.',
       drawdownRisk: 'Very Low (< 8%)',
@@ -80,7 +80,7 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       id: 'fixed1',
       name: 'Fixed 1.0% Risk (Standard)',
       riskPercent: 1.0,
-      color: '#38bdf8',
+      color: 'var(--theme-secondary)',
       badge: 'CONSERVATIVE',
       description: 'The prop-firm golden rule standard to protect accounts from a drawdown breach.',
       drawdownRisk: 'Low (< 10%)',
@@ -90,7 +90,7 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       id: 'full',
       name: 'Full Kelly (Theoretical Peak)',
       riskPercent: fullKelly,
-      color: '#ef4444',
+      color: 'var(--loss-red)',
       badge: 'HIGH VOLATILITY',
       description: 'Theoretical mathematical maximum. Not recommended for live accounts due to sharp drawdown swings.',
       drawdownRisk: 'High (can exceed 40%)',
@@ -150,7 +150,7 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
               <span style={{ color: 'var(--text-secondary)' }}>Payoff Ratio (Average R:R):</span>
-              <span style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontWeight: 700, color: 'var(--theme-secondary)', fontFamily: 'var(--font-mono)' }}>
                 1 : {payoffRatio.toFixed(1)}
               </span>
             </div>
@@ -187,7 +187,7 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
           justifyContent: 'center',
           flexShrink: 0
         }}>
-          {hasPositiveEdge ? <CheckCircle2 size={20} color="#10b981" /> : <AlertTriangle size={20} color="#ef4444" />}
+          {hasPositiveEdge ? <CheckCircle2 size={20} color="var(--profit-green)" /> : <AlertTriangle size={20} color="var(--loss-red)" />}
         </div>
 
         <div>
@@ -219,7 +219,7 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 border: `1px solid ${m.color}40`,
-                background: `linear-gradient(135deg, ${m.color}0a, #070b16)`
+                background: 'var(--bg-main)'
               }}
             >
               <div>
@@ -273,7 +273,7 @@ export const KellyRiskSimulator: React.FC<KellyRiskSimulatorProps> = ({
       </div>
 
       {/* Kelly Formula Guide Card */}
-      <div className="card" style={{ padding: '20px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--theme-secondary-strong) 8%, transparent), #090e1c)' }}>
+      <div className="card" style={{ padding: '20px', background: 'var(--bg-main)' }}>
         <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--theme-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Info size={16} />
           <span>Why Do Institutional Traders Use Half-Kelly or Quarter-Kelly?</span>

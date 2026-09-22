@@ -128,7 +128,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
         {/* Modal Body */}
         <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {/* Execution Timeline (Opened At & Closed At) */}
-          <div style={{ backgroundColor: '#070b18', padding: '14px 18px', borderRadius: '12px', border: '1px solid #1c283f', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px 18px', borderRadius: '12px', border: '1px solid #1c283f', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -162,7 +162,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
           </div>
 
           {/* Key Metrics Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', backgroundColor: '#060913', padding: '14px', borderRadius: '12px', border: '1px solid #1c273a' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '12px', border: '1px solid #1c273a' }}>
             <div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Entry Price</div>
               <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
@@ -212,13 +212,13 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
 
           {/* Partial Exits Breakdown (if exists) */}
           {trade.exits && trade.exits.length > 0 && (
-            <div style={{ backgroundColor: '#070b1a', padding: '14px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#93c5fd', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--theme-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span>Scaling Out / Partial Exits History</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
                 {trade.exits.map((item, idx) => (
-                  <div key={item.id || idx} style={{ backgroundColor: '#0b1328', padding: '8px 12px', borderRadius: '6px', border: '1px solid #1c2b48' }}>
+                  <div key={item.id || idx} style={{ backgroundColor: 'var(--bg-main)', padding: '8px 12px', borderRadius: '6px', border: '1px solid #1c2b48' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
                       <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--theme-secondary)' }}>{item.label || `TP${idx + 1}`}</span>
                       <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{item.percentage ? `${item.percentage}%` : ''}</span>
@@ -251,7 +251,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Confluences Verified:</div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {trade.confluences.map((c, i) => (
-                    <span key={i} className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', color: 'var(--profit-green)', border: '1px solid rgba(16, 185, 129, 0.25)', fontSize: '0.72rem' }}>
+                    <span key={i} className="badge" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--profit-green)', border: '1px solid rgba(16, 185, 129, 0.25)', fontSize: '0.72rem' }}>
                       <CheckCircle2 size={12} /> {c}
                     </span>
                   ))}
@@ -261,7 +261,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
           </div>
 
           {/* Psychology & Discipline Audit */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', backgroundColor: '#070a16', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
             <div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Psychological State</span>
               <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
@@ -280,8 +280,8 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
 
           {/* Notes & Rich Journal */}
           {trade.notes && (
-            <div style={{ backgroundColor: '#070a16', padding: '16px', borderRadius: '10px', border: '1px solid #1a2538' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#93c5fd', marginBottom: '8px' }}>
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '16px', borderRadius: '10px', border: '1px solid #1a2538' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--theme-secondary)', marginBottom: '8px' }}>
                 Trade Notes & Visual Analysis
               </div>
               <div 
@@ -295,8 +295,8 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
           <TradeCoachNotes tradeId={trade.id} />
 
           {trade.lessons && (
-            <div style={{ backgroundColor: '#070a16', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#f59e0b', marginBottom: '4px' }}>Lessons & Feedback</div>
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--accent-amber)', marginBottom: '4px' }}>Lessons & Feedback</div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-strong)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
                 {trade.lessons}
               </p>
@@ -316,7 +316,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
               <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
                 Chart Screenshot
               </div>
-              <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid #23324d', maxHeight: '300px', backgroundColor: '#070b14' }}>
+              <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid #23324d', maxHeight: '300px', backgroundColor: 'var(--bg-main)' }}>
                 <img
                   src={trade.screenshots[0]}
                   alt="Trade Chart Screenshot"
@@ -328,7 +328,7 @@ export const TradeDetailModal: React.FC<TradeDetailModalProps> = ({
 
           {/* Edit History / Audit Trail */}
           {auditEntries.length > 0 && (
-            <div style={{ backgroundColor: '#070a16', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid #1a2538' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <History size={14} /> Edit History ({auditEntries.length})
               </div>

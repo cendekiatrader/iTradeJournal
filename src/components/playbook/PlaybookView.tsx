@@ -193,7 +193,7 @@ export const PlaybookView: React.FC = () => {
           borderRadius: '16px',
           border: '1px dashed var(--bg-chip)'
         }}>
-          <BookMarked size={40} color="#475569" style={{ marginBottom: '12px' }} />
+          <BookMarked size={40} color="var(--text-muted)" style={{ marginBottom: '12px' }} />
           <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginBottom: '6px' }}>Belum ada Setup Playbook</h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
             Start archiving your A+ trading setups with proven, consistent rules.
@@ -318,7 +318,7 @@ export const PlaybookView: React.FC = () => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {pb.rules.slice(0, 3).map((r, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: 'var(--text-strong)' }}>
-                        <CheckCircle2 size={12} color="#10b981" style={{ flexShrink: 0 }} />
+                        <CheckCircle2 size={12} color="var(--profit-green)" style={{ flexShrink: 0 }} />
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r}</span>
                       </div>
                     ))}
@@ -357,7 +357,7 @@ export const PlaybookView: React.FC = () => {
                     onClick={(e) => handleDelete(pb, e)}
                     className="btn btn-ghost btn-icon btn-sm"
                     title="Delete Playbook"
-                    style={{ color: '#ef4444' }}
+                    style={{ color: 'var(--loss-red)' }}
                     aria-label="Delete Playbook"
                   >
                     <Trash2 size={14} />
@@ -462,13 +462,13 @@ export const PlaybookView: React.FC = () => {
               {/* Rules & Confluences */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div style={{ backgroundColor: 'var(--bg-sidebar)', padding: '14px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 700, textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--profit-green-light)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <CheckCircle2 size={15} /> Entry Rules (Mandatory)
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {selectedDetail.rules.map((r, i) => (
                       <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
-                        <span style={{ color: '#34d399', fontWeight: 700 }}>{i + 1}.</span>
+                        <span style={{ color: 'var(--profit-green-light)', fontWeight: 700 }}>{i + 1}.</span>
                         <span>{r}</span>
                       </div>
                     ))}
@@ -492,13 +492,13 @@ export const PlaybookView: React.FC = () => {
 
               {/* Mistakes to avoid */}
               {selectedDetail.mistakesToAvoid && selectedDetail.mistakesToAvoid.length > 0 && (
-                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', padding: '14px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#f87171', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ backgroundColor: 'var(--bg-main)', boxShadow: 'var(--neo-inset)', padding: '14px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--loss-red)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <AlertTriangle size={15} /> Mistakes to Avoid (Traps)
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {selectedDetail.mistakesToAvoid.map((m, i) => (
-                      <div key={i} style={{ fontSize: '0.8rem', color: '#fca5a5', display: 'flex', gap: '6px' }}>
+                      <div key={i} style={{ fontSize: '0.8rem', color: 'var(--loss-red-light)', display: 'flex', gap: '6px' }}>
                         <span>⚠️</span>
                         <span>{m}</span>
                       </div>
@@ -516,7 +516,7 @@ export const PlaybookView: React.FC = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: selectedDetail.chartBeforeUrl && selectedDetail.chartAfterUrl ? '1fr 1fr' : '1fr', gap: '12px' }}>
                     {selectedDetail.chartBeforeUrl && (
                       <div>
-                        <span style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--theme-secondary)', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                           Setup Blueprint (Before)
                         </span>
                         <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--bg-chip)' }}>
@@ -526,7 +526,7 @@ export const PlaybookView: React.FC = () => {
                     )}
                     {selectedDetail.chartAfterUrl && (
                       <div>
-                        <span style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--profit-green-light)', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                           Outcome Blueprint (After)
                         </span>
                         <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--bg-chip)' }}>

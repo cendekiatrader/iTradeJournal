@@ -218,7 +218,7 @@ const formatRMultiple = (r: number): string => {
         </div>
 
         {/* Month Navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#0b1020', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '4px 8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '4px 8px' }}>
           <button onClick={prevMonth} className="btn btn-ghost btn-icon btn-sm" aria-label="Previous month">
             <ChevronLeft size={16} />
           </button>
@@ -296,7 +296,7 @@ const formatRMultiple = (r: number): string => {
                 fontSize: '0.78rem',
                 fontWeight: 700,
                 color: idx >= 5 ? 'var(--text-muted)' : 'var(--text-secondary)',
-                backgroundColor: '#070a16',
+                backgroundColor: 'var(--bg-main)',
                 borderRadius: '6px'
               }}
             >
@@ -408,7 +408,7 @@ const formatRMultiple = (r: number): string => {
                     </div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: '0.7rem', color: '#334155' }}>-</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>-</div>
                 )}
               </div>
             );
@@ -444,7 +444,7 @@ const formatRMultiple = (r: number): string => {
               <div className="modal-body" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
                 {/* Day Summary Highlights Banner */}
                 <div style={{
-                  backgroundColor: '#070b18',
+                  backgroundColor: 'var(--bg-main)',
                   padding: '12px 16px',
                   borderRadius: '10px',
                   border: '1px solid #1a253a',
@@ -504,7 +504,7 @@ const formatRMultiple = (r: number): string => {
                         }}
                         style={{
                           padding: '14px',
-                          backgroundColor: '#070a16',
+                          backgroundColor: 'var(--bg-main)',
                           border: '1px solid #1c283d',
                           borderRadius: '10px',
                           cursor: 'pointer',

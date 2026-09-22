@@ -441,7 +441,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </p>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <span className="badge" style={{ backgroundColor: '#131e33', color: 'var(--theme-secondary)' }}>
+              <span className="badge" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--theme-secondary)' }}>
                 {equityCurve.length - 1} Closed Points
               </span>
             </div>
@@ -455,17 +455,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div>
             <div className="card-header">
               <div className="card-title">
-                <Sparkles size={18} color="#f59e0b" />
+                <Sparkles size={18} color="var(--accent-amber)" />
                 <span>Trade Performance Edge</span>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '10px' }}>
               {/* Avg Holding Period row in edge summary */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderRadius: '10px', border: '1px solid #1c273a' }}>
                 <div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Avg Holding Period</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--theme-secondary)' }}>
                     {metrics.avgHoldingFormatted}
                   </div>
                 </div>
@@ -478,7 +478,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
 
               {/* Avg Win vs Avg Loss */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderRadius: '10px', border: '1px solid #1c273a' }}>
                 <div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Average Win</div>
                   <div style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--profit-green)' }}>
@@ -494,7 +494,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
 
               {/* Win/Loss Ratio */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderRadius: '10px', border: '1px solid #1c273a' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Win / Loss Payout Ratio</span>
                 <span style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
                   {metrics.winLossRatio.toFixed(2)}x
@@ -502,7 +502,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
 
               {/* Consecutive Streaks */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#060913', borderRadius: '10px', border: '1px solid #1c273a' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderRadius: '10px', border: '1px solid #1c273a' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Max Win Streak</span>
                 <span style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--profit-green)' }}>
                   {metrics.consecutiveWins} Trades
@@ -646,7 +646,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             aria-label="Customize Dashboard Cards"
             tabIndex={-1}
             style={{
-            backgroundColor: '#0c1322',
+            backgroundColor: 'var(--bg-main)',
             border: '1px solid var(--bg-chip)',
             borderRadius: '16px',
             width: '100%',
@@ -707,7 +707,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     fontSize: '0.72rem',
                     padding: '4px 10px',
                     borderRadius: '6px',
-                    backgroundColor: '#131b2e',
+                    backgroundColor: 'var(--bg-main)',
                     color: 'var(--text-secondary)',
                     border: '1px solid #23304a',
                     cursor: 'pointer',
@@ -744,8 +744,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               justifyContent: 'space-between',
                               padding: '10px 12px',
                               borderRadius: '8px',
-                              backgroundColor: isChecked ? 'color-mix(in srgb, var(--theme-secondary-strong) 12%, transparent)' : '#070b16',
-                              border: isChecked ? '1px solid var(--theme-secondary-strong)' : '1px solid #1a2538',
+                              backgroundColor: 'var(--bg-main)',
+                              boxShadow: isChecked ? 'var(--neo-inset)' : 'var(--neo-outset-sm)',
+                              border: 'none',
                               color: isChecked ? 'var(--text-primary)' : 'var(--text-muted)',
                               cursor: 'pointer',
                               textAlign: 'left',
@@ -759,7 +760,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               width: '18px',
                               height: '18px',
                               borderRadius: '4px',
-                              backgroundColor: isChecked ? 'var(--theme-secondary-strong)' : '#141d2e',
+                              backgroundColor: isChecked ? 'var(--theme-primary)' : 'var(--bg-main)',
+                              boxShadow: isChecked ? 'none' : 'var(--neo-inset)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',

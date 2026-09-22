@@ -90,10 +90,10 @@ export const ResetPasswordModal: React.FC = () => {
               alignItems: 'center',
               gap: '8px',
               padding: '10px 14px',
-              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              backgroundColor: 'var(--bg-main)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '8px',
-              color: '#f87171',
+              color: 'var(--loss-red)',
               fontSize: '0.8rem',
               marginBottom: '16px'
             }}>
@@ -111,7 +111,7 @@ export const ResetPasswordModal: React.FC = () => {
               alignItems: 'center',
               gap: '12px'
             }}>
-              <CheckCircle2 size={40} color="#10b981" />
+              <CheckCircle2 size={40} color="var(--profit-green)" />
               <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Password Berhasil Diperbarui!
               </div>

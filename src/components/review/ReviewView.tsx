@@ -79,7 +79,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({ token, onBack }) => {
         </p>
 
         {note && (
-          <div className="card" style={{ marginBottom: '18px', borderLeft: '3px solid var(--theme-secondary)' }}>
+          <div className="card" style={{ marginBottom: '18px', boxShadow: 'var(--neo-outset), inset 3px 0 0 var(--theme-secondary)' }}>
             <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>
               Note from the trader
             </div>
@@ -88,8 +88,8 @@ export const ReviewView: React.FC<ReviewViewProps> = ({ token, onBack }) => {
         )}
 
         {!loading && !cloud && (
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(245, 158, 11, 0.4)', backgroundColor: 'rgba(245, 158, 11, 0.12)', marginBottom: '18px' }}>
-            <AlertTriangle size={16} color="#f59e0b" style={{ flexShrink: 0, marginTop: '1px' }} />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(245, 158, 11, 0.4)', backgroundColor: 'var(--bg-main)', marginBottom: '18px' }}>
+            <AlertTriangle size={16} color="var(--accent-amber)" style={{ flexShrink: 0, marginTop: '1px' }} />
             <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               <strong style={{ color: 'var(--text-primary)' }}>Cloud review tables not found.</strong>{' '}
               The trades below load from a local snapshot, and comments are disabled. Run <code style={{ fontFamily: 'var(--font-mono)' }}>supabase_review_schema.sql</code> in your Supabase SQL editor to enable sharing and comments.
@@ -129,7 +129,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({ token, onBack }) => {
                     <span>Rules followed: {trade.rulesFollowed ? 'Yes' : 'No'}</span>
                   </div>
                   {trade.notes && (
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: 1.5, borderLeft: '2px solid var(--border-color)', paddingLeft: '8px' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: 1.5, boxShadow: 'inset 2px 0 0 var(--neo-sep)', paddingLeft: '8px' }}>
                       {trade.notes}
                     </p>
                   )}
