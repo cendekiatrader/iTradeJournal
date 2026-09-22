@@ -577,6 +577,19 @@ textarea.input-control {
   }
 }
 
+/* Position Size & Growth Calculator: inputs + result side-by-side on desktop, stacked on mobile */
+.risk-calc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .risk-calc-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* Rich Text Editor & Embedded Images */
 [contenteditable]:empty:before {
   content: attr(data-placeholder);

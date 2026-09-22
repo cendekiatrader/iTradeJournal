@@ -99,7 +99,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
         </div>
 
         {/* Tab Switcher */}
-        <div style={{ display: 'flex', gap: '6px', backgroundColor: 'var(--bg-main)', padding: '4px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', backgroundColor: 'var(--bg-main)', padding: '4px', borderRadius: '10px', border: '1px solid var(--bg-chip)' }}>
           <button
             type="button"
             onClick={() => setActiveSubTab('lot')}
@@ -107,6 +107,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
             style={{
               fontSize: '0.78rem',
               fontWeight: 700,
+              whiteSpace: 'nowrap',
               borderRadius: '8px',
               backgroundColor: activeSubTab === 'lot' ? '#1e3a8a' : 'transparent',
               borderColor: activeSubTab === 'lot' ? 'var(--theme-secondary-strong)' : 'transparent',
@@ -122,6 +123,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
             style={{
               fontSize: '0.78rem',
               fontWeight: 700,
+              whiteSpace: 'nowrap',
               borderRadius: '8px',
               backgroundColor: activeSubTab === 'compounding' ? '#1e3a8a' : 'transparent',
               borderColor: activeSubTab === 'compounding' ? 'var(--theme-secondary-strong)' : 'transparent',
@@ -137,6 +139,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
             style={{
               fontSize: '0.78rem',
               fontWeight: 700,
+              whiteSpace: 'nowrap',
               borderRadius: '8px',
               backgroundColor: activeSubTab === 'kelly' ? '#1e3a8a' : 'transparent',
               borderColor: activeSubTab === 'kelly' ? 'var(--theme-secondary-strong)' : 'transparent',
@@ -159,7 +162,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
         />
       ) : (
         <>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
+        <div className="risk-calc-grid">
         {/* Input Parameters Card */}
         <div className="card">
           <div className="card-header">
@@ -189,7 +192,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
             {/* Instrument Class */}
             <div>
               <label className="input-label" style={{ marginBottom: '6px', display: 'block' }}>Market Instrument</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '6px' }}>
                 {(['Gold', 'Forex', 'Crypto', 'Indices'] as const).map(inst => (
                   <button
                     key={inst}
@@ -251,7 +254,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
                   -${riskAmount.toFixed(2)} Risk
                 </span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '6px', marginBottom: '8px' }}>
                 {[0.5, 1.0, 1.5, 2.0].map(pct => (
                   <button
                     key={pct}
@@ -276,7 +279,7 @@ export const RiskCalculatorView: React.FC<{ onLogTradeWithValues?: (values: any)
             </div>
 
             {/* Price Levels */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '10px' }}>
               <div className="input-group" style={{ margin: 0 }}>
                 <label className="input-label">Entry Price</label>
                 <input
