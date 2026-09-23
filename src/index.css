@@ -942,6 +942,25 @@ textarea.input-control {
     row-gap: 8px !important;
   }
 
+  /*
+   * …but the close button always stays pinned to the top-right corner: when the
+   * header wraps it used to end up after the tabs/pills on the second line.
+   */
+  .modal-header,
+  .trade-modal-header {
+    position: relative;
+    padding-right: 58px !important;
+  }
+
+  .modal-header > button[aria-label^="Close"],
+  .modal-header button[aria-label^="Close"],
+  .trade-modal-header button[aria-label^="Close"] {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    z-index: 3;
+  }
+
   .trade-modal-pnl {
     margin-left: auto;
   }
