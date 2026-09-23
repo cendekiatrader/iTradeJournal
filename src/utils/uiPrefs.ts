@@ -3,17 +3,22 @@ export interface UiPrefs {
   performance: boolean;
   /** The sticky Quick Risk dock on desktop. ON by default (existing behaviour). */
   quickRisk: boolean;
+  /** Show the bottom navigation bar on desktop widths too. OFF by default. */
+  desktopBottomNav: boolean;
 }
 
 const DIM_KEY = 'itrade_dim_mode';
 const PERF_KEY = 'itrade_perf_mode';
 const QUICK_RISK_KEY = 'itrade_quickrisk_dock';
+const DESKTOP_BOTTOM_NAV_KEY = 'itrade_bottomnav_desktop';
 
 export const getUiPrefs = (): UiPrefs => ({
   dim: localStorage.getItem(DIM_KEY) === 'true',
   performance: localStorage.getItem(PERF_KEY) === 'true',
   // Opt-out pref, so an unset key means ON.
-  quickRisk: localStorage.getItem(QUICK_RISK_KEY) !== 'false'
+  quickRisk: localStorage.getItem(QUICK_RISK_KEY) !== 'false',
+  // Opt-in pref: desktop keeps the bar hidden until the user asks for it.
+  desktopBottomNav: localStorage.getItem(DESKTOP_BOTTOM_NAV_KEY) === 'true'
 });
 
 /** Applies the current UI preferences as data-attributes on <html>. */
@@ -30,14 +35,26 @@ export const applyUiPrefs = (prefs?: UiPrefs): void => {
   } else {
     root.removeAttribute('data-perf');
   }
+  if (p.desktopBottomNav) {
+    root.setAttribute('data-bottom-nav', 'on');
+  } else {
+    root.removeAttribute('data-bottom-nav');
+  }
 };
 
 /** Persists a preference, applies it and notifies listeners (Navbar sync). */
 export const setUiPref = (
-  key: 'dim' | 'performance' | 'quickRisk',
+  key: 'dim' | 'performance' | 'quickRisk' | 'desktopBottomNav',
   value: boolean
 ): UiPrefs => {
-  const storageKey = key === 'dim' ? DIM_KEY : key === 'performance' ? PERF_KEY : QUICK_RISK_KEY;
+  const storageKey =
+    key === 'dim'
+      ? DIM_KEY
+      : key === 'performance'
+        ? PERF_KEY
+        : key === 'quickRisk'
+          ? QUICK_RISK_KEY
+          : DESKTOP_BOTTOM_NAV_KEY;
   localStorage.setItem(storageKey, String(value));
   const prefs = getUiPrefs();
   applyUiPrefs(prefs);

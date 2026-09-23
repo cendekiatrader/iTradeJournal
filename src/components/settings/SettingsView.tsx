@@ -16,6 +16,7 @@ import {
   Moon,
   Zap,
   Calculator,
+  PanelBottom,
   Eye,
   EyeOff,
   Keyboard,
@@ -443,6 +444,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenFeedback, onSe
                   prefs.quickRisk
                     ? 'Quick Risk dock ON - the mini calculator is back on screen.'
                     : 'Quick Risk dock OFF - press C or open Position Size Calc to use it.',
+                  'info'
+                );
+              }}
+            />
+          }
+        />
+
+        <SettingsRow
+          icon={<PanelBottom size={15} />}
+          label="Bottom Navigation on Desktop"
+          hint="Shows the phone-style bottom bar (with the Quick Log button) on desktop too. Off by default."
+          right={
+            <PillToggle
+              on={uiPrefsState.desktopBottomNav}
+              labelOn="ON"
+              labelOff="OFF"
+              ariaLabel="Toggle bottom navigation on desktop"
+              onClick={() => {
+                const prefs = setUiPref('desktopBottomNav', !uiPrefsState.desktopBottomNav);
+                setUiPrefsState(prefs);
+                showToast(
+                  prefs.desktopBottomNav
+                    ? 'Bottom navigation ON — the bar now shows on desktop as well.'
+                    : 'Bottom navigation OFF — desktop keeps the sidebar only.',
                   'info'
                 );
               }}

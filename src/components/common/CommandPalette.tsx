@@ -29,6 +29,7 @@ import {
   NotebookPen,
   MessageSquarePlus,
   Newspaper,
+  PanelBottom,
   Zap,
   Settings as SettingsIcon
 } from 'lucide-react';
@@ -241,6 +242,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
         run: () => {
           const prefs = setUiPref('quickRisk', !getUiPrefs().quickRisk);
           showToast(prefs.quickRisk ? 'Quick Risk dock ON.' : 'Quick Risk dock OFF.', 'info');
+          onClose();
+        }
+      },
+      {
+        id: 'action-desktop-bottom-nav',
+        label: 'Toggle bottom navigation on desktop',
+        group: 'Actions',
+        icon: <PanelBottom size={15} />,
+        keywords: 'bottom bar mobile nav dock desktop phone layout',
+        run: () => {
+          const prefs = setUiPref('desktopBottomNav', !getUiPrefs().desktopBottomNav);
+          showToast(prefs.desktopBottomNav ? 'Bottom navigation ON for desktop.' : 'Bottom navigation OFF for desktop.', 'info');
           onClose();
         }
       }
