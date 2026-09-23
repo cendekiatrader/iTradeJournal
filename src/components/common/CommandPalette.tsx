@@ -231,6 +231,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
           showToast(prefs.performance ? 'Performance mode ON — animations disabled.' : 'Performance mode OFF.', 'info');
           onClose();
         }
+      },
+      {
+        id: 'action-quick-risk',
+        label: 'Toggle Quick Risk dock',
+        group: 'Actions',
+        icon: <Calculator size={15} />,
+        keywords: 'dock calculator position size lot risk sticky hide show',
+        run: () => {
+          const prefs = setUiPref('quickRisk', !getUiPrefs().quickRisk);
+          showToast(prefs.quickRisk ? 'Quick Risk dock ON.' : 'Quick Risk dock OFF.', 'info');
+          onClose();
+        }
       }
     );
 

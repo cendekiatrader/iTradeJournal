@@ -42,6 +42,7 @@ import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Toast } from './components/common/Toast';
 import { Trade, TradingAccount } from './types';
 import { getNavPrefs, isTabVisible } from './utils/navPrefs';
+import { getUiPrefs, type UiPrefs } from './utils/uiPrefs';
 
 const CalendarView = lazy(() => import('./components/calendar/CalendarView').then((m) => ({ default: m.CalendarView })));
 const AnalyticsView = lazy(() => import('./components/analytics/AnalyticsView').then((m) => ({ default: m.AnalyticsView })));
@@ -132,6 +133,14 @@ const MainApp: React.FC = () => {
 
   // Public Blog Route (/blog, /blog/slug, #/blog, #/blog/slug)
   const [blogRoute, setBlogRoute] = useState<BlogRoute>(readBlogRoute);
+
+  // UI preferences (dim / performance / Quick Risk dock) — kept in sync with Settings
+  const [uiPrefs, setUiPrefs] = useState<UiPrefs>(getUiPrefs);
+  useEffect(() => {
+    const handler = () => setUiPrefs(getUiPrefs());
+    window.addEventListener('itrade-uiprefs-changed', handler);
+    return () => window.removeEventListener('itrade-uiprefs-changed', handler);
+  }, []);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -671,8 +680,8 @@ const MainApp: React.FC = () => {
         initialMode={authMode}
       />
 
-      {/* Sticky Quick-Risk Mini Dock Bar (Always on Top Capable) */}
-      <QuickRiskDock />
+      {/* Sticky Quick-Risk Mini Dock Bar (Always on Top Capable) — can be switched off in Settings */}
+      {uiPrefs.quickRisk && <QuickRiskDock />}
 
       {/* PWA Install Banner */}
       <PWAInstallPrompt />

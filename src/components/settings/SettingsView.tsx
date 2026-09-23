@@ -15,6 +15,7 @@ import {
   Palette,
   Moon,
   Zap,
+  Calculator,
   Eye,
   EyeOff,
   Keyboard,
@@ -420,6 +421,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenFeedback, onSe
                 const prefs = setUiPref('performance', !uiPrefsState.performance);
                 setUiPrefsState(prefs);
                 showToast(prefs.performance ? 'Performance mode ON - animations & confetti disabled.' : 'Performance mode OFF.', 'info');
+              }}
+            />
+          }
+        />
+
+        <SettingsRow
+          icon={<Calculator size={15} />}
+          label="Quick Risk Dock"
+          hint="Sticky mini position-size calculator with an always-on-top window."
+          right={
+            <PillToggle
+              on={uiPrefsState.quickRisk}
+              labelOn="ON"
+              labelOff="OFF"
+              ariaLabel="Toggle the Quick Risk dock"
+              onClick={() => {
+                const prefs = setUiPref('quickRisk', !uiPrefsState.quickRisk);
+                setUiPrefsState(prefs);
+                showToast(
+                  prefs.quickRisk
+                    ? 'Quick Risk dock ON - the mini calculator is back on screen.'
+                    : 'Quick Risk dock OFF - press C or open Position Size Calc to use it.',
+                  'info'
+                );
               }}
             />
           }
