@@ -116,7 +116,14 @@ create policy "Admins can upload blog media" on storage.objects
 create policy "Admins can delete blog media" on storage.objects
   for delete to authenticated using (bucket_id = 'blog-media' and public.is_admin());
 
--- 6) Promote your account to admin (if not done yet) — EDIT THE EMAIL:
+-- 6) Optional cleanup: blank out admin emails stored as author labels.
+--    The public page never prints an email anyway (see publicAuthorName in
+--    src/utils/blog.ts), this just stops them living in the table at all.
+update public.blog_posts
+   set author_name = null
+ where author_name ~* '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$';
+
+-- 7) Promote your account to admin (if not done yet) — EDIT THE EMAIL:
 -- insert into public.admins (user_id)
 -- select id from auth.users where email = 'you@example.com'
 -- on conflict (user_id) do nothing;

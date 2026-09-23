@@ -19,6 +19,7 @@ import {
   fetchPublishedPosts,
   incrementBlogViews,
   plainText,
+  publicAuthorName,
   readingMinutes,
   sanitizeBlogHtml
 } from '../../utils/blog';
@@ -244,7 +245,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ slug, onNavigate, onBackToAp
               {post.excerpt && <p className="blog-article-lead">{post.excerpt}</p>}
 
               <div className="blog-meta">
-                {post.authorName && <span>{post.authorName}</span>}
+                {publicAuthorName(post.authorName) && <span>{publicAuthorName(post.authorName)}</span>}
                 <span>
                   <Calendar size={13} /> {formatBlogDate(post.publishedAt || post.createdAt)}
                 </span>

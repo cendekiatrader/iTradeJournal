@@ -40,6 +40,20 @@ export interface BlogPostInput {
 const COLUMNS =
   'id, slug, title, excerpt, content, cover_image_url, tags, status, author_name, views, published_at, created_at, updated_at';
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Author label that is safe to render on the public blog.
+ *
+ * Admin accounts sign in with an email, so the raw column can hold one — the
+ * public page must never print it. Non-email display names pass through.
+ */
+export const publicAuthorName = (name?: string | null): string | null => {
+  const trimmed = (name ?? '').trim();
+  if (!trimmed || EMAIL_RE.test(trimmed)) return null;
+  return trimmed;
+};
+
 interface BlogRow {
   id: string;
   slug: string;
@@ -65,7 +79,7 @@ const mapRow = (row: BlogRow): BlogPost => ({
   coverImageUrl: row.cover_image_url || null,
   tags: Array.isArray(row.tags) ? row.tags : [],
   status: row.status === 'published' ? 'published' : 'draft',
-  authorName: row.author_name || null,
+  authorName: publicAuthorName(row.author_name),
   views: Number(row.views || 0),
   publishedAt: row.published_at,
   createdAt: row.created_at,
@@ -253,7 +267,7 @@ export const createBlogPost = async (
         tags: input.tags,
         status: input.status,
         author_id: auth?.user?.id ?? null,
-        author_name: input.authorName || auth?.user?.email || null,
+        author_name: input.authorName || null,
         published_at: publishedAt
       })
       .select(COLUMNS)
