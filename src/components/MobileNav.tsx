@@ -34,26 +34,13 @@ export const MobileNav: React.FC<MobileNavProps> = ({ activeTab, onSelectTab, on
       <button
         key={id}
         type="button"
+        className={`nav-item${isActive ? ' active' : ''}`}
         onClick={() => onSelectTab(id)}
         aria-label={NAV_META[id].label}
         aria-current={isActive ? 'page' : undefined}
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '2px',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          color: isActive ? 'var(--theme-secondary)' : 'var(--text-muted)',
-          fontSize: '0.62rem',
-          fontWeight: 700,
-          padding: '6px 0'
-        }}
       >
-        <Icon size={20} />
-        {NAV_META[id].label.split(' ')[0]}
+        <Icon />
+        <span>{NAV_META[id].label.split(' ')[0]}</span>
       </button>
     );
   };
@@ -62,16 +49,20 @@ export const MobileNav: React.FC<MobileNavProps> = ({ activeTab, onSelectTab, on
     <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
       {left.map(renderItem)}
 
-      <button
-        type="button"
-        onClick={onOpenTradeModal}
-        aria-label="Log new trade"
-        className="mobile-fab"
-      >
-        <Plus size={22} strokeWidth={2.6} />
-      </button>
+      <div className="center-btn-wrapper">
+        <button
+          type="button"
+          onClick={onOpenTradeModal}
+          aria-label="Log new trade"
+          className="mobile-fab"
+        >
+          <Plus size={26} strokeWidth={2.6} />
+        </button>
+      </div>
 
       {right.map(renderItem)}
+
+      <div className="home-indicator" aria-hidden="true" />
     </nav>
   );
 };
