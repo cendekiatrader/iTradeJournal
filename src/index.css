@@ -1659,6 +1659,71 @@ html[data-perf="true"] *::after {
 }
 
 /* ==========================================================================
+   Monte Carlo Risk & Equity Forecaster (Analytics) — phone layout
+   The section is a 320px + 1fr grid inline in MonteCarloView; on a phone the
+   fixed track squeezes the results column to a few pixels and everything is
+   clipped, so it stacks into a single column here.
+   ========================================================================== */
+@media (max-width: 768px) {
+  .mc-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .mc-layout > * {
+    min-width: 0;
+  }
+
+  .mc-head {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .mc-title {
+    font-size: 1.06rem !important;
+    gap: 8px !important;
+  }
+
+  .mc-actions .btn {
+    flex: 1 1 150px;
+    justify-content: center;
+  }
+
+  .mc-panel,
+  .mc-chart-card {
+    padding: 14px !important;
+  }
+
+  .mc-panel input[type='range'] {
+    width: 100%;
+  }
+
+  .mc-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .mc-stats .card {
+    padding: 12px !important;
+    min-width: 0;
+  }
+
+  .mc-chart-head h3 {
+    font-size: 0.9rem !important;
+  }
+
+  /* Shorter plot on phones, and bigger axis text: the 720x300 viewBox is
+     scaled down, so 10px labels would render at roughly 5px. */
+  .mc-plot {
+    height: 210px !important;
+  }
+
+  .mc-plot svg text {
+    font-size: 18px !important;
+  }
+}
+
+/* ==========================================================================
    Public blog (/blog) — standalone pages, light + dark theme
    ========================================================================== */
 

@@ -104,11 +104,11 @@ export const MonteCarloView: React.FC = () => {
     : '';
 
   return (
-    <div style={{ marginTop: '28px' }}>
+    <div className="mc-root" style={{ marginTop: '28px' }}>
       {/* Section Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+      <div className="mc-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h2 className="mc-title" style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <Sparkles size={22} color="var(--accent-purple)" />
             <span>Monte Carlo Risk & Equity Forecaster</span>
             <span style={{
@@ -128,7 +128,7 @@ export const MonteCarloView: React.FC = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="mc-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={handleResetToMyStats} className="btn btn-secondary btn-sm" style={{ gap: '6px' }}>
             <Layers size={14} />
             <span>Gunakan Data Asli Saya</span>
@@ -141,9 +141,9 @@ export const MonteCarloView: React.FC = () => {
       </div>
 
       {/* Grid: Parameter Sliders & Key Probability Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '20px', alignItems: 'start' }}>
+      <div className="mc-layout" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '20px', alignItems: 'start' }}>
         {/* Parameter Sliders Panel */}
-        <div className="card" style={{ padding: '20px' }}>
+        <div className="card mc-panel" style={{ padding: '20px' }}>
           <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Sliders size={17} color="var(--theme-secondary-strong)" />
             <span>Simulation Parameters</span>
@@ -255,9 +255,9 @@ export const MonteCarloView: React.FC = () => {
         </div>
 
         {/* Results & Interactive SVG Multi-Path Chart */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="mc-results" style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0 }}>
           {/* 4 Probability Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
+          <div className="mc-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
             <div className="card" style={{ padding: '14px', background: 'var(--bg-main)' }}>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Probabilitas Profit</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 800, color: simulationResult.probOfProfit >= 70 ? '#10b981' : '#f59e0b', marginTop: '3px' }}>
@@ -300,8 +300,8 @@ export const MonteCarloView: React.FC = () => {
           </div>
 
           {/* Multi-Path Monte Carlo Simulation Chart */}
-          <div className="card" style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+          <div className="card mc-chart-card" style={{ padding: '20px' }}>
+            <div className="mc-chart-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   Simulated Equity Pathways & Confidence Intervals
@@ -312,7 +312,7 @@ export const MonteCarloView: React.FC = () => {
               </div>
 
               {/* Legend */}
-              <div style={{ display: 'flex', gap: '12px', fontSize: '0.72rem' }}>
+              <div className="mc-legend" style={{ display: 'flex', gap: '12px', fontSize: '0.72rem', flexWrap: 'wrap', rowGap: '4px' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--profit-green)' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
                   Best 95th: {formatCurrency(simulationResult.bestCaseBalance, currency)}
@@ -329,7 +329,7 @@ export const MonteCarloView: React.FC = () => {
             </div>
 
             {/* SVG Plot */}
-            <div style={{ width: '100%', height: `${chartHeight}px`, overflow: 'hidden' }}>
+            <div className="mc-plot" style={{ width: '100%', height: `${chartHeight}px`, overflow: 'hidden' }}>
               <svg 
                 viewBox={`0 0 ${chartWidth} ${chartHeight}`} 
                 style={{ width: '100%', height: '100%', overflow: 'visible' }}
