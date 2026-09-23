@@ -11,7 +11,8 @@ import {
   MessageSquare,
   WifiOff,
   CheckCircle2,
-  Globe
+  Globe,
+  Newspaper
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -39,6 +40,7 @@ interface FaqCopy {
 interface LandingCopy {
   navSignIn: string;
   navSignUp: string;
+  navBlog: string;
   badge: string;
   title: string;
   sub: string;
@@ -62,6 +64,7 @@ const COPY: Record<Lang, LandingCopy> = {
   id: {
     navSignIn: 'Masuk',
     navSignUp: 'Daftar Gratis',
+    navBlog: 'Blog',
     badge: 'Jurnal trading + analytics untuk trader serius',
     title: 'Ubah catatan trading jadi edge yang nyata',
     sub: 'Satu tempat untuk jurnal multi-akun, statistik performa, alat risiko prop firm, dan review mentor — supaya kamu tahu persis dari mana profit (dan loss) datang.',
@@ -129,6 +132,7 @@ const COPY: Record<Lang, LandingCopy> = {
   en: {
     navSignIn: 'Sign In',
     navSignUp: 'Sign Up Free',
+    navBlog: 'Blog',
     badge: 'Trading journal + analytics for serious traders',
     title: 'Turn your trading notes into a real edge',
     sub: 'One place for a multi-account journal, performance stats, prop-firm risk tools, and mentor review — so you know exactly where your money comes from.',
@@ -370,6 +374,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenDemo
               </button>
             ))}
           </div>
+          <a
+            href="/blog"
+            className="btn btn-secondary btn-sm"
+            style={{ padding: '8px 14px', fontSize: '0.82rem', textDecoration: 'none' }}
+          >
+            <Newspaper size={14} /> {t.navBlog}
+          </a>
           <button
             type="button"
             className="btn btn-secondary btn-sm"

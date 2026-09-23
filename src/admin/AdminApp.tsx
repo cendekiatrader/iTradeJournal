@@ -46,10 +46,12 @@ import {
 import { useModalA11y } from '../hooks/useModalA11y';
 import { formatCurrency } from '../utils/formatters';
 import { Currency } from '../types';
+import { BlogAdminPanel } from './BlogAdminPanel';
 import {
   ArrowDown,
   ArrowUp,
   BarChart3,
+  BookOpen,
   Bug,
   CheckCheck,
   ClipboardList,
@@ -81,7 +83,7 @@ import {
 } from 'lucide-react';
 
 type AdminStatus = 'loading' | 'not_configured' | 'signed_out' | 'denied' | 'ok';
-type AdminTab = 'overview' | 'users' | 'content' | 'inbox';
+type AdminTab = 'overview' | 'users' | 'blog' | 'content' | 'inbox';
 type UserSortKey = 'created_at' | 'last_sign_in_at' | 'trades_count';
 
 const fmtDateTime = (x?: string | null): string => (x ? new Date(x).toLocaleString() : '—');
@@ -784,6 +786,15 @@ export const AdminApp: React.FC = () => {
             <button
               type="button"
               role="tab"
+              aria-selected={tab === 'blog'}
+              className={tab === 'blog' ? 'active' : ''}
+              onClick={() => setTab('blog')}
+            >
+              <BookOpen size={14} /> Blog
+            </button>
+            <button
+              type="button"
+              role="tab"
               aria-selected={tab === 'content'}
               className={tab === 'content' ? 'active' : ''}
               onClick={() => setTab('content')}
@@ -1130,6 +1141,9 @@ export const AdminApp: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* blog articles (admin-only publishing) */}
+        {tab === 'blog' && <BlogAdminPanel />}
 
         {/* content / moderation */}
         {tab === 'content' && (

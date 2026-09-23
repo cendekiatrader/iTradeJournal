@@ -10,6 +10,7 @@ import {
   GraduationCap,
   BookMarked,
   LayoutGrid,
+  Newspaper,
   Target,
   Settings as SettingsIcon
 } from 'lucide-react';
@@ -26,6 +27,7 @@ export type NavTab =
   | 'accounts'
   | 'calculator'
   | 'coaching'
+  | 'blog'
   | 'settings';
 
 export type ModuleTier = 'core' | 'advanced';
@@ -49,6 +51,7 @@ export const NAV_MODULES: NavModuleDef[] = [
   { id: 'calendar', label: 'Calendar View', icon: CalendarDays, tier: 'core' },
   { id: 'accounts', label: 'Account Manager', icon: WalletCards, tier: 'core' },
   { id: 'coaching', label: 'Coaching', icon: GraduationCap, tier: 'core' },
+  { id: 'blog', label: 'Blog', icon: Newspaper, tier: 'core' },
   { id: 'workspace', label: 'Workspace', icon: LayoutGrid, tier: 'advanced' },
   { id: 'analytics', label: 'Analytics & Setups', icon: BarChart3, tier: 'advanced' },
   { id: 'playbook', label: 'Playbook', icon: BookMarked, tier: 'advanced' },

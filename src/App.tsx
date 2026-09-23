@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useCallback, useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { JournalProvider, useJournal } from './context/JournalContext';
@@ -23,6 +23,7 @@ import { FeedbackModal } from './components/common/FeedbackModal';
 import { isSupabaseConfigured, fetchMyUserFlags } from './utils/supabase';
 import { AuthModal, AuthMode } from './components/auth/AuthModal';
 import { PublicProfileView } from './components/profile/PublicProfileView';
+import { BlogView } from './components/blog/BlogView';
 import { QuickRiskDock } from './components/calculator/QuickRiskDock';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { CommandPalette } from './components/common/CommandPalette';
@@ -64,6 +65,31 @@ const ViewLoading: React.FC = () => (
   </div>
 );
 
+/**
+ * Public blog route.
+ *
+ * Works both as a real path (`/blog`, `/blog/<slug>` — see the Vercel rewrites)
+ * and as a hash route (`#/blog`, `#/blog/<slug>`) so in-app links never trigger
+ * a full page load.
+ */
+type BlogRoute = { slug: string | null } | null;
+
+const readBlogRoute = (): BlogRoute => {
+  const path = window.location.pathname.replace(/\/+$/, '');
+  if (path === '/blog') return { slug: null };
+  if (path.startsWith('/blog/')) {
+    const slug = decodeURIComponent(path.slice('/blog/'.length)).split('?')[0];
+    return { slug: slug || null };
+  }
+  const hash = window.location.hash;
+  if (hash === '#/blog' || hash === '#/blog/') return { slug: null };
+  if (hash.startsWith('#/blog/')) {
+    const slug = decodeURIComponent(hash.slice('#/blog/'.length)).split('?')[0];
+    return { slug: slug || null };
+  }
+  return null;
+};
+
 const MainApp: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
@@ -104,9 +130,13 @@ const MainApp: React.FC = () => {
     return null;
   });
 
+  // Public Blog Route (/blog, /blog/slug, #/blog, #/blog/slug)
+  const [blogRoute, setBlogRoute] = useState<BlogRoute>(readBlogRoute);
+
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
+      setBlogRoute(readBlogRoute());
       if (hash.startsWith('#/review/')) {
         setReviewToken(hash.replace('#/review/', '').split('?')[0]);
         setPublicUsername(null);
@@ -119,7 +149,11 @@ const MainApp: React.FC = () => {
       }
     };
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handleHashChange);
+    };
   }, []);
 
   // Global Keyboard Shortcuts Listener
@@ -318,6 +352,31 @@ const MainApp: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   /**
+   * Blog navigation. Inside a real `/blog` path we push the path itself, otherwise
+   * we use the hash route so the SPA never reloads.
+   */
+  const openBlogRoute = useCallback((slug: string | null) => {
+    setBlogRoute({ slug });
+    const onBlogPath = window.location.pathname.replace(/\/+$/, '').startsWith('/blog');
+    if (onBlogPath) {
+      window.history.pushState(null, '', slug ? `/blog/${encodeURIComponent(slug)}` : '/blog');
+      return;
+    }
+    const nextHash = slug ? `#/blog/${encodeURIComponent(slug)}` : '#/blog';
+    if (window.location.hash !== nextHash) window.location.hash = nextHash;
+  }, []);
+
+  /** Leave the blog and go back to the journal app. */
+  const closeBlogRoute = useCallback(() => {
+    setBlogRoute(null);
+    if (window.location.pathname.replace(/\/+$/, '').startsWith('/blog')) {
+      window.location.href = '/';
+      return;
+    }
+    window.location.hash = '';
+  }, []);
+
+  /**
    * Single navigation entry point: refuses to jump to a module the user has hidden
    * (progressive disclosure) and points them at Settings instead.
    */
@@ -326,6 +385,11 @@ const MainApp: React.FC = () => {
       const label = NAV_META[tab]?.label || tab;
       showToast(`${label} is hidden. Turn it back on in Settings → Navigation & Modules.`, 'info');
       setActiveTab('settings');
+      return;
+    }
+    // The blog is a public page, not a journal module: leave the app shell for it.
+    if (tab === 'blog') {
+      openBlogRoute(null);
       return;
     }
     setActiveTab(tab);
@@ -354,6 +418,29 @@ const MainApp: React.FC = () => {
       <Suspense fallback={<ViewLoading />}>
         <AdminApp />
       </Suspense>
+    );
+  }
+
+  // Public blog: /blog (or #/blog). Reachable signed in or signed out.
+  if (blogRoute) {
+    return (
+      <>
+        <BlogView
+          slug={blogRoute.slug}
+          onNavigate={openBlogRoute}
+          onBackToApp={closeBlogRoute}
+          onOpenAuth={(mode) => {
+            setAuthMode(mode);
+            setAuthModalOpen(true);
+          }}
+          signedIn={Boolean(user)}
+        />
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          initialMode={authMode}
+        />
+      </>
     );
   }
 

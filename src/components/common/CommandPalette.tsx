@@ -28,6 +28,7 @@ import {
   Moon,
   NotebookPen,
   MessageSquarePlus,
+  Newspaper,
   Zap,
   Settings as SettingsIcon
 } from 'lucide-react';
@@ -68,6 +69,7 @@ const PAGES: Array<{ id: NavTab; label: string; hint: string; icon: React.ReactN
   { id: 'news', label: 'Economic Calendar', hint: 'E', icon: <Flame size={15} /> },
   { id: 'accounts', label: 'Account Manager', hint: 'M', icon: <WalletCards size={15} /> },
   { id: 'calculator', label: 'Position Size Calc', hint: 'C', icon: <Calculator size={15} /> },
+  { id: 'blog', label: 'Blog articles', hint: '', icon: <Newspaper size={15} /> },
   { id: 'settings', label: 'Settings', hint: 'S', icon: <SettingsIcon size={15} /> }
 ];
 
