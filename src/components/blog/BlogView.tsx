@@ -321,9 +321,10 @@ export const BlogView: React.FC<BlogViewProps> = ({ slug, onNavigate, onBackToAp
             <span className="blog-hero-chip">
               <BookOpen size={13} /> Blog iTradeJournal
             </span>
-            <h1 className="blog-hero-title">Catatan, riset, dan pelajaran dari meja trading</h1>
+            <h1 className="blog-hero-title">Berita market, analisis, dan edukasi trader yang praktis</h1>
             <p className="blog-hero-sub">
-              Artikel tentang manajemen risiko, psikologi, jurnal trading, dan cara membaca performa secara objektif.
+              Catatan harian untuk headline yang menggerakkan market, plus pelajaran evergreen soal risiko, analisis
+              teknikal, forex, crypto, emas, dan workflow trader.
             </p>
           </section>
 
