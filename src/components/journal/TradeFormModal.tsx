@@ -43,6 +43,68 @@ interface TradeFormModalProps {
 
 const DRAFT_KEY = 'itrade_trade_draft_v1';
 
+interface NumericInputProps {
+  value: number;
+  onChange: (value: number) => void;
+  className?: string;
+  style?: React.CSSProperties;
+  required?: boolean;
+  placeholder?: string;
+  ariaLabel?: string;
+}
+
+/**
+ * Number field for the pricing block.
+ *
+ * A controlled `<input type="number">` bound to a number cannot represent the
+ * intermediate states of typing a negative value: the browser reports "" for "-",
+ * `parseFloat("") || 0` writes 0 back and the minus sign disappears, so "-10"
+ * was impossible to type. This keeps the raw text in local state and only pushes
+ * a number upward once it parses, so "-", "-." and "" survive while typing and
+ * snap back to the last valid value on blur.
+ */
+const NumericInput: React.FC<NumericInputProps> = ({ value, onChange, className, style, required, placeholder, ariaLabel }) => {
+  const [text, setText] = useState<string>(() => String(value));
+  const [focused, setFocused] = useState(false);
+
+  // External updates (draft restore, queue prefill, edit mode) win while unfocused.
+  useEffect(() => {
+    if (!focused) setText(String(value));
+  }, [value, focused]);
+
+  const handleChange = (raw: string) => {
+    const cleaned = raw.replace(/[^0-9.,\-]/g, '');
+    setText(cleaned);
+    const normalized = cleaned.replace(',', '.');
+    if (normalized === '' || normalized === '-' || normalized === '.' || normalized === '-.') return;
+    const parsed = Number(normalized);
+    if (!Number.isNaN(parsed)) onChange(parsed);
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    const normalized = text.trim().replace(',', '.');
+    const parsed = Number(normalized);
+    setText(Number.isNaN(parsed) ? String(value) : String(parsed));
+  };
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      className={className}
+      style={style}
+      required={required}
+      placeholder={placeholder}
+      aria-label={ariaLabel}
+      value={text}
+      onFocus={() => setFocused(true)}
+      onChange={(e) => handleChange(e.target.value)}
+      onBlur={handleBlur}
+    />
+  );
+};
+
 const COMMON_SYMBOLS = ['XAUUSD', 'EURUSD', 'BTCUSDT', 'ETHUSDT', 'US30', 'NAS100', 'GBPJPY', 'SOLUSDT', 'NVDA'];
 
 const STRATEGIES: StrategyType[] = [
@@ -104,12 +166,12 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
     return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   });
   const [timeframe, setTimeframe] = useState('15m');
-  const [entryPrice, setEntryPrice] = useState<number>(2500);
-  const [exitPrice, setExitPrice] = useState<number>(2515);
-  const [stopLoss, setStopLoss] = useState<number>(2495);
-  const [takeProfit, setTakeProfit] = useState<number>(2520);
-  const [quantity, setQuantity] = useState<number>(1.0);
-  const [pnl, setPnl] = useState<number>(1500);
+  const [entryPrice, setEntryPrice] = useState<number>(0);
+  const [exitPrice, setExitPrice] = useState<number>(0);
+  const [stopLoss, setStopLoss] = useState<number>(0);
+  const [takeProfit, setTakeProfit] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number>(0);
+  const [pnl, setPnl] = useState<number>(0);
   const [pips, setPips] = useState<number>(150);
   const [session, setSession] = useState<TradingSession>('London');
   const [setup, setSetup] = useState<StrategyType>('SMC / Liquidity Sweep');
@@ -863,46 +925,42 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '16px', backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '10px', border: '1px solid #1c273a' }}>
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Entry Price *</label>
-              <input
-                type="number" inputMode="decimal"
-                step="any"
+              <NumericInput
                 value={entryPrice}
-                onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
+                onChange={setEntryPrice}
                 className="input-control font-mono"
                 required
+                ariaLabel="Entry Price"
               />
             </div>
 
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Exit Price</label>
-              <input
-                type="number" inputMode="decimal"
-                step="any"
+              <NumericInput
                 value={exitPrice}
-                onChange={(e) => setExitPrice(parseFloat(e.target.value) || 0)}
+                onChange={setExitPrice}
                 className="input-control font-mono"
+                ariaLabel="Exit Price"
               />
             </div>
 
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Stop Loss</label>
-              <input
-                type="number" inputMode="decimal"
-                step="any"
+              <NumericInput
                 value={stopLoss}
-                onChange={(e) => setStopLoss(parseFloat(e.target.value) || 0)}
+                onChange={setStopLoss}
                 className="input-control font-mono"
+                ariaLabel="Stop Loss"
               />
             </div>
 
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Take Profit</label>
-              <input
-                type="number" inputMode="decimal"
-                step="any"
+              <NumericInput
                 value={takeProfit}
-                onChange={(e) => setTakeProfit(parseFloat(e.target.value) || 0)}
+                onChange={setTakeProfit}
                 className="input-control font-mono"
+                ariaLabel="Take Profit"
               />
             </div>
 
@@ -910,27 +968,38 @@ export const TradeFormModal: React.FC<TradeFormModalProps> = ({
               <label className="input-label">
                 {assetClass === 'Crypto' ? 'Units / Quantity *' : assetClass === 'Indices' ? 'Contracts / Quantity *' : 'Lots / Quantity *'}
               </label>
-              <input
-                type="number" inputMode="decimal"
-                step="any"
+              <NumericInput
                 value={quantity}
-                onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
+                onChange={setQuantity}
                 className="input-control font-mono"
                 required
+                ariaLabel="Lots / Quantity"
               />
             </div>
 
             <div className="input-group" style={{ margin: 0 }}>
               <label className="input-label">Realized Net PnL ($) *</label>
-              <input
-                type="number" inputMode="decimal"
-                step="any"
-                value={pnl}
-                onChange={(e) => setPnl(parseFloat(e.target.value) || 0)}
-                className="input-control font-mono"
-                style={{ color: pnl >= 0 ? 'var(--profit-green)' : 'var(--loss-red)', fontWeight: 700 }}
-                required
-              />
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'stretch' }}>
+                <NumericInput
+                  value={pnl}
+                  onChange={setPnl}
+                  className="input-control font-mono"
+                  style={{ color: pnl >= 0 ? 'var(--profit-green)' : 'var(--loss-red)', fontWeight: 700, flex: 1, minWidth: 0 }}
+                  required
+                  ariaLabel="Realized Net PnL"
+                />
+                {/* Sign flip: mobile decimal keypads (iOS) have no minus key. */}
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setPnl((prev) => -prev)}
+                  title="Flip the PnL sign (profit / loss)"
+                  aria-label="Flip the PnL sign"
+                  style={{ padding: '0 10px', flexShrink: 0 }}
+                >
+                  ±
+                </button>
+              </div>
             </div>
           </div>
 
