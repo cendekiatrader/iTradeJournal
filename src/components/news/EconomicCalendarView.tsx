@@ -13,6 +13,7 @@ import {
   Zap,
   CheckCircle2
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface HighImpactItem {
   id: string;
@@ -103,6 +104,7 @@ const UPCOMING_MAJOR_NEWS: HighImpactItem[] = [
 ];
 
 export const EconomicCalendarView: React.FC = () => {
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('ALL');
   const [selectedImpact, setSelectedImpact] = useState<'ALL' | 'HIGH'>('ALL');
@@ -127,7 +129,8 @@ export const EconomicCalendarView: React.FC = () => {
     script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
     script.async = true;
     script.innerHTML = JSON.stringify({
-      colorTheme: 'dark',
+      // Follow the app theme so the feed stays readable on both the dark and the light neumorphic surface
+      colorTheme: theme === 'light' ? 'light' : 'dark',
       isTransparent: true,
       width: '100%',
       height: '650',
@@ -146,7 +149,7 @@ export const EconomicCalendarView: React.FC = () => {
         containerRef.current.innerHTML = '';
       }
     };
-  }, [selectedCurrency, selectedImpact]);
+  }, [selectedCurrency, selectedImpact, theme]);
 
   const currencies = ['ALL', 'USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY'];
 
@@ -286,7 +289,7 @@ export const EconomicCalendarView: React.FC = () => {
               fontWeight: 700,
               backgroundColor: selectedImpact === 'HIGH' ? 'rgba(239, 68, 68, 0.2)' : 'var(--bg-panel)',
               borderColor: selectedImpact === 'HIGH' ? '#ef4444' : 'var(--border-color)',
-              color: selectedImpact === 'HIGH' ? '#f87171' : 'var(--text-secondary)',
+              color: selectedImpact === 'HIGH' ? 'var(--loss-red)' : 'var(--text-secondary)',
               gap: '6px'
             }}
           >
