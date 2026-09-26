@@ -651,6 +651,18 @@ textarea.input-control {
   margin-bottom: 6px;
 }
 
+/* Third-party embeds (TradingView widgets)
+   The script-embedded widgets build `.tradingview-widget-container__widget` and inherit
+   the host document's color-scheme. With `color-scheme: dark` on <html> (our dark theme)
+   the events widget flips to its LIGHT rendering — an opaque white panel with black text —
+   even though it was created with colorTheme=dark. Resetting the scheme on the embed
+   wrapper lets the widget's own `colorTheme` parameter decide. */
+.tradingview-widget-container,
+.tradingview-widget-container__widget,
+iframe[src*="tradingview"] {
+  color-scheme: normal;
+}
+
 /* Sidebar Default Styling */
 .app-sidebar {
   width: 240px;
