@@ -348,10 +348,15 @@ export interface CopySettings {
     maxLotCap: number;
     allowMinLotFallback: boolean;
   };
-  stops: { slFallbackPoints: number; copyTp: boolean; maxHoldMinutes: number };
+  // Satuan jarak memakai PERSEN HARGA, bukan poin: `point` = 1 desimal terakhir
+  // harga, jadi 30 poin berarti 0,30 USD di broker 2-desimal tapi 0,03 USD di
+  // broker 3-desimal. Elemen *Points tetap ada sebagai alternatif manual (0 = off).
+  stops: { slFallbackPct: number; slFallbackPoints: number; copyTp: boolean; maxHoldMinutes: number };
   mirror: { modifyThrottleSeconds: number; minModifyPoints: number; riskBreachAction: 'warn' | 'trim' | 'ignore' };
   guards: {
+    maxSpreadPct: number;
     maxSpreadPoints: number;
+    maxEntryDeviationPct: number;
     maxEntryDeviationPoints: number;
     maxSlippagePoints: number;
     maxPositions: number;
@@ -369,7 +374,7 @@ export interface CopySettings {
     maxDrawdownPct: number;
     maxTradesPerDay: number;
   };
-  order: { type: 'market'; deviationPoints: number; fillPolicy: 'IOC' | 'FOK' | 'RETURN' };
+  order: { type: 'market'; deviationPct: number; deviationPoints: number; fillPolicy: 'IOC' | 'FOK' | 'RETURN' };
   journal: { autoSync: boolean; accountId: string | null };
   notify: { telegram: boolean; bell: boolean };
 }
@@ -377,11 +382,13 @@ export interface CopySettings {
 export const DEFAULT_COPY_SETTINGS: CopySettings = {
   mode: 'auto',
   sizing: { method: 'risk_pct', riskPct: 1, basis: 'balance', maxLotCap: 5, allowMinLotFallback: false },
-  stops: { slFallbackPoints: 100, copyTp: true, maxHoldMinutes: 0 },
+  stops: { slFallbackPct: 0.15, slFallbackPoints: 0, copyTp: true, maxHoldMinutes: 0 },
   mirror: { modifyThrottleSeconds: 3, minModifyPoints: 0, riskBreachAction: 'warn' },
   guards: {
-    maxSpreadPoints: 30,
-    maxEntryDeviationPoints: 50,
+    maxSpreadPct: 0.08,
+    maxSpreadPoints: 0,
+    maxEntryDeviationPct: 0.2,
+    maxEntryDeviationPoints: 0,
     maxSlippagePoints: 20,
     maxPositions: 5,
     maxPositionsPerSymbol: 1,
@@ -392,7 +399,7 @@ export const DEFAULT_COPY_SETTINGS: CopySettings = {
     failStreakPause: true
   },
   limits: { maxTotalRiskPct: 10, dailyLossLimitPct: 5, dailyProfitTargetPct: null, maxDrawdownPct: 15, maxTradesPerDay: 20 },
-  order: { type: 'market', deviationPoints: 20, fillPolicy: 'IOC' },
+  order: { type: 'market', deviationPct: 0.05, deviationPoints: 0, fillPolicy: 'IOC' },
   journal: { autoSync: false, accountId: null },
   notify: { telegram: true, bell: true }
 };

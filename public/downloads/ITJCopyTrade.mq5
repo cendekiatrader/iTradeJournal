@@ -185,7 +185,8 @@ struct LinkSettings
    double   maxLotCap;
    bool     allowMinLotFallback;
    // stops
-   int      slFallbackPoints;
+   int      slFallbackPoints;   // alternatif manual (bergantung digit broker)
+   double   slFallbackPct;      // 0.15 = 0,15% harga - portabel antar broker
    bool     copyTp;
    int      maxHoldMinutes;
    // mirror
@@ -193,8 +194,10 @@ struct LinkSettings
    int      minModifyPoints;
    string   riskBreachAction;   // warn | trim | ignore
    // guards
-   int      maxSpreadPoints;
-   int      maxEntryDeviationPoints;
+   int      maxSpreadPoints;          // alternatif manual
+   double   maxSpreadPct;             // batas spread dalam % harga (portabel)
+   int      maxEntryDeviationPoints;  // alternatif manual
+   double   maxEntryDeviationPct;     // batas selisih harga masuk dalam % harga
    int      maxSlippagePoints;
    int      maxPositions;
    int      maxPositionsPerSymbol;
@@ -212,7 +215,8 @@ struct LinkSettings
    double   maxDrawdownPct;
    int      maxTradesPerDay;
    // order
-   int      deviationPoints;
+   int      deviationPoints;          // alternatif manual
+   double   deviationPct;             // toleransi slippage order dalam % harga
   };
 
 // Snapshot posisi provider (untuk diff 1 detik) + waktu throttle per ticket.
@@ -1050,14 +1054,22 @@ void SetLinkDefaults(LinkSettings &s)
    s.basis      = "balance";
    s.maxLotCap  = 0;
    s.allowMinLotFallback = false;
-   s.slFallbackPoints = 100;
+   // Angka dalam POIN tidak berarti sama di broker berbeda (point = 1 desimal
+   // terakhir harga): spread 0,30 USD = 30 poin di broker 2-desimal, tapi 300 poin
+   // di broker 3-desimal. Itu membuat batas berbasis poin memblokir trade yang
+   // sebenarnya wajar. Karena itu yang aktif adalah versi PERSEN HARGA, dan
+   // angka poin hanya dipakai kalau client memang mengisinya (>0).
+   s.slFallbackPct    = 0.15;
+   s.slFallbackPoints = 0;
    s.copyTp     = true;
    s.maxHoldMinutes = 0;
    s.modifyThrottleSeconds = ModifyThrottleSeconds;
    s.minModifyPoints = MinModifyPoints;
    s.riskBreachAction = "warn";
-   s.maxSpreadPoints = 30;
-   s.maxEntryDeviationPoints = 50;
+   s.maxSpreadPct = 0.08;
+   s.maxSpreadPoints = 0;
+   s.maxEntryDeviationPct = 0.20;
+   s.maxEntryDeviationPoints = 0;
    s.maxSlippagePoints = 20;
    s.maxPositions = 5;
    s.maxPositionsPerSymbol = 1;
@@ -1073,7 +1085,8 @@ void SetLinkDefaults(LinkSettings &s)
    s.dailyProfitTargetPct = 0;
    s.maxDrawdownPct = 15;
    s.maxTradesPerDay = 20;
-   s.deviationPoints = 20;
+   s.deviationPct = 0.05;
+   s.deviationPoints = 0;
   }
 
 void ParseSettings(const string row, LinkSettings &s)
@@ -1111,6 +1124,7 @@ void ParseSettings(const string row, LinkSettings &s)
    if(StringLen(stops) > 2)
      {
       s.slFallbackPoints = (int)JsonGetInt(stops, "slFallbackPoints", s.slFallbackPoints);
+      s.slFallbackPct    = JsonGetNum(stops, "slFallbackPct", s.slFallbackPct);
       s.copyTp           = JsonGetBool(stops, "copyTp", s.copyTp);
       s.maxHoldMinutes   = (int)JsonGetInt(stops, "maxHoldMinutes", s.maxHoldMinutes);
      }
@@ -1129,6 +1143,8 @@ void ParseSettings(const string row, LinkSettings &s)
    if(StringLen(guards) > 2)
      {
       s.maxSpreadPoints         = (int)JsonGetInt(guards, "maxSpreadPoints", s.maxSpreadPoints);
+      s.maxSpreadPct            = JsonGetNum(guards, "maxSpreadPct", s.maxSpreadPct);
+      s.maxEntryDeviationPct    = JsonGetNum(guards, "maxEntryDeviationPct", s.maxEntryDeviationPct);
       s.maxEntryDeviationPoints = (int)JsonGetInt(guards, "maxEntryDeviationPoints", s.maxEntryDeviationPoints);
       s.maxSlippagePoints       = (int)JsonGetInt(guards, "maxSlippagePoints", s.maxSlippagePoints);
       s.maxPositions            = (int)JsonGetInt(guards, "maxPositions", s.maxPositions);
@@ -1161,6 +1177,7 @@ void ParseSettings(const string row, LinkSettings &s)
    string order = JsonRaw(set, "order");
    if(StringLen(order) > 2)
       s.deviationPoints = (int)JsonGetInt(order, "deviationPoints", s.deviationPoints);
+      s.deviationPct    = JsonGetNum(order, "deviationPct", s.deviationPct);
 
    // Cap lokal (input user) > 0 -> pakai yang lebih kecil (PRD 8.1).
    if(LocalRiskPctCap > 0 && s.riskPct > LocalRiskPctCap) s.riskPct = LocalRiskPctCap;
@@ -1391,6 +1408,22 @@ bool GuardSymbol(const LinkSettings &s, const string sym, string &why)
    return(true);
   }
 
+// Poin <-> persen harga. `point` = 1 desimal terakhir, jadi angka poin tidak
+// portabel antar broker; persen harga portabel.
+double PointsFromPct(const string sym, const double price, const double pct)
+  {
+   double pt = SymbolInfoDouble(sym, SYMBOL_POINT);
+   if(pt <= 0 || price <= 0 || pct <= 0) return(0);
+   return(((pct / 100.0) * price) / pt);
+  }
+
+double PctOfPoints(const string sym, const double price, const double points)
+  {
+   double pt = SymbolInfoDouble(sym, SYMBOL_POINT);
+   if(pt <= 0 || price <= 0) return(0);
+   return((points * pt) / price * 100.0);
+  }
+
 double CurrentSpreadPoints(const string sym)
   {
    double pt = SymbolInfoDouble(sym, SYMBOL_POINT);
@@ -1402,10 +1435,16 @@ double CurrentSpreadPoints(const string sym)
 
 bool GuardSpread(const LinkSettings &s, const string sym, string &why)
   {
-   double sp = CurrentSpreadPoints(sym);
-   if(s.maxSpreadPoints > 0 && sp > s.maxSpreadPoints)
+   double sp  = CurrentSpreadPoints(sym);
+   double bid = SymbolInfoDouble(sym, SYMBOL_BID);
+   double lim = (s.maxSpreadPct > 0)     ? PointsFromPct(sym, bid, s.maxSpreadPct)
+                : (s.maxSpreadPoints > 0 ? (double)s.maxSpreadPoints : 0);
+   if(lim > 0 && sp > lim)
      {
-      why = StringFormat("Dilewati: spread %.0f > batas %d", sp, s.maxSpreadPoints);
+      why = StringFormat("Dilewati: spread %.0f poin (%.4f%% dari harga) > batas %.0f poin (%s)",
+                         sp, PctOfPoints(sym, bid, sp), lim,
+                         (s.maxSpreadPct > 0 ? DoubleToString(s.maxSpreadPct, 3) + "% harga"
+                                             : IntegerToString((int)lim) + " poin"));
       return(false);
      }
    return(true);
@@ -1419,10 +1458,14 @@ bool GuardEntryDeviation(const LinkSettings &s, const string sym, const int side
    if(pt <= 0) return(true);
    double mkt = (side > 0) ? SymbolInfoDouble(sym, SYMBOL_ASK) : SymbolInfoDouble(sym, SYMBOL_BID);
    double dev = MathAbs(mkt - providerEntry) / pt;
-   if(s.maxEntryDeviationPoints > 0 && dev > s.maxEntryDeviationPoints)
+   double lim = (s.maxEntryDeviationPct > 0)     ? PointsFromPct(sym, mkt, s.maxEntryDeviationPct)
+                : (s.maxEntryDeviationPoints > 0 ? (double)s.maxEntryDeviationPoints : 0);
+   if(lim > 0 && dev > lim)
      {
-      why = StringFormat("Dilewati: harga bergerak %.0f poin dari fill provider (batas %d)",
-                         dev, s.maxEntryDeviationPoints);
+      why = StringFormat("Dilewati: harga bergerak %.0f poin (%.4f%%) dari fill provider, batas %.0f poin (%s)",
+                         dev, PctOfPoints(sym, mkt, dev), lim,
+                         (s.maxEntryDeviationPct > 0 ? DoubleToString(s.maxEntryDeviationPct, 3) + "% harga"
+                                                     : IntegerToString((int)lim) + " poin"));
       return(false);
      }
    return(true);
@@ -1612,7 +1655,9 @@ double ComputeLots(const LinkSettings &s, const string sym, const int side,
      {
       // Provider tidak diwajibkan punya SL (keputusan 9). Jaring pengaman ada di
       // sisi client sebagai setelan milik client sendiri (slFallbackPoints).
-      if(s.slFallbackPoints > 0) stopDist = s.slFallbackPoints * point;
+      // Persen harga lebih dulu (portabel antar broker); angka poin hanya kalau diisi.
+      if(s.slFallbackPct > 0 && entryRef > 0) stopDist = (s.slFallbackPct / 100.0) * entryRef;
+      else if(s.slFallbackPoints > 0)         stopDist = s.slFallbackPoints * point;
      }
    if(stopDist <= 0) { why = "sizing: stopDistance 0 (SL provider kosong & slFallbackPoints off)"; return(0); }
 
@@ -1792,6 +1837,11 @@ void HandleOpen(const Delivery &d, const LinkSettings &s)
    // provider terjaga berapa pun selisih harga antar broker.
    double sl = 0, tp = 0;
    if(d.sl > 0) sl = NormalizeDouble(LevelForClient(d.entry, d.sl, px, SlTpMode == SLTP_ABSOLUTE), digits);
+   else if(s.slFallbackPct > 0)
+     {
+      double dist = (s.slFallbackPct / 100.0) * px;
+      sl = NormalizeDouble(d.side > 0 ? px - dist : px + dist, digits);
+     }
    else if(s.slFallbackPoints > 0)
       sl = NormalizeDouble(d.side > 0 ? px - s.slFallbackPoints * point : px + s.slFallbackPoints * point, digits);
    if(s.copyTp && d.tp > 0) tp = NormalizeDouble(LevelForClient(d.entry, d.tp, px, SlTpMode == SLTP_ABSOLUTE), digits);
@@ -1809,7 +1859,13 @@ void HandleOpen(const Delivery &d, const LinkSettings &s)
      }
 
    g_trade.SetExpertMagicNumber(mag);
-   g_trade.SetDeviationInPoints((ulong)MathMax(1, s.maxSlippagePoints > 0 ? s.maxSlippagePoints : s.deviationPoints));
+   // Toleransi slippage juga dalam % harga: 20 poin = 0,20 USD di broker 2-desimal
+   // tetapi 0,02 USD di broker 3-desimal - beda 10x hanya karena jumlah desimal.
+   double devPts = 0;
+   if(s.deviationPct > 0)          devPts = PointsFromPct(sym, px, s.deviationPct);
+   else if(s.maxSlippagePoints > 0) devPts = s.maxSlippagePoints;
+   else                             devPts = s.deviationPoints;
+   g_trade.SetDeviationInPoints((ulong)MathMax(1, (int)devPts));
    g_trade.SetTypeFillingBySymbol(sym);
 
    bool ok = false;
@@ -2390,6 +2446,19 @@ void ShowStatus()
       s += StringFormat("Copy aktif: %d   paused: %d   rev terakhir: %d\n", aktif, pause, g_lastRev);
       s += StringFormat("HTTP terakhir: %d   delivery pending terlihat: %d\n", g_lastHttpCode, g_lastPendingSeen);
       s += StringFormat("Posisi copy terbuka: %d   poll: %s\n", posOwn, (g_lastPoll > 0 ? "jalan" : "belum"));
+      // Angka poin tidak portabel antar broker, jadi tampilkan juga artinya dalam %.
+      double spNow  = CurrentSpreadPoints(_Symbol);
+      double bidNow = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+      string spLimit = "(tanpa batas)";
+      if(ArraySize(g_links) > 0)
+        {
+         if(g_links[0].maxSpreadPct > 0)
+            spLimit = DoubleToString(g_links[0].maxSpreadPct, 3) + "% harga";
+         else if(g_links[0].maxSpreadPoints > 0)
+            spLimit = IntegerToString(g_links[0].maxSpreadPoints) + " poin";
+        }
+      s += StringFormat("Spread %s: %.0f poin (%.4f%% harga) - batas: %s\n",
+                        _Symbol, spNow, PctOfPoints(_Symbol, bidNow, spNow), spLimit);
       if(aktif == 0)
          s += "TIDAK ADA copy_link aktif - provider harus menekan Accept di dashboard-nya.\n";
       if(g_lastSkip != "")

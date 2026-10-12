@@ -396,20 +396,41 @@ as $$
     "mode": "auto",
     "sizing": {"method": "risk_pct", "riskPct": 1.0, "basis": "balance",
                "maxLotCap": 5.0, "allowMinLotFallback": false},
-    "stops":  {"slFallbackPoints": 100, "copyTp": true, "maxHoldMinutes": 0},
+    "stops":  {"slFallbackPct": 0.15, "slFallbackPoints": 0, "copyTp": true, "maxHoldMinutes": 0},
     "mirror": {"modifyThrottleSeconds": 3, "minModifyPoints": 0, "riskBreachAction": "warn"},
-    "guards": {"maxSpreadPoints": 30, "maxEntryDeviationPoints": 50,
-               "maxSlippagePoints": 20, "maxPositions": 5, "maxPositionsPerSymbol": 1,
+    "guards": {"maxSpreadPct": 0.08, "maxSpreadPoints": 0,
+               "maxEntryDeviationPct": 0.20, "maxEntryDeviationPoints": 0,
+               "maxSlippagePoints": 0, "maxPositions": 5, "maxPositionsPerSymbol": 1,
                "allowSymbols": [], "blockSymbols": [],
                "sessionFilter": {"enabled": false, "start": "07:00", "end": "22:00"},
                "followOnReconnect": false, "failStreakPause": true},
     "limits": {"maxTotalRiskPct": 10, "dailyLossLimitPct": 5, "dailyProfitTargetPct": null,
                "maxDrawdownPct": 15, "maxTradesPerDay": 20},
-    "order":  {"type": "market", "deviationPoints": 20, "fillPolicy": "IOC"},
+    "order":  {"type": "market", "deviationPct": 0.05, "deviationPoints": 0, "fillPolicy": "IOC"},
     "journal": {"autoSync": false, "accountId": null},
     "notify": {"telegram": true, "bell": true}
   }'::jsonb;
 $$;
+
+-- Mengapa batas jarak memakai PERSEN HARGA, bukan poin:
+-- `point` = 1 desimal terakhir harga, jadi angka poin TIDAK berarti sama di broker
+-- berbeda. Contoh nyata: spread XAUUSD 0,30 USD terbaca 30 poin di broker dengan 2
+-- desimal, tetapi 300 poin di broker dengan 3 desimal - dengan batas 30 poin, client
+-- di broker 3-desimal SELALU dilewati meski spreadnya normal. Persen harga sama
+-- artinya di mana pun. Angka poin tetap bisa diisi (elemen `*Points` > 0) kalau client
+-- memang ingin memakai konvensi brokernya.
+--
+-- Migrasi untuk instalasi yang sudah punya baris: nilai poin lama diganti; hanya
+-- menyentuh baris yang belum punya kunci persen, jadi aman diulang dan tidak menimpa
+-- pilihan yang sudah dibuat setelah pembaruan ini.
+update public.copy_links
+   set settings = public.jsonb_deep_merge(settings, '{
+         "guards": {"maxSpreadPct": 0.08, "maxSpreadPoints": 0,
+                    "maxEntryDeviationPct": 0.20, "maxEntryDeviationPoints": 0},
+         "stops":  {"slFallbackPct": 0.15, "slFallbackPoints": 0},
+         "order":  {"deviationPct": 0.05, "deviationPoints": 0}
+       }'::jsonb)
+ where settings -> 'guards' -> 'maxSpreadPct' is null;
 
 -- Kode akses 8 karakter (tanpa huruf/angka yang mudah tertukar)
 create or replace function public.copytrade_new_code()

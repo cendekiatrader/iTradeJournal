@@ -594,14 +594,23 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ signedIn, onOp
                     Guards on the entry
                   </div>
                   <div className="ct-grid ct-grid-2" style={{ gap: 12 }}>
-                    <Row label="Max spread (points)">
-                      <NumField ariaLabel="max spread" value={draft.guards.maxSpreadPoints} onChange={(n) => patch('guards', { maxSpreadPoints: n })} min={0} />
+                    <Row
+                      label="Max spread (% of price)"
+                      hint="0.08% is about 1.9 USD on XAUUSD at 2400 - a normal gold spread passes, a widened one is blocked. It is a percentage and not a number of points because a point is the last decimal of the price: 30 points mean 0.30 USD at a 2-decimal broker but 0.03 USD at a 3-decimal one."
+                    >
+                      <NumField ariaLabel="max spread" value={draft.guards.maxSpreadPct} onChange={(n) => patch('guards', { maxSpreadPct: n })} min={0} step="0.01" />
                     </Row>
-                    <Row label="Max entry deviation (points)">
-                      <NumField ariaLabel="max entry deviation" value={draft.guards.maxEntryDeviationPoints} onChange={(n) => patch('guards', { maxEntryDeviationPoints: n })} min={0} />
+                    <Row
+                      label="Max entry deviation (% of price)"
+                      hint="How far your price may sit from the provider's fill before the entry is skipped. Same reason for using a percentage here."
+                    >
+                      <NumField ariaLabel="max entry deviation" value={draft.guards.maxEntryDeviationPct} onChange={(n) => patch('guards', { maxEntryDeviationPct: n })} min={0} step="0.01" />
                     </Row>
-                    <Row label="Max slippage sent to broker (points)">
-                      <NumField ariaLabel="max slippage" value={draft.guards.maxSlippagePoints} onChange={(n) => patch('guards', { maxSlippagePoints: n })} min={0} />
+                    <Row
+                      label="Max slippage sent to broker (% of price)"
+                      hint="The tolerance your terminal hands to the broker with each order. A fixed number of points would be 10x tighter at a 3-decimal broker."
+                    >
+                      <NumField ariaLabel="max slippage" value={draft.order.deviationPct} onChange={(n) => patch('order', { deviationPct: n })} min={0} step="0.01" />
                     </Row>
                     <Row label="Max open positions">
                       <NumField ariaLabel="max positions" value={draft.guards.maxPositions} onChange={(n) => patch('guards', { maxPositions: n })} min={1} />
@@ -609,8 +618,11 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ signedIn, onOp
                     <Row label="Max positions per symbol">
                       <NumField ariaLabel="max per symbol" value={draft.guards.maxPositionsPerSymbol} onChange={(n) => patch('guards', { maxPositionsPerSymbol: n })} min={1} />
                     </Row>
-                    <Row label="Fallback stop (points)" hint="Used only when the provider's position has no stop loss, so your position is never left completely unprotected.">
-                      <NumField ariaLabel="fallback stop" value={draft.stops.slFallbackPoints} onChange={(n) => patch('stops', { slFallbackPoints: n })} min={0} />
+                    <Row
+                      label="Fallback stop (% of price)"
+                      hint="Used only when the provider's position has no stop loss, so your position is never left completely unprotected. 0.15% is about 3.60 USD on XAUUSD at 2400; a points-based value would mean 0.10 USD at a 3-decimal broker and be hit instantly."
+                    >
+                      <NumField ariaLabel="fallback stop" value={draft.stops.slFallbackPct} onChange={(n) => patch('stops', { slFallbackPct: n })} min={0} step="0.01" />
                     </Row>
                   </div>
                   <div className="ct-grid" style={{ gap: 10, marginTop: 12 }}>
