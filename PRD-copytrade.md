@@ -693,6 +693,94 @@ Acuan implementasi EA (MIT, bebas dipakai/dimodifikasi): `Mubincodes/TradeCopier
 
 ---
 
+## 15. Pending order (limit/stop) — memirror LEVEL, bukan harga
+
+Ditambahkan setelah uji nyata: provider yang bekerja dengan limit/stop order tidak bisa
+ditiru sama sekali. EA provider hanya membaca **posisi** (`PositionsTotal`), tidak pernah
+membaca **pending order** (`OrdersTotal`), jadi client baru melihat sesuatu setelah order
+provider terisi dan menjadi posisi — level entry-nya tidak pernah ikut.
+
+### 15.1 Prinsip: level = JARAK RELATIF dari harga pasar provider saat penempatan
+
+Dua broker tidak pernah punya harga yang sama, jadi harga absolut provider tidak boleh
+dipasang apa adanya di client — pelajaran yang sama dengan §6.6 (SL/TP):
+
+```
+ratio      = (provider_order_price − provider_market_ref) / provider_market_ref
+price_client = client_market_now × (1 + ratio)
+```
+
+- `provider_market_ref` = harga pasar provider **saat order ditempatkan**, dikirim di
+  payload supaya client tidak perlu menebak.
+- Sisi order (buy limit di bawah harga, buy stop di atas harga) otomatis terjaga karena
+  `ratio` membawa tandanya.
+- Input `OrderLevelMode = RELATIVE` (default) | `ABSOLUTE` — ABSOLUTE hanya untuk akun
+  yang benar-benar identik, sejalan dengan `SlTpMode`.
+
+### 15.2 Event baru
+
+| `kind` | Kapan | Payload tambahan |
+|---|---|---|
+| `PLACE_ORDER` | provider memasang pending order | `order_ticket`, `order_type`, `price`, `sl`, `tp`, `volume`, `market_ref`, `expiration` |
+| `MODIFY_ORDER` | provider mengubah price/SL/TP/expiry | idem + `old_price` |
+| `CANCEL_ORDER` | provider membatalkan, atau order kedaluwarsa | `order_ticket` |
+
+`order_type`: `buy_limit` \| `sell_limit` \| `buy_stop` \| `sell_stop` \|
+`buy_stop_limit` \| `sell_stop_limit`.
+
+### 15.3 Keputusan (lanjutan §1.1, #15–#26)
+
+| # | Keputusan |
+|---|---|
+| 15 | Pending order **dimirror**, tapi per-link bisa dimatikan (`mirror.mirrorPendingOrders`, default **ON**) — client boleh memilih hanya menyalin posisi terisi |
+| 16 | Level diterjemahkan sebagai **jarak relatif** (RELATIVE default), bukan harga absolut |
+| 17 | Order client ditandai comment `ITJ-O<order_ticket>` sebagai kunci pemetaan (comment MT5 maksimal 31 karakter) |
+| 18 | **Anti-dobel**: saat order provider terisi, provider menerbitkan `OPEN`. Client yang masih memegang pending order untuk ticket order itu **tidak** membuka posisi market lagi — posisinya akan lahir dari order pending-nya sendiri. Kalau client belum sempat memasang pending (baru follow / offline / mode pending OFF), perilaku lama (buka market) tetap dipakai |
+| 19 | Volume order pending dihitung dengan rumus sizing yang sama (§4): risk % dari balance memakai jarak `harga order → SL`; kalau order tanpa SL → fallback SL (§6.6) |
+| 20 | Guard saat **penempatan**: resolusi symbol, allowSymbols/blockSymbols, `guards.maxPendingOrders` (default 5), cek margin. Guard **spread & entry-deviation tidak berlaku** di sini (belum ada eksekusi). Level hasil terjemahan yang jatuh di **sisi yang salah** atau lebih dekat dari jarak minimum broker → **dilewati dengan alasan eksplisit**, bukan diam-diam dieksekusi market |
+| 21 | `MODIFY_ORDER` dan `CANCEL_ORDER` ditiru; kalau order di client sudah tidak ada, dianggap selesai (idempotent) |
+| 22 | Expiry ditiru bila broker mendukung `ORDER_TIME_SPECIFIED`; kalau tidak, order dipasang GTC dan keterbatasan itu dicatat di log (bisa dimatikan lewat `order.copyExpiry`) |
+| 23 | **Kill switch** juga membatalkan pending order client — kill switch berarti berhenti membuka posisi baru, dan order pending yang masih hidup bisa terisi kapan saja |
+| 24 | Posisi yang lahir dari order pending tetap tunduk pada batas harian, `maxHoldMinutes`, dan rekonsiliasi seperti posisi lain |
+| 25 | Rekonsiliasi (§6.4) diperluas: order client yang provider-nya sudah tidak ada → dibatalkan; order provider yang belum ada di client (mode pending ON) → dipasang dengan level dihitung dari harga pasar saat itu, dan log mencatat levelnya bergeser (catch-up, bukan kejar harga) |
+| 26 | Statistik provider tidak berubah (tetap dari posisi yang closing); pending order bukan trade |
+
+### 15.4 Skema data tambahan
+
+- Tabel baru **`provider_orders`**: `provider_id`, `order_ticket` (unik per provider),
+  `symbol`, `order_type`, `price`, `sl`, `tp`, `volume`, `market_ref`, `expiration`,
+  `status` (`working` \| `filled` \| `cancelled` \| `expired`), `revision`, timestamp.
+- Tabel baru **`client_orders`**: `client_id`, `provider_order_id`, `client_ticket`
+  (ticket order di terminal client), `state` (`working` \| `filled` \| `cancelled`),
+  diisi dari ack EA — pola yang sama dengan `copy_deliveries`/`client_positions`.
+- `copy_events.kind` menerima tiga nilai baru.
+- Settings baru: `mirror.mirrorPendingOrders` (bool), `guards.maxPendingOrders` (int),
+  `order.copyExpiry` (bool).
+
+### 15.5 Rencana kerja (Fase 6)
+
+| Langkah | Isi | Kriteria uji |
+|---|---|---|
+| 6.1 | Skema: 2 tabel + 3 kind + settings baru + fan-out untuk `PLACE_ORDER`/`MODIFY_ORDER`/`CANCEL_ORDER` | di Postgres: provider pasang limit → 1 delivery `PLACE_ORDER` ke tiap link aktif; cancel → 1 delivery `CANCEL_ORDER` |
+| 6.2 | EA provider: diff `OrdersTotal()` → publish PLACE/MODIFY/CANCEL (dengan `market_ref`) | order diletakkan/diubah/dibatalkan di terminal provider → baris `provider_orders` + event sesuai |
+| 6.3 | EA client: terjemahan level relatif, sizing, guard penempatan, penempatan order + ack | order provider di broker A bermunculan sebagai order sejenis di broker B dengan **jarak** yang setara |
+| 6.4 | Pemetaan + anti-dobel saat order provider terisi | order provider terisi → client **tidak** dobel: posisi lahir dari order pending-nya sendiri, `client_positions` terisi benar |
+| 6.5 | Cancel/modify/expiry + kill switch membatalkan pending | cancel di provider → order client hilang; kill switch → semua pending client batal |
+| 6.6 | Rekonsiliasi pending + UI (kolom pending order di dashboard client & provider, setelan baru) | order yatim dibersihkan, level pergeseran catch-up terlihat di log |
+
+### 15.6 Risiko khusus
+
+1. **Order client terisi sementara order provider tidak** (likuiditas/spread berbeda) →
+   posisi client tanpa pasangan di sisi provider. Perlu kebijakan eksplisit: lihat
+   pertanyaan baru di §14.
+2. **Order client tidak terisi saat order provider terisi** (kebalikannya) →
+   divalidasi oleh rekonsiliasi; client mengejar lewat market hanya kalau
+   `followOnReconnect` menyala.
+3. **Broker tanpa stop-limit / tanpa expiry tertentu** → fitur yang tidak didukung
+   dilewati dengan catatan di log, bukan gagal senyap.
+
+---
+
 ## 14. Sisa pertanyaan (kecil, bisa diputuskan saat implementasi)
 
 1. **Hosting Edge Function untuk Telegram** — pakai Edge Function Supabase (butuh project punya `pgcrypto`+secret), atau Cloudflare Worker (lebih murah request, tapi secret di tempat lain)? Default saya: Supabase Edge Function supaya semua di satu tempat.
@@ -700,3 +788,4 @@ Acuan implementasi EA (MIT, bebas dipakai/dimodifikasi): `Mubincodes/TradeCopier
 3. **`maxHoldMinutes`** untuk client yang provider-nya sering offline — default 0 (off) atau 720 menit (12 jam) sebagai pengaman?
 4. **Uptime provider** — tampilkan skor uptime publik dari `ea_tokens.last_seen`? Saya sarankan ya (Fase 5), karena provider wajib 24/7 tapi tidak ada konsekuensi kalau melanggar.
 5. **Suspend provider** — efeknya langsung memutus semua fan-out, atau tetap jalan sampai semua posisi terbuka ditutup lebih dulu?
+6. **Order client terisi tapi order provider tidak** (§15.6 #1) — posisi client itu ditutup otomatis (setia pada janji "mirror"), atau dibiarkan dengan tanda peringatan di UI? Default saya: **dibiarkan + ditandai**, karena menutupnya bisa memotong posisi yang justru untung dan provider-nya bisa saja menyusul terisi.
