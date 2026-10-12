@@ -11,7 +11,8 @@ import {
   RefreshCw,
   Server,
   ShieldAlert,
-  Trash2
+  Trash2,
+  UserPlus
 } from 'lucide-react';
 import {
   DEFAULT_COPY_SETTINGS,
@@ -32,7 +33,9 @@ import {
   saveCopySettings,
   setKillSwitch,
   setLinkStatus,
+  slugFromProviderRef,
   symbolValueHint,
+  requestFollow,
   type CopySettings,
   type DeliveryRow,
   type EaTokenRow,
@@ -128,6 +131,32 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ signedIn, onOp
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [followInput, setFollowInput] = useState('');
+  const [followBusy, setFollowBusy] = useState(false);
+  const [followMsg, setFollowMsg] = useState<string | null>(null);
+  const [followBad, setFollowBad] = useState(false);
+
+  /** Kirim permintaan follow ke provider (satu-satunya jalan masuk ke CopyTrade). */
+  const sendFollowRequest = async () => {
+    const slug = slugFromProviderRef(followInput);
+    if (!slug) return;
+    setFollowBusy(true);
+    const res = await requestFollow(slug);
+    setFollowBusy(false);
+    if (!res.ok) {
+      setFollowBad(true);
+      setFollowMsg(res.error || 'Could not send the request.');
+      return;
+    }
+    setFollowBad(false);
+    setFollowInput('');
+    setFollowMsg(
+      res.status === 'active'
+        ? `You are already copying ${slug}.`
+        : `Request sent to ${slug}. Your terminal stays idle until the provider accepts.`
+    );
+    await refresh();
+  };
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<CopySettings>(DEFAULT_COPY_SETTINGS);
   const [saving, setSaving] = useState(false);
@@ -322,6 +351,55 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ signedIn, onOp
         <button type="button" className="btn btn-secondary btn-sm" onClick={onOpenPublic}>
           Find providers
         </button>
+      </div>
+
+      {/* 1b. hubungkan ke provider - satu-satunya jalan masuk ke CopyTrade */}
+      <div className="ct-card" style={{ marginBottom: 18 }}>
+        <div className="ct-step-t" style={{ marginBottom: 6 }}>
+          <UserPlus size={15} style={{ verticalAlign: '-2px', marginRight: 6 }} /> Copy a provider
+        </div>
+        <div className="ct-step-d" style={{ marginBottom: 10 }}>
+          Paste the link a provider shared with you - or just their handle. They have to accept the request before
+          anything is copied; until they do, your terminal stays idle.
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input
+            className="input-control"
+            style={{ flex: '1 1 280px' }}
+            value={followInput}
+            placeholder="https://…/copytrade/provider/gold-london  or  @gold-london"
+            onChange={(e) => {
+              setFollowInput(e.target.value);
+              setFollowMsg(null);
+              setFollowBad(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void sendFollowRequest();
+            }}
+          />
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            disabled={followBusy || !slugFromProviderRef(followInput)}
+            onClick={() => void sendFollowRequest()}
+          >
+            <UserPlus size={14} /> {followBusy ? 'Sending…' : 'Send request'}
+          </button>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={onOpenPublic}>
+            Browse providers
+          </button>
+        </div>
+        {followInput.trim() !== '' && !slugFromProviderRef(followInput) && (
+          <div className="ct-step-d" style={{ marginTop: 8 }}>
+            That does not look like a provider link or handle yet (at least 3 characters, after that anything that is not
+            a letter or a digit becomes a dash).
+          </div>
+        )}
+        {followMsg && (
+          <div className="ct-step-d" style={{ marginTop: 8, color: followBad ? 'var(--loss-red)' : undefined }}>
+            {followMsg}
+          </div>
+        )}
       </div>
 
       {loading ? (

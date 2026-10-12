@@ -7,12 +7,14 @@ import {
   CheckCircle2,
   Flag,
   Radio,
+  RefreshCw,
   ShieldOff,
   Users
 } from 'lucide-react';
 import {
   REPORT_REASONS,
   fetchProviderPublic,
+  requestFollow,
   fmtNum,
   fmtPct,
   fmtRelative,
@@ -45,6 +47,11 @@ export const ProviderProfileView: React.FC<ProviderProfileViewProps> = ({
   const [note, setNote] = useState('');
   const [reportState, setReportState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [reportError, setReportError] = useState<string | null>(null);
+  // Permintaan follow: tombol ini yang menghubungkan client ke provider. Sebelum
+  // ini tombolnya hanya kembali ke aplikasi, sehingga tidak ada cara mengirim
+  // permintaan sama sekali.
+  const [followState, setFollowState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [followMsg, setFollowMsg] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -157,14 +164,64 @@ export const ProviderProfileView: React.FC<ProviderProfileViewProps> = ({
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => (signedIn ? onBackToApp() : onOpenAuth('signup'))}
+                  disabled={followState === 'sending' || followState === 'sent'}
+                  onClick={async () => {
+                    if (!signedIn) {
+                      onOpenAuth('signup');
+                      return;
+                    }
+                    setFollowState('sending');
+                    const res = await requestFollow(slug);
+                    if (res.ok) {
+                      setFollowState('sent');
+                      setFollowMsg(
+                        res.status === 'active'
+                          ? 'You are already copying this provider - open the CopyTrade tab to manage it.'
+                          : 'Request sent. It is waiting for the provider to accept - nothing is copied until they do.'
+                      );
+                    } else {
+                      setFollowState('error');
+                      setFollowMsg(res.error || 'Could not send the request.');
+                    }
+                  }}
                 >
-                  <ArrowLeftRight size={16} /> {signedIn ? 'Copy in dashboard' : 'Sign up to copy'}
+                  {followState === 'sending' ? (
+                    <RefreshCw size={16} className="spin" />
+                  ) : followState === 'sent' ? (
+                    <CheckCircle2 size={16} />
+                  ) : (
+                    <ArrowLeftRight size={16} />
+                  )}{' '}
+                  {!signedIn
+                    ? 'Sign up to copy'
+                    : followState === 'sending'
+                      ? 'Sending request…'
+                      : followState === 'sent'
+                        ? 'Request sent'
+                        : 'Copy this provider'}
                 </button>
                 <button type="button" className="btn btn-secondary" onClick={() => setReportOpen((v) => !v)}>
                   <Flag size={15} /> Report
                 </button>
               </div>
+              {followMsg && (
+                <div
+                  className="ct-step-d"
+                  style={{ marginTop: 10, color: followState === 'error' ? 'var(--loss-red)' : undefined }}
+                >
+                  {followMsg}
+                  {followState === 'sent' && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ marginLeft: 8 }}
+                      onClick={onBackToApp}
+                    >
+                      Open CopyTrade
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

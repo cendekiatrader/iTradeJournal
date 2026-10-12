@@ -53,7 +53,9 @@ export interface CopyProviderDetail {
   }>;
 }
 
-export type CopyApplyResult = { ok: boolean; error?: string; slug?: string };
+// `status` diisi oleh request_copy(): 'pending' (menunggu provider menerima) atau
+// 'active' (sudah/begitu diterima). Dipakai UI untuk memilih kalimat yang benar.
+export type CopyApplyResult = { ok: boolean; error?: string; slug?: string; status?: string };
 export type CopyReportResult = { ok: boolean; error?: string };
 
 /** Files offered on the public download card. Served straight from `public/`. */
@@ -794,6 +796,29 @@ const rpcOk = async (name: string, params: Record<string, unknown>): Promise<Cop
 
 /** Ask to follow a provider (creates the link as 'pending'). */
 export const requestFollow = (providerSlug: string) => rpcOk('request_copy', { p_provider_slug: providerSlug });
+
+/**
+ * Terima apa pun yang dibagikan provider: URL halaman lengkap
+ * (`https://.../copytrade/provider/gold-london`), bentuk hash
+ * (`#/copytrade/provider/gold-london`), `@gold-london`, atau handle polos.
+ *
+ * Normalisasinya SENGAJA sama dengan apply_provider() di supabase_copytrade.sql
+ * (lowercase, karakter non-alfanumerik -> '-', trim '-', maks 48, min 3) supaya
+ * apa yang diketik client menghasilkan slug yang identik dengan yang disimpan.
+ */
+export const slugFromProviderRef = (value: string): string | null => {
+  const raw = (value || '').trim();
+  if (!raw) return null;
+  const cut = raw.split(/[?#]/)[0];
+  const m = cut.match(/copytrade\/provider\/([^/\s]+)/i);
+  const base = (m ? m[1] : cut).replace(/^@+/, '');
+  const slug = base
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+  return slug.length >= 3 ? slug : null;
+};
 
 /** Provider side: accept or reject a follow request. */
 export const respondFollow = (linkId: string, accept: boolean) =>

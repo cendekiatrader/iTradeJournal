@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
+  Copy,
   KeyRound,
+  Link2,
   Radio,
   RefreshCw,
   Server,
@@ -55,6 +57,7 @@ export const ProviderDashboard: React.FC<ProviderDashboardProps> = ({ signedIn, 
   const [tokenLabel, setTokenLabel] = useState('my provider terminal');
   const [newToken, setNewToken] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const refresh = async () => {
     const res = await fetchProviderPanel();
@@ -183,6 +186,9 @@ export const ProviderDashboard: React.FC<ProviderDashboardProps> = ({ signedIn, 
 
   const stats = (panel.stats || {}) as Record<string, any>;
   const providerId = panel.followers[0]?.providerId || '';
+  // Halaman publik memakai path (bukan hash) dan sudah terverifikasi render di
+  // rute ≥2 segmen - asalkan vite base '/' (lihat catatan di skill).
+  const publicUrl = `${window.location.origin}/copytrade/provider/${panel.slug}`;
 
   return (
     <div>
@@ -244,6 +250,41 @@ export const ProviderDashboard: React.FC<ProviderDashboardProps> = ({ signedIn, 
         <a className="btn btn-secondary btn-sm" href={EA_FILES[0].href} download>
           <Server size={14} /> Download the EA
         </a>
+      </div>
+
+      {/* 2b. halaman publik - inilah yang dibagikan ke calon client */}
+      <div className="ct-card" style={{ marginBottom: 8 }}>
+        <div className="ct-step-t" style={{ marginBottom: 6 }}>
+          <Link2 size={15} style={{ verticalAlign: '-2px', marginRight: 6 }} /> Your public page
+        </div>
+        <div className="ct-step-d" style={{ marginBottom: 10 }}>
+          Share this link. A client opens it, presses “Copy this provider”, and the request lands in the table below for
+          you to accept. Nobody can copy you without your approval.
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <code className="ct-inline-code" style={{ flex: '1 1 280px', overflowWrap: 'anywhere' }}>
+            {publicUrl}
+          </code>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(publicUrl);
+                setLinkCopied(true);
+                showToast('Public page link copied.', 'success');
+                window.setTimeout(() => setLinkCopied(false), 2000);
+              } catch {
+                showToast('Could not copy - select the text and copy it manually.', 'error');
+              }
+            }}
+          >
+            <Copy size={14} /> {linkCopied ? 'Copied' : 'Copy link'}
+          </button>
+          <a className="btn btn-secondary btn-sm" href={publicUrl} target="_blank" rel="noreferrer">
+            Open
+          </a>
+        </div>
       </div>
 
       {/* 3. permintaan follow */}

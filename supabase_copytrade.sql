@@ -1042,8 +1042,15 @@ begin
 
   insert into public.copy_links (provider_id, client_id, status, requested_by, settings, runtime_state)
   values (v_provider, my_id, 'pending', 'client', public.copytrade_default_settings(), '{}'::jsonb)
+  -- Menekan tombol "Copy" lagi TIDAK boleh menurunkan status yang sudah dimiliki
+  -- client: kalau link sedang 'paused' dan statusnya direset ke 'pending', EA
+  -- (yang hanya mengambil active|paused) berhenti, tanpa penjelasan yang jelas.
+  -- 'active' dan 'paused' dipertahankan; 'rejected'/'ended' boleh jadi permintaan baru.
   on conflict (provider_id, client_id) do update
-    set status = case when public.copy_links.status = 'active' then 'active' else 'pending' end,
+    set status = case
+          when public.copy_links.status in ('active', 'paused') then public.copy_links.status
+          else 'pending'
+        end,
         requested_by = 'client'
   returning status into v_status;
 
