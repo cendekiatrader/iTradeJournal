@@ -1157,8 +1157,14 @@ void LinkForProvider(const string providerId, LinkSettings &out)
   {
    for(int i = 0; i < ArraySize(g_links); i++)
       if(g_links[i].providerId == providerId) { out = g_links[i]; return; }
+   // TIDAK ditemukan: jangan pakai default. linkId sengaja dibiarkan kosong
+   // sebagai penanda "tidak aktif/tercabut" supaya pemanggil melewati delivery
+   // (fail-closed). Kalau di sini kita isi default, delivery dari link yang
+   // sudah revoked/paused akan dieksekusi dengan riskPct 1% - persis yang
+   // tidak boleh terjadi.
    SetLinkDefaults(out);
    out.providerId = providerId;
+   out.linkId = "";
    if(LocalRiskPctCap > 0 && out.riskPct > LocalRiskPctCap) out.riskPct = LocalRiskPctCap;
   }
 
@@ -1166,7 +1172,10 @@ void LinkForProvider(const string providerId, LinkSettings &out)
 void RefreshLinks()
   {
    string resp = "";
-   int code = HttpGet("copy_links?status=eq.active&select=id,provider_id,status,settings,runtime_state,updated_at", resp);
+   // status=in.(active,paused): link yang di-pause HARUS tetap terlihat, kalau tidak
+   // EA tidak menemukannya dan jatuh ke setelan default (riskPct 1%) - artinya
+   // "pause" malah bikin trade jalan dengan setelan yang bukan pilihan user.
+   int code = HttpGet("copy_links?status=in.(active,paused)&select=id,provider_id,status,settings,runtime_state,updated_at", resp);
    if(code != 200)
      {
       if(!g_cfgFromFile && LoadConfigCache(g_cfgRawJson)) { g_cfgFromFile = true; }
@@ -1973,6 +1982,11 @@ void ProcessDelivery(const string row)
 
    LinkSettings s;
    LinkForProvider(d.providerId, s);
+
+   // Fail-closed: link yang tidak termuat (revoked / di luar cache / baru saja
+   // dipause sebelum EA menyegarkan konfigurasi) TIDAK dieksekusi.
+   if(StringLen(s.linkId) == 0)
+     { AckDelivery(d.id, "skipped", "copy_link tidak aktif atau tidak ditemukan di terminal ini - delivery dilewati (fail-closed)", 0,0,0,0,0,0); return; }
 
    // Kill switch & pause: posisi existing dibiarkan (PRD 5).
    if(s.killSwitch)

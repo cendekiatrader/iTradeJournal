@@ -55,6 +55,8 @@ const WorkspaceView = lazy(() => import('./components/workspace/WorkspaceView').
 // shared provider link should not download the journal to read one profile.
 const CopyTradeView = lazy(() => import('./components/copytrade/CopyTradeView').then((m) => ({ default: m.CopyTradeView })));
 const ProviderProfileView = lazy(() => import('./components/copytrade/ProviderProfileView').then((m) => ({ default: m.ProviderProfileView })));
+// In-app module (sidebar tab): dashboards for the signed-in client / provider.
+const CopyTradeModule = lazy(() => import('./components/copytrade/CopyTradeModule').then((m) => ({ default: m.CopyTradeModule })));
 
 const ViewLoading: React.FC = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '90px 20px', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
@@ -123,7 +125,11 @@ const readCopyTradeRoute = (): CopyTradeRoute => {
 
 const MainApp: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+  // Deep link into the module itself (/copytrade/client, /copytrade/provider).
+  // The bare /copytrade path is the PUBLIC page and is handled by an early return below.
+  const [activeTab, setActiveTab] = useState<NavTab>(() =>
+    /^\/copytrade\/(client|provider)$/.test(window.location.pathname.replace(/\/+$/, '')) ? 'copytrade' : 'dashboard'
+  );
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     return localStorage.getItem('itrade_sidebar_collapsed') === 'true';
   });
@@ -459,11 +465,6 @@ const MainApp: React.FC = () => {
       openBlogRoute(null);
       return;
     }
-    // CopyTrade is public as well: provider pages double as shareable links.
-    if (tab === 'copytrade') {
-      openCopyTradeRoute(null);
-      return;
-    }
     setActiveTab(tab);
   };
 
@@ -704,6 +705,17 @@ const MainApp: React.FC = () => {
 
           {activeTab === 'coaching' && (
             <CoachingView />
+          )}
+
+          {activeTab === 'copytrade' && (
+            <CopyTradeModule
+              signedIn={Boolean(user)}
+              onOpenAuth={(mode) => {
+                setAuthMode(mode);
+                setAuthModalOpen(true);
+              }}
+              onOpenPublic={() => openCopyTradeRoute(null)}
+            />
           )}
 
           {activeTab === 'queue' && (
