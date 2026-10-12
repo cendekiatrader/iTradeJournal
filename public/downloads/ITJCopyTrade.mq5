@@ -1228,6 +1228,12 @@ void ParseLinksFromRaw(const string raw)
 //====================================================================
 string g_skipReason = "";
 
+// Untuk status di chart (ShowStatus) - diisi di ClientTick/ProcessDelivery.
+// (g_lastRev sudah dideklarasikan di bagian 3 - pola `rev` - jadi jangan diulang.)
+int    g_lastHttpCode    = 0;
+int    g_lastPendingSeen = 0;
+string g_lastSkip        = "";
+
 bool GuardSession(const LinkSettings &s, string &why)
   {
    if(!s.sessionEnabled) return(true);
@@ -2149,7 +2155,8 @@ void ProcessDelivery(const string row)
    // Fail-closed: link yang tidak termuat (revoked / di luar cache / baru saja
    // dipause sebelum EA menyegarkan konfigurasi) TIDAK dieksekusi.
    if(StringLen(s.linkId) == 0)
-     { AckDelivery(d.id, "skipped", "copy_link tidak aktif atau tidak ditemukan di terminal ini - delivery dilewati (fail-closed)", 0,0,0,0,0,0); return; }
+     { g_lastSkip = "copy_link tidak aktif di terminal ini (fail-closed)";
+       AckDelivery(d.id, "skipped", "copy_link tidak aktif atau tidak ditemukan di terminal ini - delivery dilewati (fail-closed)", 0,0,0,0,0,0); return; }
 
    // Kill switch & pause: posisi existing dibiarkan (PRD 5).
    if(s.killSwitch)
@@ -2340,15 +2347,59 @@ void ClientTick(bool serverReachable)
       string resp = "";
       int code = HttpGet("copy_deliveries?status=eq.pending&select=id,event_id,status,provider_id,"
                          "copy_events(id,kind,seq,provider_id,provider_position_id,payload,created_at)", resp);
+      g_lastHttpCode = code;
       if(code == 200)
         {
          string rows[];
          int n = JsonSplitArray(resp, rows);
+         g_lastPendingSeen = n;
          if(n > 0) Print("ITJ: ", n, " delivery pending");
          for(int i = 0; i < n; i++)
             ProcessDelivery(rows[i]);
         }
      }
+  }
+
+//====================================================================
+// 15b. STATUS DI CHART
+//====================================================================
+// Selama uji, pertanyaan pertama selalu "kenapa tidak ada apa-apa?". Chart adalah
+// hal pertama yang dilihat, jadi jawabannya ditaruh di sana - bukan hanya di tab Experts.
+void ShowStatus()
+  {
+   static datetime shown = 0;
+   datetime now = TimeCurrent();
+   if(now - shown < 2) return;   // jangan spam chart
+   shown = now;
+
+   int aktif = 0, pause = 0;
+   for(int i = 0; i < ArraySize(g_links); i++)
+     {
+      if(g_links[i].paused) pause++; else aktif++;
+     }
+
+   PosInfo own[];
+   int posOwn = CollectOwnPositions(own);
+
+   string s = StringFormat("ITJ CopyTrade  %s  %s\n",
+                           EnumToString(Role),
+                           AccountInfoInteger(ACCOUNT_TRADE_MODE) == ACCOUNT_TRADE_MODE_DEMO ? "DEMO" : "REAL");
+
+   if(g_isClient)
+     {
+      s += StringFormat("Copy aktif: %d   paused: %d   rev terakhir: %d\n", aktif, pause, g_lastRev);
+      s += StringFormat("HTTP terakhir: %d   delivery pending terlihat: %d\n", g_lastHttpCode, g_lastPendingSeen);
+      s += StringFormat("Posisi copy terbuka: %d   poll: %s\n", posOwn, (g_lastPoll > 0 ? "jalan" : "belum"));
+      if(aktif == 0)
+         s += "TIDAK ADA copy_link aktif - provider harus menekan Accept di dashboard-nya.\n";
+      if(g_lastSkip != "")
+         s += "Terakhir dilewati: " + g_lastSkip + "\n";
+     }
+   else
+      s += StringFormat("Mode provider (publish): %s   posisi terpantau: %d\n",
+                        EnumToString(PublishMode), posOwn);
+
+   Comment(s);
   }
 
 //====================================================================
@@ -2500,8 +2551,12 @@ void OnTimer()
         {
          g_lastPoll = now;
          RefreshLinks();
-         ClientTick(serverOk);
+         // Heartbeat DULU: trigger server memakai ini untuk menandai delivery yang
+         // sudah lewat expires_at sebagai 'expired'. Kalau ClientTick lebih dulu,
+         // entry basi (EA baru dinyalakan berjam-jam setelah provider entry) ikut
+         // dieksekusi di harga sekarang - lebih mahal daripada melewatkannya.
          Heartbeat();
+         ClientTick(serverOk);
         }
 
       if(now - g_lastRecon >= g_snapSec)
@@ -2510,6 +2565,8 @@ void OnTimer()
          Reconcile();
         }
      }
+
+   ShowStatus();
   }
 
 // PRD 8.2: OnTradeTransaction HANYA menandai dirty. WebRequest blocking dan

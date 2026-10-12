@@ -2342,6 +2342,36 @@ create policy "ea_tokens_ea_update" on public.ea_tokens
   using (public.ea_token_id() is not null and id = public.ea_token_id())
   with check (public.ea_token_id() is not null and id = public.ea_token_id());
 
+-- 10f) KEDALUWARSA delivery ditandai SERVER, bukan EA.
+--      Tanpa ini delivery 'pending' yang lewat expires_at tinggal selamanya, dan
+--      saat EA client menyala belakangan entry LAMA itu ikut dieksekusi di harga
+--      sekarang - kesalahan yang jauh lebih mahal daripada melewatkannya.
+--      Pemicunya heartbeat EA client (UPDATE ea_tokens.last_seen), jadi penilaian
+--      waktunya memakai jam server: tidak bergantung pada jam PC/VPS client.
+create or replace function public.copytrade_expire_stale_deliveries()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.copy_deliveries d
+     set status      = 'expired',
+         skip_reason = 'kedaluwarsa: sinyal sudah berumur ' ||
+                       floor(extract(epoch from (now() - d.created_at)))::text ||
+                       ' detik dan belum diambil EA di terminal client (entry tidak dikejar)'
+   where d.client_id = new.client_id      -- client_id (pemilik token), BUKAN new.id (id baris token)
+     and d.status = 'pending'
+     and d.expires_at is not null
+     and d.expires_at < now();
+  return new;
+end $$;
+
+drop trigger if exists ea_tokens_expire_deliveries on public.ea_tokens;
+create trigger ea_tokens_expire_deliveries
+  after update of last_seen on public.ea_tokens
+  for each row execute function public.copytrade_expire_stale_deliveries();
+
 -- 10e) client_positions diturunkan dari ACK EA (PATCH copy_deliveries).
 --      EA client menyimpan mapping-nya di berkas lokal (MQL5/Files); tabel ini
 --      yang bikin dashboard web + client_copy_overview bisa menampilkan posisi
