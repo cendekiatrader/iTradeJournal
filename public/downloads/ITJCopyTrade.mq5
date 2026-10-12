@@ -936,7 +936,12 @@ void PublishSnapshot(const PosInfo &list[], const int count)
    body += "]";
 
    string resp = "";
-   int code = HttpPost("provider_positions?on_conflict=provider_ticket", body, resp,
+   // on_conflict WAJIB menyebut seluruh kunci unik tabel: unique-nya
+   // (provider_id, provider_ticket). Kalau hanya "provider_ticket", Postgres
+   // menolak dengan 42P10 "no unique or exclusion constraint matching the
+   // ON CONFLICT specification". provider_id sendiri diisi server dari
+   // x-ea-token lewat BEFORE INSERT trigger, jadi body tetap tidak memuatnya.
+   int code = HttpPost("provider_positions?on_conflict=provider_id,provider_ticket", body, resp,
                        "resolution=merge-duplicates,return=minimal");
    if(code != 200 && code != 201 && code != 204)
       Print("ITJ: snapshot provider gagal (HTTP ", code, ")");

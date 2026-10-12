@@ -2043,3 +2043,298 @@ grant execute on function public.copytrade_provider_public(text) to anon, authen
 grant execute on function public.copytrade_my_provider() to authenticated;
 grant execute on function public.report_provider_slug(text, text, text) to authenticated;
 
+
+-- ============================================================
+-- 10) JEMBATAN EA -> TABEL (akses langsung via PostgREST)
+-- ------------------------------------------------------------
+-- EA TIDAK memanggil RPC §7: ia POST/PATCH tabel langsung dengan header
+-- x-ea-token (pola PRD §7.4). Supaya itu benar-benar bekerja, lima hal harus
+-- disediakan server, dan kelimanya ada di bagian ini:
+--   (1) copy_events.provider_ticket  - EA mengirim ticket, bukan uuid
+--   (2) provider_id diisi dari token (BEFORE INSERT)
+--   (3) provider_position_id diresolusi dari ticket (BEFORE INSERT)
+--   (4) state provider_positions DITURUNKAN dari event (AFTER INSERT), supaya
+--       jalan yang sama dipakai entah EA insert langsung atau lewat RPC
+--   (5) policy tulis untuk peran anon/by-token: provider_positions insert+update,
+--       ea_tokens update (heartbeat), copy_events select (return=representation)
+-- Tanpa (4), rekonsiliasi klien (§6.4) akan mengira posisi provider masih
+-- terbuka selamanya dan tidak pernah menutup exit yang terlewat. Idempotent.
+-- ============================================================
+
+-- 10a) Kolom ticket di copy_events (EA mengirimnya di body)
+alter table public.copy_events add column if not exists provider_ticket bigint;
+create index if not exists copy_events_ticket_idx on public.copy_events(provider_id, provider_ticket);
+
+-- 10b1) Stempel provider_id dari token.
+--       Trigger function TIDAK boleh diasumsikan dipakai satu tabel saja:
+--       provider_positions/guard_events tidak punya kolom provider_position_id
+--       atau provider_ticket, dan plpgsql menyelesaikan field `new.x` saat
+--       statement dijalankan - jadi satu fungsi "shared" gagal di runtime
+--       ("record new has no field ..."). Karena itu dipisah.
+create or replace function public.copytrade_ea_stamp()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.provider_id is null then
+    new.provider_id := public.ea_uid();
+  end if;
+  return new;
+end $$;
+
+-- 10b2) Khusus copy_events: tambahan resolusi provider_position_id dari ticket.
+--       EA mengirim provider_ticket, bukan uuid posisi. Untuk event OPEN posisi
+--       belum ada (dibuat oleh trigger AFTER di 10c), jadi hasilnya NULL dan
+--       event berikutnya tetap bisa diresolusi dari ticket.
+create or replace function public.copytrade_ea_stamp_event()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.provider_id is null then
+    new.provider_id := public.ea_uid();
+  end if;
+
+  if new.provider_position_id is null and new.provider_ticket is not null then
+    select p.id into new.provider_position_id
+    from public.provider_positions p
+    where p.provider_id = new.provider_id
+      and p.provider_ticket = new.provider_ticket
+    limit 1;
+  end if;
+
+  return new;
+end $$;
+
+do $$
+declare
+  t text;
+begin
+  -- tabel dengan provider_id saja
+  foreach t in array array['provider_positions', 'guard_events'] loop
+    execute format('drop trigger if exists %I_ea_stamp on public.%I', t, t);
+    execute format('create trigger %I_ea_stamp before insert on public.%I '
+                   'for each row execute function public.copytrade_ea_stamp()', t, t);
+  end loop;
+end $$;
+
+drop trigger if exists copy_events_ea_stamp on public.copy_events;
+create trigger copy_events_ea_stamp
+  before insert on public.copy_events
+  for each row execute function public.copytrade_ea_stamp_event();
+
+-- 10c) AFTER INSERT: provider_positions diturunkan dari event.
+--      Ini yang membuat snapshot EA + aliran event tetap konsisten, dan yang
+--      membuat rekonsiliasi klien melihat status yang benar.
+create or replace function public.copytrade_apply_event_state()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_sl numeric := public.copytrade_price(new.payload ->> 'sl');
+  v_tp numeric := public.copytrade_price(new.payload ->> 'tp');
+  v_vol numeric := public.copytrade_num(new.payload ->> 'volume');
+begin
+  if new.kind = 'OPEN' then
+    if new.provider_ticket is null then
+      return new;
+    end if;
+    insert into public.provider_positions as pp (
+      provider_id, provider_ticket, symbol, side, volume, entry, sl, tp, opened_at, status
+    ) values (
+      new.provider_id,
+      new.provider_ticket,
+      coalesce(new.payload ->> 'symbol', '?'),
+      case when new.payload ->> 'side' = 'sell' then 'sell' else 'buy' end,
+      coalesce(v_vol, 0),
+      public.copytrade_price(new.payload ->> 'entry'),
+      v_sl,
+      v_tp,
+      public.copytrade_ts(new.payload ->> 'opened_at'),
+      'open'
+    )
+    on conflict (provider_id, provider_ticket) do update
+      set symbol    = excluded.symbol,
+          side      = excluded.side,
+          volume    = excluded.volume,
+          entry     = excluded.entry,
+          sl        = excluded.sl,
+          tp        = excluded.tp,
+          opened_at = coalesce(pp.opened_at, excluded.opened_at),
+          status    = 'open',
+          closed_at = null,
+          updated_at = now();
+
+    -- backfill id posisi ke event OPEN (RETURNING PostgREST sudah lewat, tapi
+    -- ini yang membuat join dashboard/recent konsisten)
+    update public.copy_events
+       set provider_position_id = (
+         select p.id from public.provider_positions p
+         where p.provider_id = new.provider_id and p.provider_ticket = new.provider_ticket
+       )
+     where id = new.id and provider_position_id is null;
+
+  elsif new.kind in ('MODIFY_SL', 'MODIFY_TP') then
+    update public.provider_positions
+       set sl       = coalesce(v_sl, sl),
+           tp       = coalesce(v_tp, tp),
+           volume   = coalesce(v_vol, volume),
+           updated_at = now()
+     where id = new.provider_position_id;
+
+  elsif new.kind = 'PARTIAL_CLOSE' then
+    update public.provider_positions
+       set volume   = coalesce(v_vol, volume),
+           sl       = coalesce(v_sl, sl),
+           tp       = coalesce(v_tp, tp),
+           updated_at = now()
+     where id = new.provider_position_id;
+
+  elsif new.kind = 'CLOSE' then
+    update public.provider_positions
+       set status    = 'closed',
+           closed_at = now(),
+           volume    = coalesce(v_vol, volume),
+           updated_at = now()
+     where id = new.provider_position_id;
+
+  elsif new.kind = 'CLOSE_ALL' then
+    update public.provider_positions
+       set status    = 'closed',
+           closed_at = now(),
+           updated_at = now()
+     where provider_id = new.provider_id
+       and status = 'open';
+  end if;
+
+  return new;
+end $$;
+
+drop trigger if exists copy_events_state on public.copy_events;
+create trigger copy_events_state
+  after insert on public.copy_events
+  for each row execute function public.copytrade_apply_event_state();
+
+-- 10d) Policy tulis untuk EA (peran anon bawaan anon key + x-ea-token)
+drop policy if exists "provider_positions_ea_insert" on public.provider_positions;
+create policy "provider_positions_ea_insert" on public.provider_positions
+  for insert to anon, authenticated
+  with check (public.ea_uid() is not null
+              and public.ea_uid() = provider_id
+              and coalesce(public.ea_role(), '') in ('PROVIDER','BOTH'));
+
+drop policy if exists "provider_positions_ea_update" on public.provider_positions;
+create policy "provider_positions_ea_update" on public.provider_positions
+  for update to anon, authenticated
+  using (public.ea_uid() is not null and public.ea_uid() = provider_id)
+  with check (public.ea_uid() is not null and public.ea_uid() = provider_id);
+
+-- return=representation pada POST copy_events: butuh policy SELECT untuk dirinya
+drop policy if exists "copy_events_ea_read" on public.copy_events;
+create policy "copy_events_ea_read" on public.copy_events
+  for select to anon, authenticated
+  using (public.ea_uid() is not null and public.ea_uid() = provider_id);
+
+-- EA CLIENT membaca event lewat EMBED PostgREST
+--   GET copy_deliveries?select=...,copy_events(id,kind,payload)
+-- Embed menghormati RLS tabel yang di-embed: tanpa policy ini, objek copy_events
+-- kembali null dan EA tidak tahu kind/payload apa yang harus dieksekusi.
+drop policy if exists "copy_events_ea_read_client" on public.copy_events;
+create policy "copy_events_ea_read_client" on public.copy_events
+  for select to anon, authenticated
+  using (public.ea_uid() is not null and exists (
+    select 1 from public.copy_deliveries d
+    where d.event_id = copy_events.id
+      and d.client_id = public.ea_uid()
+  ));
+
+-- heartbeat EA: baca + update HANYA baris tokennya sendiri.
+-- CATATAN PENTING: PostgreSQL menerapkan policy SELECT juga saat sebuah UPDATE
+-- mencari barisnya - tabel yang cuma punya policy UPDATE akan menghasilkan
+-- "UPDATE 0" tanpa error. Karena itu pasangan read+update di bawah ini wajib
+-- ada berdua (copy_deliveries sudah punya keduanya, ea_tokens belum).
+drop policy if exists "ea_tokens_ea_read" on public.ea_tokens;
+create policy "ea_tokens_ea_read" on public.ea_tokens
+  for select to anon, authenticated
+  using (public.ea_token_id() is not null and id = public.ea_token_id());
+
+drop policy if exists "ea_tokens_ea_update" on public.ea_tokens;
+create policy "ea_tokens_ea_update" on public.ea_tokens
+  for update to anon, authenticated
+  using (public.ea_token_id() is not null and id = public.ea_token_id())
+  with check (public.ea_token_id() is not null and id = public.ea_token_id());
+
+-- 10e) client_positions diturunkan dari ACK EA (PATCH copy_deliveries).
+--      EA client menyimpan mapping-nya di berkas lokal (MQL5/Files); tabel ini
+--      yang bikin dashboard web + client_copy_overview bisa menampilkan posisi
+--      yang sedang dicopy tanpa membaca terminal client.
+create or replace function public.copytrade_apply_ack_state()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_kind text;
+  v_pp uuid;
+  v_sym text;
+  v_sl numeric;
+  v_tp numeric;
+  v_entry numeric;
+begin
+  if new.status <> 'executed' or coalesce(old.status, '') = 'executed' then
+    return new;
+  end if;
+
+  select e.kind, e.provider_position_id, pp.symbol, pp.sl, pp.tp, pp.entry
+    into v_kind, v_pp, v_sym, v_sl, v_tp, v_entry
+  from public.copy_events e
+  left join public.provider_positions pp on pp.id = e.provider_position_id
+  where e.id = new.event_id;
+
+  if v_kind is null then
+    return new;
+  end if;
+
+  if v_kind = 'OPEN' then
+    insert into public.client_positions as cp (
+      client_id, provider_id, provider_position_id, client_ticket,
+      symbol, lots, state, sl, tp, opened_at
+    ) values (
+      new.client_id, new.provider_id, v_pp, new.client_ticket,
+      v_sym, new.lots, 'open', v_sl, v_tp, coalesce(new.executed_at, now())
+    )
+    on conflict do nothing;
+
+  elsif v_kind in ('CLOSE', 'CLOSE_ALL') then
+    update public.client_positions
+       set state = 'closed', closed_at = coalesce(new.executed_at, now()), updated_at = now()
+     where client_id = new.client_id
+       and state = 'open'
+       and (provider_position_id = v_pp
+            or (v_kind = 'CLOSE_ALL' and provider_id = new.provider_id));
+
+  elsif v_kind = 'PARTIAL_CLOSE' then
+    update public.client_positions
+       set lots = coalesce(new.lots, lots), updated_at = now()
+     where client_id = new.client_id and provider_position_id = v_pp and state = 'open';
+
+  else -- MODIFY_SL / MODIFY_TP
+    update public.client_positions
+       set sl = coalesce(v_sl, sl), tp = coalesce(v_tp, tp), updated_at = now()
+     where client_id = new.client_id and provider_position_id = v_pp and state = 'open';
+  end if;
+
+  return new;
+end $$;
+
+drop trigger if exists copy_deliveries_ack_state on public.copy_deliveries;
+create trigger copy_deliveries_ack_state
+  after update on public.copy_deliveries
+  for each row execute function public.copytrade_apply_ack_state();
