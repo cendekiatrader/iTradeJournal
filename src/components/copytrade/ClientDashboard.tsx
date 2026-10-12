@@ -127,6 +127,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ signedIn, onOp
   const [positions, setPositions] = useState<Awaited<ReturnType<typeof fetchClientPositions>>>([]);
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<CopySettings>(DEFAULT_COPY_SETTINGS);
   const [saving, setSaving] = useState(false);
@@ -145,6 +146,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ signedIn, onOp
     ]);
     setLinks(linksRes.links);
     setMissing(linksRes.missing);
+    setLoadError(linksRes.error);
     setTokens(tok);
     setDeliveries(del);
     setPositions(pos);
@@ -270,8 +272,13 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ signedIn, onOp
       {missing && (
         <div style={{ marginBottom: 14 }}>
           <EmptyNote warn>
-            CopyTrade is not active on this deployment yet - run <code className="ct-inline-code">supabase_copytrade.sql</code>{' '}
-            in the Supabase SQL editor, then reload.
+            CopyTrade is not installed in this Supabase project yet - run{' '}
+            <code className="ct-inline-code">supabase_copytrade.sql</code> in the SQL editor, then reload.
+            {loadError && (
+              <div className="ct-step-d" style={{ marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: '0.76rem' }}>
+                {loadError}
+              </div>
+            )}
           </EmptyNote>
         </div>
       )}

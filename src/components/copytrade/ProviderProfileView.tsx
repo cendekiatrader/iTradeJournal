@@ -39,6 +39,7 @@ export const ProviderProfileView: React.FC<ProviderProfileViewProps> = ({
   const [detail, setDetail] = useState<CopyProviderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [inactive, setInactive] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
   const [reason, setReason] = useState<string>(REPORT_REASONS[0]);
   const [note, setNote] = useState('');
@@ -53,6 +54,7 @@ export const ProviderProfileView: React.FC<ProviderProfileViewProps> = ({
       if (!alive) return;
       setDetail(res.detail);
       setInactive(res.missing && !res.detail);
+      setLoadError(res.error);
       setLoading(false);
     })();
     return () => {
@@ -99,8 +101,13 @@ export const ProviderProfileView: React.FC<ProviderProfileViewProps> = ({
       ) : !provider ? (
         <EmptyNote warn={inactive}>
           {inactive
-            ? 'CopyTrade is not active on this deployment yet - the database migration (supabase_copytrade.sql) has not been run.'
+            ? 'CopyTrade is not installed in this Supabase project yet - the database migration (supabase_copytrade.sql) has not been run.'
             : `No provider found for “${slug}”. The handle may have changed or the provider was removed.`}
+          {loadError && (
+            <div className="ct-step-d" style={{ marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: '0.76rem' }}>
+              {loadError}
+            </div>
+          )}
         </EmptyNote>
       ) : (
         <>

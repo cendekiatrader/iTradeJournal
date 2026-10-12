@@ -151,8 +151,13 @@ export const ProviderDashboard: React.FC<ProviderDashboardProps> = ({ signedIn, 
   if (panel?.missing) {
     return (
       <EmptyNote warn>
-        CopyTrade is not active on this deployment yet - run <code className="ct-inline-code">supabase_copytrade.sql</code> in
-        the Supabase SQL editor, then reload.
+        CopyTrade is not installed in this Supabase project yet - run{' '}
+        <code className="ct-inline-code">supabase_copytrade.sql</code> in the SQL editor, then reload.
+        {panel.error && (
+          <div className="ct-step-d" style={{ marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: '0.76rem' }}>
+            {panel.error}
+          </div>
+        )}
       </EmptyNote>
     );
   }

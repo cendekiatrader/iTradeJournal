@@ -84,17 +84,41 @@ export const EA_FILES: EaFile[] = [
   }
 ];
 
+/**
+ * Codes that mean "the CopyTrade objects are not in this project" (migration not
+ * run) as opposed to "something else failed". Everything that is NOT one of
+ * these must be shown to the user verbatim: the earlier blanket message
+ * ("not active yet") hid real failures and sent people back to re-run a
+ * migration that had already run.
+ */
+const MISSING_MIGRATION_HINT =
+  'CopyTrade is not installed in this Supabase project yet - run supabase_copytrade.sql in the SQL editor, then reload.';
+
+const MISSING_CODES = ['PGRST202', 'PGRST205', 'PGRST204', '42P01', '42883'];
 const MISSING_HINTS = [
   'could not find the function',
-  'does not exist',
+  'could not find the table',
   'schema cache',
+  'does not exist',
   'undefined table',
   'undefined function'
 ];
 
-const looksMissing = (message: string): boolean => {
-  const m = (message || '').toLowerCase();
+const looksMissing = (err: unknown): boolean => {
+  const code = err && typeof err === 'object' ? String((err as any).code || '') : '';
+  if (code && MISSING_CODES.includes(code)) return true;
+  const raw = typeof err === 'string' ? err : String((err as any)?.message || '');
+  const m = raw.toLowerCase();
   return MISSING_HINTS.some((h) => m.includes(h));
+};
+
+/** Full, honest description of a failure for the UI (code + message + details). */
+const errorText = (err: unknown): string => {
+  if (typeof err === 'string') return err;
+  const e = (err || {}) as any;
+  const bits = [e.message, e.details, e.hint].filter(Boolean).map(String);
+  const prefix = e.code ? `${e.code}: ` : '';
+  return `${prefix}${bits.join(' · ') || 'Request failed'}`;
 };
 
 /**
@@ -105,14 +129,13 @@ async function callRpc<T>(
   name: string,
   params?: Record<string, unknown>
 ): Promise<{ data: T | null; error: string | null; missing: boolean }> {
-  if (!supabase) return { data: null, error: 'Supabase not configured', missing: true };
+  if (!supabase) return { data: null, error: 'Supabase is not configured in this build.', missing: true };
   try {
     const { data, error } = await supabase.rpc(name, params as any);
     if (error) throw error;
     return { data: (data as T) ?? null, error: null, missing: false };
   } catch (err: any) {
-    const message = err?.message || 'Request failed';
-    return { data: null, error: message, missing: looksMissing(message) };
+    return { data: null, error: errorText(err), missing: looksMissing(err) };
   }
 }
 
@@ -237,8 +260,8 @@ export const applyAsProvider = async (input: {
     if (error) throw error;
     return { ok: true, slug: (data as any)?.slug || input.slug };
   } catch (err: any) {
-    const message = err?.message || 'Could not register as provider';
-    return { ok: false, error: looksMissing(message) ? 'CopyTrade is not active on this deployment yet.' : message };
+    const message = errorText(err);
+    return { ok: false, error: looksMissing(err) ? MISSING_MIGRATION_HINT : message };
   }
 };
 
@@ -265,8 +288,7 @@ export const reportProvider = async (input: {
     if (error) throw error;
     return { ok: true };
   } catch (err: any) {
-    const message = err?.message || 'Could not send the report';
-    return { ok: false, error: looksMissing(message) ? 'CopyTrade is not active on this deployment yet.' : message };
+    return { ok: false, error: looksMissing(err) ? MISSING_MIGRATION_HINT : errorText(err) };
   }
 };
 
@@ -553,12 +575,12 @@ const providerInfoMap = async (ids: string[]): Promise<Record<string, { slug: st
 };
 
 /** Links where I am the client. */
-export const fetchMyClientLinks = async (): Promise<{ links: MyLink[]; missing: boolean }> => {
-  if (!supabase) return { links: [], missing: true };
+export const fetchMyClientLinks = async (): Promise<{ links: MyLink[]; missing: boolean; error: string | null }> => {
+  if (!supabase) return { links: [], missing: true, error: 'Supabase is not configured in this build.' };
   try {
     const { data: auth } = await supabase.auth.getUser();
     const me = auth?.user?.id;
-    if (!me) return { links: [], missing: false };
+    if (!me) return { links: [], missing: false, error: null };
     const { data, error } = await supabase
       .from('copy_links')
       .select('id,provider_id,client_id,status,settings,runtime_state,requested_by,updated_at')
@@ -567,10 +589,9 @@ export const fetchMyClientLinks = async (): Promise<{ links: MyLink[]; missing: 
     if (error) throw error;
     const rows = (data || []) as LinkRaw[];
     const info = await providerInfoMap(Array.from(new Set(rows.map((r) => r.provider_id))));
-    return { links: rows.map((r) => mapLink(r, info[r.provider_id])), missing: false };
+    return { links: rows.map((r) => mapLink(r, info[r.provider_id])), missing: false, error: null };
   } catch (err: any) {
-    const message = err?.message || 'Could not load your CopyTrade links';
-    return { links: [], missing: looksMissing(message) };
+    return { links: [], missing: looksMissing(err), error: errorText(err) };
   }
 };
 
@@ -677,6 +698,7 @@ export interface ProviderPanel {
   stats: Record<string, any> | null;
   tokens: EaTokenRow[];
   missing: boolean;
+  error: string | null;
 }
 
 export const fetchProviderPanel = async (): Promise<ProviderPanel> => {
@@ -688,9 +710,10 @@ export const fetchProviderPanel = async (): Promise<ProviderPanel> => {
     pending: [],
     stats: null,
     tokens: [],
-    missing: false
+    missing: false,
+    error: null
   };
-  if (!supabase) return { ...empty, missing: true };
+  if (!supabase) return { ...empty, missing: true, error: 'Supabase is not configured in this build.' };
   try {
     const { slug, missing } = await fetchMyProvider();
     if (!slug) return { ...empty, missing };
@@ -720,10 +743,11 @@ export const fetchProviderPanel = async (): Promise<ProviderPanel> => {
       pending,
       stats: statsRes.data,
       tokens,
-      missing: false
+      missing: false,
+      error: null
     };
   } catch (err: any) {
-    return { ...empty, missing: looksMissing(err?.message || '') };
+    return { ...empty, missing: looksMissing(err), error: errorText(err) };
   }
 };
 
@@ -758,8 +782,7 @@ const rpcOk = async (name: string, params: Record<string, unknown>): Promise<Cop
     if (res.ok === false) return { ok: false, error: res.error || 'Rejected' };
     return { ok: true, slug: res.slug };
   } catch (err: any) {
-    const message = err?.message || 'Request failed';
-    return { ok: false, error: looksMissing(message) ? 'CopyTrade is not active on this deployment yet.' : message };
+    return { ok: false, error: looksMissing(err) ? MISSING_MIGRATION_HINT : errorText(err) };
   }
 };
 
@@ -848,8 +871,7 @@ export const createEaToken = async (input: { role: 'PROVIDER' | 'CLIENT' | 'BOTH
     if (error) throw error;
     return { ok: true, token };
   } catch (err: any) {
-    const message = err?.message || 'Could not save the token';
-    return { ok: false, error: looksMissing(message) ? 'CopyTrade is not active on this deployment yet.' : message };
+    return { ok: false, error: looksMissing(err) ? MISSING_MIGRATION_HINT : errorText(err) };
   }
 };
 

@@ -114,6 +114,7 @@ export const CopyTradeView: React.FC<CopyTradeViewProps> = ({
   const [rows, setRows] = useState<CopyLeaderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [inactive, setInactive] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [applyOpen, setApplyOpen] = useState(false);
   const [mySlug, setMySlug] = useState<string | null>(null);
   const [form, setForm] = useState({ displayName: '', slug: '', bio: '' });
@@ -131,6 +132,7 @@ export const CopyTradeView: React.FC<CopyTradeViewProps> = ({
       if (!alive) return;
       setRows(res.rows);
       setInactive(res.missing && res.rows.length === 0);
+      setLoadError(res.error);
       setLoading(false);
     })();
     return () => {
@@ -523,8 +525,13 @@ lots         = round DOWN to the broker volume step`}</pre>
         ) : rows.length === 0 ? (
           <EmptyNote warn={inactive}>
             {inactive
-              ? 'CopyTrade is not active on this deployment yet - the database migration (supabase_copytrade.sql) has not been run.'
+              ? 'CopyTrade is not installed in this Supabase project yet - the database migration (supabase_copytrade.sql) has not been run.'
               : 'No providers yet. Register as a provider above and your page appears here immediately.'}
+            {inactive && loadError && (
+              <div className="ct-step-d" style={{ marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: '0.76rem' }}>
+                {loadError}
+              </div>
+            )}
           </EmptyNote>
         ) : (
           <div className="ct-table-wrap">
