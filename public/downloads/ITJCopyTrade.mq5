@@ -610,20 +610,27 @@ void LogTransportError(const int err)
       Print("ITJ: WebRequest gagal, error ", err);
   }
 
+// Nilai input yang sudah dirapikan (trim). Diisi di OnInit.
+// Dipakai oleh seluruh lapisan HTTP supaya spasi/baris-baru hasil tempel dari
+// web app tidak membuat setiap request gagal tanpa penjelasan.
+string g_url = "";
+string g_key = "";
+string g_tok = "";
+
 // Panggil PostgREST. `path` contoh: "copy_events?select=id".
 // return = HTTP status, atau -1 kalau gagal di level transport.
 int HttpCall(const string method, const string path, const string body, string &out, const string prefer = "")
   {
    out = "";
-   if(StringLen(SupabaseUrl) == 0 || StringLen(AnonKey) == 0)
+   if(StringLen(g_url) == 0 || StringLen(g_key) == 0)
      { Print("ITJ: SupabaseUrl / AnonKey belum diisi."); return(-1); }
 
-   string url = TrimTrailingSlash(SupabaseUrl) + "/rest/v1/" + path;
+   string url = TrimTrailingSlash(g_url) + "/rest/v1/" + path;
    string hdrs = "apikey: " + AnonKey + "\r\n"
                  "Authorization: Bearer " + AnonKey + "\r\n"
                  "Accept: application/json\r\n"
                  "Content-Type: application/json\r\n"
-                 "x-ea-token: " + EaToken + "\r\n";
+                 "x-ea-token: " + g_tok + "\r\n";
    if(StringLen(prefer) > 0) hdrs += "Prefer: " + prefer + "\r\n";
 
    char data[];
@@ -2370,9 +2377,40 @@ void Heartbeat()
 //====================================================================
 int OnInit()
   {
-   if(StringLen(SupabaseUrl) == 0 || StringLen(AnonKey) == 0 || StringLen(EaToken) == 0)
+   // Rapikan input: menempel URL/key dari web app sering membawa spasi atau
+   // baris baru di ujung - panjangnya jadi > 0 sehingga lolos validasi, tapi
+   // setiap WebRequest gagal. Buang dulu sebelum diperiksa.
+   g_url  = SymTrim(SupabaseUrl);
+   g_key  = SymTrim(AnonKey);
+   g_tok  = SymTrim(EaToken);
+
+   // Sebutkan FIELD-nya satu per satu. MT5 hanya melaporkan "32767 (incorrect
+   // parameters)" tanpa memberi tahu field mana yang kurang, jadi tanpa ini
+   // pemasang EA tidak tahu apa yang harus diisi.
+   string kurang = "";
+   if(StringLen(g_url) == 0) kurang += " SupabaseUrl";
+   if(StringLen(g_key) == 0) kurang += " AnonKey";
+   if(StringLen(g_tok) == 0) kurang += " EaToken";
+
+   if(StringLen(kurang) > 0)
      {
-      Print("ITJ: SupabaseUrl / AnonKey / EaToken wajib diisi. EA berhenti.");
+      Print("ITJ: input wajib belum diisi ->", kurang,
+            ". Isi lewat jendela Properties EA (F7 saat EA terpilih), lalu OK lagi.");
+      Print("ITJ:   SupabaseUrl = https://<project>.supabase.co   (TANPA garis miring di akhir)");
+      Print("ITJ:   AnonKey     = anon/publishable key project Supabase");
+      Print("ITJ:   EaToken     = token dari web app, tab CopyTrade -> Client -> Generate EA token");
+      Print("ITJ: jangan lupa Tools > Options > Expert Advisors > Allow WebRequest untuk URL di atas.");
+      Comment("ITJCopyTrade BERHENTI - input wajib belum diisi:", kurang,
+              "\nBuka Properties EA (F7): SupabaseUrl, AnonKey, EaToken.",
+              "\nToken diambil dari web app: CopyTrade > Client > Generate EA token.",
+              "\nLalu Tools > Options > Expert Advisors > Allow WebRequest untuk URL Supabase.");
+      return(INIT_PARAMETERS_INCORRECT);
+     }
+
+   if(StringFind(g_url, "http") != 0)
+     {
+      Print("ITJ: SupabaseUrl harus dimulai dengan https:// - nilai sekarang: \"", g_url, "\"");
+      Comment("ITJCopyTrade BERHENTI - SupabaseUrl harus dimulai dengan https://\nNilai sekarang: ", g_url);
       return(INIT_PARAMETERS_INCORRECT);
      }
    if(PollSeconds < 1)   g_pollSec = 1;  else g_pollSec = PollSeconds;
@@ -2383,7 +2421,10 @@ int OnInit()
 
    if(g_isClient && LocalRiskPctCap > 100)
      {
-      Print("ITJ: LocalRiskPctCap > 100 tidak wajar. EA berhenti.");
+      Print("ITJ: LocalRiskPctCap = ", DoubleToString(LocalRiskPctCap, 2),
+            " tidak wajar (maksimum 100, artinya 100% balance per posisi). Set 0 kalau tidak dipakai.");
+      Comment("ITJCopyTrade BERHENTI - LocalRiskPctCap = ", DoubleToString(LocalRiskPctCap, 2),
+              " (maksimum 100; isi 0 kalau tidak dipakai).");
       return(INIT_PARAMETERS_INCORRECT);
      }
 
@@ -2411,6 +2452,7 @@ int OnInit()
 
    EventSetTimer(1); // gate 1 detik: provider diff tiap detik (PRD 6.5.1)
 
+   Comment("");
    Print("ITJ: mulai. role=", EnumToString(Role), " provider=", g_isProvider, " client=", g_isClient,
          " magicBase=", Magic, " demo=", (AccountInfoInteger(ACCOUNT_TRADE_MODE) == ACCOUNT_TRADE_MODE_DEMO));
    Print("ITJ: PERINGATAN - EA ini belum diuji di akun nyata; uji di akun DEMO lebih dulu.");
