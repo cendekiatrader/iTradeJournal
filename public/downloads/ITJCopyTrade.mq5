@@ -88,6 +88,16 @@ input bool            DebugDryRun         = false;       // TERSEMBUNYI - penguj
 input int             ModifyThrottleSeconds = 3;         // jeda minimum antar perubahan SL-TP (PRD 6.5.4)
 input int             MinModifyPoints     = 0;           // abaikan perubahan SL-TP lebih kecil dari X poin
 
+enum ENUM_ITJ_SLTP_MODE
+  {
+   SLTP_RELATIVE = 0, // RELATIVE - jarak SL/TP dipindah proporsional (aman lintas broker)
+   SLTP_ABSOLUTE = 1  // ABSOLUTE - harga provider apa adanya (hanya untuk akun identik)
+  };
+
+input ENUM_ITJ_SLTP_MODE SlTpMode        = SLTP_RELATIVE; // cara memindahkan SL/TP provider ke client
+input string          SymbolMap         = "";            // pemetaan simbol: XAUUSD=GOLD,US500=SPX500
+input bool            AutoResolveSymbol = true;          // cari otomatis kalau nama simbol beda (suffix/prefix)
+
 //=== KONSTANTA PERILAKU ============================================
 #define ITJ_MAX_PROVIDERS      32   // client bebas follow berapa pun, tapi array kita dibatasi
 #define ITJ_HTTP_TIMEOUT_MS    5000 // WebRequest blocking -> jangan terlalu panjang
@@ -1224,6 +1234,138 @@ bool GuardSession(const LinkSettings &s, string &why)
    return(ok);
   }
 
+//====================================================================
+// 11b. BROKER BERBEDA: nama simbol + perpindahan SL/TP
+//====================================================================
+// Broker client TIDAK harus sama dengan broker provider. Yang harus ada:
+//   1. simbolnya tersedia di broker client (nama boleh beda -> SymbolMap /
+//      AutoResolveSymbol);
+//   2. SL/TP dipindah sebagai JARAK, bukan harga absolut.
+// Nama simbol hanya dipakai SEKALI, saat OPEN: setelah posisi client ada,
+// MODIFY/PARTIAL/CLOSE mencari posisi lewat provider_position_id dan memakai
+// simbol milik posisi itu sendiri.
+#define ITJ_MAX_SYMMAP 64
+string g_symIn[ITJ_MAX_SYMMAP];    // nama di sisi provider
+string g_symOut[ITJ_MAX_SYMMAP];   // nama di broker client
+int    g_symCount = 0;
+
+string SymTrim(const string v)
+  {
+   string s = v;
+   StringTrimLeft(s);
+   StringTrimRight(s);
+   return(s);
+  }
+
+// Kunci pembanding: hanya huruf (dibesarkan) dan angka.
+// "XAUUSD.a" -> "XAUUSDA", "mXAUUSD" -> "MXAUUSD", "XAU/USD" -> "XAUUSD".
+string SymKey(const string s)
+  {
+   string out = "";
+   int n = StringLen(s);
+   for(int i = 0; i < n; i++)
+     {
+      ushort c = StringGetCharacter(s, i);
+      if(c >= 'a' && c <= 'z') c = (ushort)(c - 32);
+      if((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) out += ShortToString(c);
+     }
+   return(out);
+  }
+
+// Pasangan di input SymbolMap, format "XAUUSD=GOLD,US500=SPX500" (kiri = nama
+// provider, kanan = nama di broker client).
+string MapLookup(const string providerSym)
+  {
+   if(StringLen(SymTrim(SymbolMap)) == 0) return("");
+   string pairs[];
+   int n = StringSplit(SymbolMap, ',', pairs);
+   for(int i = 0; i < n; i++)
+     {
+      string kv[];
+      if(StringSplit(pairs[i], '=', kv) != 2) continue;
+      string k = SymKey(kv[0]);
+      if(StringLen(k) == 0) continue;
+      if(k == SymKey(providerSym)) return(SymTrim(kv[1]));
+     }
+   return("");
+  }
+
+bool SymbolUsable(const string sym)
+  {
+   if(StringLen(sym) == 0) return(false);
+   if(!SymbolSelect(sym, true)) return(false);
+   return(SymbolInfoInteger(sym, SYMBOL_SELECT) != 0);
+  }
+
+// Cari padanan otomatis di broker client (suffix/prefix broker: XAUUSD ->
+// XAUUSD.a, XAUUSDm, mXAUUSD, GOLD.a). Kembalikan "" kalau tidak ada atau
+// AMBIGU: menebak simbol yang salah jauh lebih berbahaya daripada melewati satu sinyal.
+string MatchBrokerSymbol(const string providerSym)
+  {
+   string base = SymKey(providerSym);
+   if(StringLen(base) < 2) return("");
+   string best = "";
+   int    bestScore = 999;
+   bool   tie = false;
+   int total = SymbolsTotal(false);          // semua simbol broker, bukan cuma Market Watch
+   for(int i = 0; i < total; i++)
+     {
+      string name = SymbolName(i, false);
+      string key  = SymKey(name);
+      int score = -1;
+      int rem = StringLen(key) - StringLen(base);
+      if(key == base)                                 score = 0;
+      else if(rem > 0 && StringFind(key, base) == 0 && rem <= 4)                 score = rem;         // XAUUSDxxx
+      else if(rem > 0 && StringFind(key, base) == StringLen(key) - StringLen(base) && rem <= 2) score = rem; // xxxXAUUSD
+      if(score < 0) continue;
+      if(score < bestScore) { bestScore = score; best = name; tie = false; }
+      else if(score == bestScore && name != best) tie = true;
+     }
+   if(tie)
+     { Print("ITJ: simbol ", providerSym, " ambigu di broker ini (kandidat ", best, ") - isi input SymbolMap"); return(""); }
+   return(best);
+  }
+
+// Nama simbol yang benar-benar dipakai di broker client (dengan cache).
+string ResolveClientSymbol(const string providerSym)
+  {
+   string key = SymKey(providerSym);
+   for(int i = 0; i < g_symCount; i++)
+      if(SymKey(g_symIn[i]) == key) return(g_symOut[i]);
+
+   string mapped = MapLookup(providerSym);
+   string found  = "";
+   if(StringLen(mapped) > 0 && SymbolUsable(mapped))      found = mapped;
+   else if(SymbolUsable(providerSym))                     found = providerSym;
+   else if(AutoResolveSymbol)                             found = MatchBrokerSymbol(providerSym);
+
+   if(StringLen(found) > 0)
+     {
+      // hanya hasil sukses yang di-cache, supaya simbol yang baru ditambahkan
+      // ke Market Watch tetap dicoba lagi nanti
+      if(g_symCount < ITJ_MAX_SYMMAP)
+        { g_symIn[g_symCount] = providerSym; g_symOut[g_symCount] = found; g_symCount++; }
+      if(found != providerSym)
+         Print("ITJ: simbol provider ", providerSym, " dipetakan ke ", found, " di broker ini");
+     }
+   return(found);
+  }
+
+// Harga absolut provider (SL/TP) -> harga di sisi client.
+// RELATIVE (default): yang dipindah adalah JARAK dari entry provider, proporsional
+// terhadap harga. Harga dua broker tidak pernah sama, jadi harga absolut membuat
+// risiko client menyimpang dari yang dia pilih (dan SL bisa mendarat di sisi yang
+// salah). ABSOLUTE hanya masuk akal untuk akun yang benar-benar identik.
+double LevelForClient(const double providerEntry, const double providerLevel,
+                      const double clientAnchor, const int absoluteMode)
+  {
+   if(providerLevel <= 0 || providerEntry <= 0 || clientAnchor <= 0) return(0);
+   if(absoluteMode) return(providerLevel);
+   double ratio = MathAbs(providerLevel - providerEntry) / providerEntry;
+   double dist  = ratio * clientAnchor;
+   return(providerLevel > providerEntry ? clientAnchor + dist : clientAnchor - dist);
+  }
+
 bool GuardSymbol(const LinkSettings &s, const string sym, string &why)
   {
    if(JsonArrayHasString(s.blockSymbolsJson, sym))
@@ -1593,14 +1735,21 @@ void AckDelivery(const string id, const string status, const string reason,
 // --- OPEN (PRD 6.1) ---
 void HandleOpen(const Delivery &d, const LinkSettings &s)
   {
-   string sym = d.symbol;
-   if(!SymbolSelect(sym, true))
-     { AckDelivery(d.id, "skipped", "simbol " + sym + " tidak tersedia di broker client", 0,0,0,0,0,0); return; }
-   if(!SymbolInfoInteger(sym, SYMBOL_SELECT))
-     { AckDelivery(d.id, "skipped", "simbol " + sym + " tidak ada di Market Watch", 0,0,0,0,0,0); return; }
-
+   // Daftar simbol di web app ditulis dengan nama PROVIDER, jadi guard memakai
+   // nama itu; eksekusinya memakai nama yang ada di broker client.
    string why = "";
-   if(!GuardSymbol(s, sym, why))      { AckDelivery(d.id, "skipped", why, 0,0,0,0,0,0); return; }
+   if(!GuardSymbol(s, d.symbol, why)) { AckDelivery(d.id, "skipped", why, 0,0,0,0,0,0); return; }
+
+   string sym = ResolveClientSymbol(d.symbol);
+   if(StringLen(sym) == 0)
+     {
+      AckDelivery(d.id, "skipped",
+         "simbol " + d.symbol + " tidak ada di broker client ini dan tidak ada padanannya. "
+         "Isi input SymbolMap (mis. " + d.symbol + "=NAMA_DI_BROKER) atau nyalakan AutoResolveSymbol",
+         0,0,0,0,0,0);
+      return;
+     }
+
    if(!GuardSession(s, why))          { AckDelivery(d.id, "skipped", why, 0,0,0,0,0,0); return; }
    if(!GuardSpread(s, sym, why))      { AckDelivery(d.id, "skipped", why, 0,0,0,0,0,0); return; }
    if(!GuardMaxPositions(s, why))     { AckDelivery(d.id, "skipped", why, 0,0,0,0,0,0); return; }
@@ -1626,11 +1775,13 @@ void HandleOpen(const Delivery &d, const LinkSettings &s)
    double point = SymbolInfoDouble(sym, SYMBOL_POINT);
    int digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
    double px = (d.side > 0) ? SymbolInfoDouble(sym, SYMBOL_ASK) : SymbolInfoDouble(sym, SYMBOL_BID);
+   // px = harga pasar client saat ini, dipakai sebagai jangkar supaya JARAK SL/TP
+   // provider terjaga berapa pun selisih harga antar broker.
    double sl = 0, tp = 0;
-   if(d.sl > 0) sl = NormalizeDouble(d.sl, digits);
+   if(d.sl > 0) sl = NormalizeDouble(LevelForClient(d.entry, d.sl, px, SlTpMode == SLTP_ABSOLUTE), digits);
    else if(s.slFallbackPoints > 0)
       sl = NormalizeDouble(d.side > 0 ? px - s.slFallbackPoints * point : px + s.slFallbackPoints * point, digits);
-   if(s.copyTp && d.tp > 0) tp = NormalizeDouble(d.tp, digits);
+   if(s.copyTp && d.tp > 0) tp = NormalizeDouble(LevelForClient(d.entry, d.tp, px, SlTpMode == SLTP_ABSOLUTE), digits);
 
    long mag = ClientMagicFor(d.providerId);
    string cmt = PositionComment(d.providerPositionId);
@@ -1749,8 +1900,13 @@ void HandleModify(const Delivery &d, const LinkSettings &s)
      }
 
    int digits = (int)SymbolInfoInteger(p.symbol, SYMBOL_DIGITS);
-   double newSl = NormalizeDouble(d.sl, digits);
-   double newTp = NormalizeDouble(s.copyTp ? d.tp : 0, digits);
+   // Jangkar = entry posisi client sendiri (bukan harga provider), supaya geseran
+   // SL/TP provider dipindah dengan jarak yang setara dan risiko tetap seperti
+   // yang dipilih client. Termasuk saat provider memindahkan SL ke titik break-even:
+   // jaraknya nol -> SL client juga di entry-nya sendiri.
+   double newSl = 0, newTp = 0;
+   if(d.sl > 0) newSl = NormalizeDouble(LevelForClient(d.entry, d.sl, p.entry, SlTpMode == SLTP_ABSOLUTE), digits);
+   if(s.copyTp && d.tp > 0) newTp = NormalizeDouble(LevelForClient(d.entry, d.tp, p.entry, SlTpMode == SLTP_ABSOLUTE), digits);
 
    // Idempotent (PRD 6.5.3): state di client sudah sama -> ack executed tanpa aksi.
    if(MathAbs(newSl - p.sl) < SymbolInfoDouble(p.symbol, SYMBOL_POINT) / 2.0 &&

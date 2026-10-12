@@ -854,6 +854,17 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ signedIn, onOp
                 </div>
               ))}
             </div>
+            <div className="ct-step-d" style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+              <strong>Your broker does not have to be the provider's.</strong> Lots come from your own balance and your
+              symbol's contract size, and the stop loss / take profit are carried over as <em>distances</em>, not as the
+              provider's price levels - two brokers never quote the same price, so copying levels verbatim would silently
+              change the risk you chose. The one condition is that the symbol must exist at your broker. If it is named
+              differently (XAUUSD vs GOLD, or a suffix such as XAUUSD.a), fill in the EA's{' '}
+              <code className="ct-inline-code">SymbolMap</code> input, e.g.{' '}
+              <code className="ct-inline-code">XAUUSD=GOLD,US500=SPX500</code>, or leave{' '}
+              <code className="ct-inline-code">AutoResolveSymbol</code> on to let the EA find it (it refuses to guess
+              when two candidates look equally good).
+            </div>
           </div>
         )}
       </section>

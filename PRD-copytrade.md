@@ -518,7 +518,58 @@ Pola sama untuk `UPDATE` (ack), `INSERT` event (role PROVIDER), dan `SELECT` pad
 | `LocalRiskPctCap` | 0 | >0 = cap lokal; EA pakai min(server, lokal) |
 | `ModifyThrottleSeconds` | 3 | jeda minimum antar publish/penerapan perubahan SL-TP (§6.5.4) |
 | `MinModifyPoints` | 0 | abaikan perubahan SL-TP yang lebih kecil dari X poin |
+| `SlTpMode` | `RELATIVE` | cara memindahkan SL/TP provider ke client — lihat §6.6 |
+| `SymbolMap` | "" | pemetaan nama simbol, `XAUUSD=GOLD,US500=SPX500` — lihat §6.7 |
+| `AutoResolveSymbol` | true | cari otomatis nama simbol di broker client kalau beda (suffix/prefix) |
 | `DebugDryRun` | false | **tersembunyi, hanya untuk pengujian internal** — bukan fitur produk (keputusan 12) |
+
+### 6.6 Perpindahan SL/TP: JARAK, bukan harga (broker boleh berbeda)
+
+Dua broker **tidak pernah** punya harga yang sama. Karena itu harga absolut provider
+tidak boleh dipasang apa adanya di client — contoh nyata: provider buy XAUUSD di
+2400.00 dengan SL 2397.50 (risiko 2.50), client dapat fill di 2401.50; kalau SL
+ditempel di harga absolut 2397.50, risiko client jadi 4.00 — **60% lebih besar dari
+yang dia pilih**, tanpa peringatan. Kalau selisihnya lebih besar lagi, SL bisa
+mendarat di sisi yang salah.
+
+Karena itu EA memindahkan **jarak**, bukan harga:
+
+```
+jarak_relatif = |provider_entry - provider_sl| / provider_entry
+sl_client     = client_entry ± (jarak_relatif × client_entry)
+```
+
+- Anchor saat OPEN = harga pasar client saat order dikirim; saat MODIFY = entry posisi
+  client itu sendiri (jadi saat provider memindahkan SL ke break-even, jaraknya nol →
+  SL client juga tepat di entry-nya).
+- Berlaku juga untuk TP, dan untuk kasus digit berbeda antar broker (XAUUSD 2 desimal
+  vs 3 desimal) karena yang dipindah adalah rasio, bukan jumlah poin.
+- `slFallbackPoints` tetap dihitung dalam poin **simbol client** (memang sudah benar).
+- Input `SlTpMode = ABSOLUTE` disediakan hanya untuk akun yang benar-benar identik.
+
+### 6.7 Broker client berbeda: nama simbol
+
+Broker client **tidak harus sama**. Beberapa hal memang sudah otomatis menyesuaikan
+karena selalu diambil dari simbol milik client: contract size (`SYMBOL_TRADE_TICK_VALUE`
+/ `TICK_SIZE`), volume step/min/max/limit, digits, minimum stops level (SL/TP yang
+terlalu dekat digeser ke jarak minimum broker), spread, dan deviation/slippage.
+
+Yang tidak otomatis adalah **namanya**. Simbol harus ada di broker client; kalau
+namanya beda (`XAUUSD` vs `GOLD`, atau suffix seperti `XAUUSD.a`/`XAUUSDm`), EA:
+
+1. memakai input `SymbolMap` kalau ada pasangannya (kiri = nama provider, kanan = nama
+   di broker client);
+2. kalau tidak, memakai nama yang sama persis;
+3. kalau tidak ada dan `AutoResolveSymbol` menyala, mencari padanan terbaik di seluruh
+   daftar simbol broker (cocok penuh lebih dulu, lalu suffix/prefix pendek);
+4. kalau tidak ada padanan **atau ambigu** (dua kandidat sama bagusnya) → sinyal
+   **dilewati** dengan alasan yang tercatat di log eksekusi. Menebak simbol salah jauh
+   lebih berbahaya daripada melewatkan satu entry.
+
+Daftar simbol di web app (`allowSymbols`/`blockSymbols`) ditulis dengan nama
+**provider**, dan guard-nya dievaluasi dengan nama itu; eksekusi memakai nama broker.
+Nama simbol hanya diselesaikan SEKALI saat OPEN — MODIFY/PARTIAL/CLOSE mencari posisi
+lewat `provider_position_id` dan memakai simbol milik posisi client itu sendiri.
 
 ### 8.2 Loop
 
