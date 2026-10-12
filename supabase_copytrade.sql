@@ -9,7 +9,22 @@
 -- Prerequisite: supabase_admin_panel.sql (public.admins + public.is_admin()).
 -- ============================================================
 
-create extension if not exists "pgcrypto";   -- digest() sha256 token EA + gen_random_bytes()
+-- pgcrypto: SUPABASE memasangnya di schema `extensions`, bukan `public`.
+-- Fungsi yang memanggil digest() punya `set search_path`, jadi ekstensinya harus
+-- ada di schema yang disebut search_path itu (lihat ea_token_hash()).
+-- Tanpa ini, permintaan pertama dari web/EA gagal dengan
+--   42883: function digest(text, unknown) does not exist
+-- karena digest() tidak terlihat dari search_path `public`.
+do $$
+begin
+  if not exists (select 1 from pg_extension where extname = 'pgcrypto') then
+    begin
+      execute 'create extension pgcrypto with schema extensions';   -- layout Supabase
+    exception when others then
+      execute 'create extension pgcrypto';                          -- Postgres biasa: public
+    end;
+  end if;
+end $$;
 
 -- ============================================================
 -- 1) TABEL (§7.1 + §7.3)
@@ -173,12 +188,23 @@ create table if not exists public.telegram_bots (
   provider_id uuid primary key references auth.users(id) on delete cascade,
   bot_username text,
   token_enc bytea,                                   -- pgp_sym_encrypt(token, TG_TOKEN_KEY)
-  webhook_secret text not null default encode(gen_random_bytes(16), 'hex'),
+  -- gen_random_uuid() = fungsi INTI Postgres (13+), bukan pgcrypto. Jangan pakai
+  -- gen_random_bytes() di DEFAULT kolom: itu milik pgcrypto yang di Supabase
+  -- tinggal di schema `extensions`, sedangkan DEFAULT dievaluasi dengan
+  -- search_path pemanggil -> INSERT gagal `42883 function gen_random_bytes(...) does not exist`.
+  webhook_secret text not null default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
   is_active boolean not null default false,
   linked_at timestamptz,
   last_error text,
   updated_at timestamptz not null default now()
 );
+
+-- Untuk instalasi yang SUDAH menjalankan versi file sebelumnya: `create table if
+-- not exists` di atas tidak mengubah default kolom yang sudah ada, sehingga
+-- `telegram_bots` masih menyimpan default pgcrypto yang gagal di Supabase.
+-- Perintah idempotent ini memperbaikinya tanpa menyentuh data.
+alter table public.telegram_bots
+  alter column webhook_secret set default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '');
 
 -- 1m) Tautan chat_id client ke bot provider
 create table if not exists public.telegram_links (
@@ -243,6 +269,10 @@ create or replace function public.ea_token_hash()
 returns text
 language sql
 stable
+-- `extensions` WAJIB ada di sini: di Supabase digest() tinggal di schema itu.
+-- (Fungsi ini tidak security definer - hanya membaca GUC header - jadi menambah
+--  schema ke search_path-nya tidak membuka jalur eskalasi.)
+set search_path = public, extensions
 as $$
   select encode(digest(t.val, 'sha256'), 'hex')
   from (

@@ -94,7 +94,13 @@ export const EA_FILES: EaFile[] = [
 const MISSING_MIGRATION_HINT =
   'CopyTrade is not installed in this Supabase project yet - run supabase_copytrade.sql in the SQL editor, then reload.';
 
-const MISSING_CODES = ['PGRST202', 'PGRST205', 'PGRST204', '42P01', '42883'];
+// 42883 (undefined_function) sengaja TIDAK di sini: itu juga muncul saat sebuah
+// objek migrasi ada tapi dependensinya tidak resolvable (mis. pgcrypto di schema
+// `extensions` dengan search_path hanya `public`). Dahulu error itu ditampilkan
+// sebagai "belum dimigrasi" dan menyesatkan. "Belum dimigrasi" yang sungguhan
+// datang sebagai PGRST202/205/204 (PostgREST tidak menemukan fungsi/tabel) atau
+// 42P01 (relation does not exist).
+const MISSING_CODES = ['PGRST202', 'PGRST205', 'PGRST204', '42P01'];
 const MISSING_HINTS = [
   'could not find the function',
   'could not find the table',
