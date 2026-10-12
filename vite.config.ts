@@ -3,7 +3,11 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: './',
+  // MUST stay absolute ('/'): with './' the built index.html references assets
+  // relatively, so a deep route like /copytrade/provider/<slug> or /blog/<slug>
+  // resolves them as /copytrade/provider/assets/*.js - the server answers with
+  // index.html, the module fails to parse and the page renders blank.
+  base: '/',
   plugins: [react()],
   server: {
     host: true,

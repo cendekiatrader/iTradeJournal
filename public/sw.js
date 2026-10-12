@@ -1,4 +1,4 @@
-const CACHE_NAME = 'itradejournal-v1.2';
+const CACHE_NAME = 'itradejournal-v1.3';
 const PRECACHE = [
   './',
   './index.html',
@@ -50,6 +50,11 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
+
+  // Downloadable artifacts (the CopyTrade MT5 Expert Advisor): always straight
+  // from the network. The filename does not change between releases, so a cached
+  // copy would keep serving an old EA after a new build.
+  if (url.pathname.startsWith('/downloads/')) return;
 
   if (url.pathname.includes('/assets/')) {
     // Build output is content-hashed and immutable: cache-first, fetch once.

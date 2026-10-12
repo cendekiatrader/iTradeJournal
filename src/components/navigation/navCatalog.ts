@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   Newspaper,
   Target,
+  ArrowLeftRight,
   Settings as SettingsIcon
 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export type NavTab =
   | 'calculator'
   | 'coaching'
   | 'blog'
+  | 'copytrade'
   | 'settings';
 
 export type ModuleTier = 'core' | 'advanced';
@@ -52,6 +54,7 @@ export const NAV_MODULES: NavModuleDef[] = [
   { id: 'accounts', label: 'Account Manager', icon: WalletCards, tier: 'core' },
   { id: 'coaching', label: 'Coaching', icon: GraduationCap, tier: 'core' },
   { id: 'blog', label: 'Blog', icon: Newspaper, tier: 'core' },
+  { id: 'copytrade', label: 'CopyTrade', icon: ArrowLeftRight, tier: 'core' },
   { id: 'workspace', label: 'Workspace', icon: LayoutGrid, tier: 'advanced' },
   { id: 'analytics', label: 'Analytics & Setups', icon: BarChart3, tier: 'advanced' },
   { id: 'playbook', label: 'Playbook', icon: BookMarked, tier: 'advanced' },

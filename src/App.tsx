@@ -51,6 +51,10 @@ const AdminApp = lazy(() => import('./admin/AdminApp').then((m) => ({ default: m
 const CoachingView = lazy(() => import('./components/coaching/CoachingView').then((m) => ({ default: m.CoachingView })));
 const PlaybookView = lazy(() => import('./components/playbook/PlaybookView').then((m) => ({ default: m.PlaybookView })));
 const WorkspaceView = lazy(() => import('./components/workspace/WorkspaceView').then((m) => ({ default: m.WorkspaceView })));
+// Public CopyTrade pages: kept out of the core bundle - visitors arriving from a
+// shared provider link should not download the journal to read one profile.
+const CopyTradeView = lazy(() => import('./components/copytrade/CopyTradeView').then((m) => ({ default: m.CopyTradeView })));
+const ProviderProfileView = lazy(() => import('./components/copytrade/ProviderProfileView').then((m) => ({ default: m.ProviderProfileView })));
 
 const ViewLoading: React.FC = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '90px 20px', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
@@ -87,6 +91,32 @@ const readBlogRoute = (): BlogRoute => {
   if (hash.startsWith('#/blog/')) {
     const slug = decodeURIComponent(hash.slice('#/blog/'.length)).split('?')[0];
     return { slug: slug || null };
+  }
+  return null;
+};
+
+/**
+ * Public CopyTrade routes.
+ *
+ * `/copytrade` is the landing + provider list, `/copytrade/provider/<slug>` is a
+ * provider's public page. Both work as real paths (see the Vercel rewrites) and
+ * as hash routes, and both must be reachable while signed out so a shared
+ * provider link can act as a referral link.
+ */
+type CopyTradeRoute = { providerSlug: string | null } | null;
+
+const readCopyTradeRoute = (): CopyTradeRoute => {
+  const path = window.location.pathname.replace(/\/+$/, '');
+  if (path === '/copytrade') return { providerSlug: null };
+  if (path.startsWith('/copytrade/provider/')) {
+    const slug = decodeURIComponent(path.slice('/copytrade/provider/'.length)).split('?')[0];
+    return { providerSlug: slug || null };
+  }
+  const hash = window.location.hash;
+  if (hash === '#/copytrade' || hash === '#/copytrade/') return { providerSlug: null };
+  if (hash.startsWith('#/copytrade/provider/')) {
+    const slug = decodeURIComponent(hash.slice('#/copytrade/provider/'.length)).split('?')[0];
+    return { providerSlug: slug || null };
   }
   return null;
 };
@@ -133,6 +163,7 @@ const MainApp: React.FC = () => {
 
   // Public Blog Route (/blog, /blog/slug, #/blog, #/blog/slug)
   const [blogRoute, setBlogRoute] = useState<BlogRoute>(readBlogRoute);
+  const [copyTradeRoute, setCopyTradeRoute] = useState<CopyTradeRoute>(readCopyTradeRoute);
 
   // UI preferences (dim / performance / Quick Risk dock) — kept in sync with Settings
   const [uiPrefs, setUiPrefs] = useState<UiPrefs>(getUiPrefs);
@@ -146,6 +177,7 @@ const MainApp: React.FC = () => {
     const handleHashChange = () => {
       const hash = window.location.hash;
       setBlogRoute(readBlogRoute());
+      setCopyTradeRoute(readCopyTradeRoute());
       if (hash.startsWith('#/review/')) {
         setReviewToken(hash.replace('#/review/', '').split('?')[0]);
         setPublicUsername(null);
@@ -385,6 +417,32 @@ const MainApp: React.FC = () => {
     window.location.hash = '';
   }, []);
 
+  /** CopyTrade navigation - same real-path/hash dance as the blog. */
+  const openCopyTradeRoute = useCallback((providerSlug: string | null) => {
+    setCopyTradeRoute({ providerSlug });
+    const onPath = window.location.pathname.replace(/\/+$/, '').startsWith('/copytrade');
+    if (onPath) {
+      window.history.pushState(
+        null,
+        '',
+        providerSlug ? `/copytrade/provider/${encodeURIComponent(providerSlug)}` : '/copytrade'
+      );
+      return;
+    }
+    const nextHash = providerSlug ? `#/copytrade/provider/${encodeURIComponent(providerSlug)}` : '#/copytrade';
+    if (window.location.hash !== nextHash) window.location.hash = nextHash;
+  }, []);
+
+  /** Leave CopyTrade and go back to the journal app. */
+  const closeCopyTradeRoute = useCallback(() => {
+    setCopyTradeRoute(null);
+    if (window.location.pathname.replace(/\/+$/, '').startsWith('/copytrade')) {
+      window.location.href = '/';
+      return;
+    }
+    window.location.hash = '';
+  }, []);
+
   /**
    * Single navigation entry point: refuses to jump to a module the user has hidden
    * (progressive disclosure) and points them at Settings instead.
@@ -399,6 +457,11 @@ const MainApp: React.FC = () => {
     // The blog is a public page, not a journal module: leave the app shell for it.
     if (tab === 'blog') {
       openBlogRoute(null);
+      return;
+    }
+    // CopyTrade is public as well: provider pages double as shareable links.
+    if (tab === 'copytrade') {
+      openCopyTradeRoute(null);
       return;
     }
     setActiveTab(tab);
@@ -450,6 +513,41 @@ const MainApp: React.FC = () => {
           initialMode={authMode}
         />
       </>
+    );
+  }
+
+  // Public CopyTrade: /copytrade or /copytrade/provider/<slug>. Reachable signed out.
+  if (copyTradeRoute) {
+    return (
+      <Suspense fallback={<ViewLoading />}>
+        {copyTradeRoute.providerSlug ? (
+          <ProviderProfileView
+            slug={copyTradeRoute.providerSlug}
+            onNavigate={openCopyTradeRoute}
+            onBackToApp={closeCopyTradeRoute}
+            onOpenAuth={(mode) => {
+              setAuthMode(mode);
+              setAuthModalOpen(true);
+            }}
+            signedIn={Boolean(user)}
+          />
+        ) : (
+          <CopyTradeView
+            onNavigate={openCopyTradeRoute}
+            onBackToApp={closeCopyTradeRoute}
+            onOpenAuth={(mode) => {
+              setAuthMode(mode);
+              setAuthModalOpen(true);
+            }}
+            signedIn={Boolean(user)}
+          />
+        )}
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          initialMode={authMode}
+        />
+      </Suspense>
     );
   }
 

@@ -18,6 +18,7 @@ import {
   WalletCards,
   Calculator,
   Target,
+  ArrowLeftRight,
   Plus,
   Eye,
   EyeOff,
@@ -71,6 +72,7 @@ const PAGES: Array<{ id: NavTab; label: string; hint: string; icon: React.ReactN
   { id: 'accounts', label: 'Account Manager', hint: 'M', icon: <WalletCards size={15} /> },
   { id: 'calculator', label: 'Position Size Calc', hint: 'C', icon: <Calculator size={15} /> },
   { id: 'blog', label: 'Blog articles', hint: '', icon: <Newspaper size={15} /> },
+  { id: 'copytrade', label: 'CopyTrade (MT5 copy trading)', hint: '', icon: <ArrowLeftRight size={15} /> },
   { id: 'settings', label: 'Settings', hint: 'S', icon: <SettingsIcon size={15} /> }
 ];
 
