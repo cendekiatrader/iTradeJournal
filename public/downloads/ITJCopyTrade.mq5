@@ -155,6 +155,21 @@ struct PosInfo
    datetime opened;
   };
 
+// Pending order milik provider (PRD 15).
+struct OrderInfo
+  {
+   long     ticket;
+   string   symbol;
+   string   otype;        // buy_limit | sell_limit | buy_stop | sell_stop | buy_stop_limit | sell_stop_limit
+   double   price;        // ORDER_PRICE_OPEN
+   double   sl;
+   double   tp;
+   double   volume;       // ORDER_VOLUME_CURRENT
+   long     magic;
+   bool     hasExpiration;
+   datetime expiration;
+  };
+
 // Satu baris copy_deliveries yang sudah di-parse.
 struct Delivery
   {
@@ -227,6 +242,10 @@ string   g_knownProviders[];
 int      g_knownProviderIdx[];
 
 LinkSettings g_links[];   // cache setelan per link (provider)
+
+// Pending order provider: snapshot untuk diff (PRD 15.2) + batas ukuran.
+#define ITJ_MAX_ORDER_SNAPSHOT 64
+OrderInfo g_oPrev[];
 string       g_respHeaders = "";
 bool         g_missedLogged = false;   // supaya log "missed" tidak spam
 long         g_lastRev      = -1;      // pola `rev` (PRD 2.2)
@@ -1041,6 +1060,161 @@ void ProviderDiff()
    // Simpan snapshot baru sebagai basis diff berikutnya.
    ArrayResize(g_pPrev, cn);
    for(int i = 0; i < cn; i++) g_pPrev[i] = cur[i];
+  }
+
+//====================================================================
+// 9b. PENDING ORDER PROVIDER (PRD 15)
+//====================================================================
+string OrderTypeToString(const ENUM_ORDER_TYPE t)
+  {
+   switch(t)
+     {
+      case ORDER_TYPE_BUY_LIMIT:       return("buy_limit");
+      case ORDER_TYPE_SELL_LIMIT:      return("sell_limit");
+      case ORDER_TYPE_BUY_STOP:        return("buy_stop");
+      case ORDER_TYPE_SELL_STOP:       return("sell_stop");
+      case ORDER_TYPE_BUY_STOP_LIMIT:  return("buy_stop_limit");
+      case ORDER_TYPE_SELL_STOP_LIMIT: return("sell_stop_limit");
+     }
+   return("");   // bukan pending order
+  }
+
+bool ReadOrderByTicket(const long ticket, OrderInfo &o)
+  {
+   if(!OrderSelect((ulong)ticket)) return(false);
+   long st = (long)OrderGetInteger(ORDER_STATE);
+   if(st > ORDER_STATE_PARTIAL) return(false);        // terisi / dibatalkan / kedaluwarsa
+   o.ticket = ticket;
+   o.symbol = OrderGetString(ORDER_SYMBOL);
+   o.otype  = OrderTypeToString((ENUM_ORDER_TYPE)OrderGetInteger(ORDER_TYPE));
+   if(StringLen(o.otype) == 0) return(false);
+   o.price  = OrderGetDouble(ORDER_PRICE_OPEN);
+   o.sl     = OrderGetDouble(ORDER_SL);
+   o.tp     = OrderGetDouble(ORDER_TP);
+   o.volume = OrderGetDouble(ORDER_VOLUME_CURRENT);
+   o.magic  = (long)OrderGetInteger(ORDER_MAGIC);
+   o.hasExpiration = ((ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME) == ORDER_TIME_SPECIFIED);
+   o.expiration    = o.hasExpiration ? (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION) : 0;
+   return(true);
+  }
+
+int CollectOrders(OrderInfo &out[])
+  {
+   ArrayResize(out, 0);
+   int total = OrdersTotal();
+   for(int i = 0; i < total; i++)
+     {
+      ulong t = OrderGetTicket(i);
+      if(t == 0) continue;
+      OrderInfo o;
+      if(!ReadOrderByTicket((long)t, o)) continue;
+      if(PublishMode == PUBLISH_MAGIC_ONLY && o.magic == 0) continue;
+      int k = ArraySize(out);
+      if(k >= ITJ_MAX_ORDER_SNAPSHOT) break;
+      ArrayResize(out, k + 1);
+      out[k] = o;
+     }
+   return(ArraySize(out));
+  }
+
+int OrderPrevIndex(const long ticket, const int count)
+  {
+   for(int i = 0; i < count; i++)
+      if(g_oPrev[i].ticket == ticket) return(i);
+   return(-1);
+  }
+
+// Harga pasar provider saat order ditempatkan - dasar terjemahan jarak relatif di
+// sisi client (PRD 15.1). Mid (ask+bid)/2 supaya netral terhadap sisi order.
+double MarketRefOf(const string sym)
+  {
+   double a = SymbolInfoDouble(sym, SYMBOL_ASK);
+   double b = SymbolInfoDouble(sym, SYMBOL_BID);
+   if(a > 0 && b > 0) return((a + b) / 2.0);
+   return(MathMax(a, b));
+  }
+
+// Payload SELALU memuat state lengkap order (bukan delta), sama seperti posisi.
+string OrderPayload(const OrderInfo &o, const double marketRef, const double oldPrice)
+  {
+   string j = "{";
+   j += "\"symbol\":" + JsonStr(o.symbol);
+   j += ",\"order_type\":" + JsonStr(o.otype);
+   j += ",\"price\":" + JsonNum(o.price);
+   j += ",\"sl\":" + JsonNum(o.sl);
+   j += ",\"tp\":" + JsonNum(o.tp);
+   j += ",\"volume\":" + JsonNum(o.volume);
+   j += ",\"market_ref\":" + JsonNum(marketRef);
+   j += ",\"expiration\":" + ((o.hasExpiration && o.expiration > 0) ? JsonStr(IsoUtc(o.expiration)) : "null");
+   j += ",\"magic\":" + IntegerToString(o.magic);
+   if(oldPrice > 0) j += ",\"old_price\":" + JsonNum(oldPrice);
+   j += "}";
+   return(j);
+  }
+
+// Order yang hilang karena TERISI bukan "dibatalkan": posisi hasilnya dipublikasikan
+// oleh diff posisi (OPEN), jadi jangan kirim CANCEL_ORDER untuk kasus itu.
+bool OrderFilledInHistory(const long ticket)
+  {
+   if(HistoryOrderSelect((ulong)ticket))
+     {
+      long st = (long)HistoryOrderGetInteger((ulong)ticket, ORDER_STATE);
+      if(st == ORDER_STATE_FILLED || st == ORDER_STATE_PARTIAL) return(true);
+     }
+   return(false);
+  }
+
+void ProviderDiffOrders()
+  {
+   OrderInfo cur[];
+   int cn = CollectOrders(cur);
+
+   // 1) order baru -> PLACE_ORDER
+   for(int i = 0; i < cn; i++)
+     {
+      if(OrderPrevIndex(cur[i].ticket, ArraySize(g_oPrev)) >= 0) continue;
+      string pid = "";
+      string pend[];
+      PublishEvent("PLACE_ORDER", OrderPayload(cur[i], MarketRefOf(cur[i].symbol), 0), cur[i].ticket, pid, pend);
+      ThrottleTouch(cur[i].ticket, TimeCurrent());
+     }
+
+   // 2) order hilang -> CANCEL_ORDER (kecuali terbukti sudah terisi)
+   for(int i = 0; i < ArraySize(g_oPrev); i++)
+     {
+      if(OrderPrevIndex(g_oPrev[i].ticket, cn) >= 0) continue;
+      if(OrderFilledInHistory(g_oPrev[i].ticket)) continue;
+      string pid = "";
+      string pend[];
+      PublishEvent("CANCEL_ORDER", OrderPayload(g_oPrev[i], 0, 0), g_oPrev[i].ticket, pid, pend);
+     }
+
+   // 3) perubahan -> MODIFY_ORDER (state lengkap, bukan delta)
+   for(int i = 0; i < cn; i++)
+     {
+      int j = OrderPrevIndex(cur[i].ticket, ArraySize(g_oPrev));
+      if(j < 0) continue;
+      OrderInfo old = g_oPrev[j];
+      double pt = SymbolInfoDouble(cur[i].symbol, SYMBOL_POINT);
+
+      bool priceCh = MathAbs(cur[i].price  - old.price)  > pt / 2.0;
+      bool slCh    = MathAbs(cur[i].sl     - old.sl)     > pt / 2.0;
+      bool tpCh    = MathAbs(cur[i].tp     - old.tp)     > pt / 2.0;
+      bool volCh   = MathAbs(cur[i].volume - old.volume) > 0.0000001;
+      bool expCh   = (cur[i].hasExpiration != old.hasExpiration) || (cur[i].expiration != old.expiration);
+      if(!priceCh && !slCh && !tpCh && !volCh && !expCh) continue;
+
+      if(TimeCurrent() - ThrottleLast(cur[i].ticket) < ModifyThrottleSeconds) continue;
+
+      string pid = "";
+      string pend[];
+      if(PublishEvent("MODIFY_ORDER", OrderPayload(cur[i], MarketRefOf(cur[i].symbol), old.price),
+                      cur[i].ticket, pid, pend))
+         ThrottleTouch(cur[i].ticket, TimeCurrent());
+     }
+
+   ArrayResize(g_oPrev, cn);
+   for(int i = 0; i < cn; i++) g_oPrev[i] = cur[i];
   }
 
 //====================================================================
@@ -2512,8 +2686,12 @@ void ShowStatus()
          s += "Terakhir dilewati: " + g_lastSkip + "\n";
      }
    else
-      s += StringFormat("Mode provider (publish): %s   posisi terpantau: %d\n",
-                        EnumToString(PublishMode), posOwn);
+     {
+      OrderInfo ord[];
+      int ordN = CollectOrders(ord);
+      s += StringFormat("Mode provider (publish): %s   posisi: %d   pending order: %d\n",
+                        EnumToString(PublishMode), posOwn, ordN);
+     }
 
    Comment(s);
   }
@@ -2647,6 +2825,7 @@ void OnTimer()
       if(now - g_lastSnapProv >= g_snapSec || g_dirty)
         {
          ProviderDiff();
+         ProviderDiffOrders();
          g_dirty = false;
         }
       if(g_lastSnapProv == 0 || now - g_lastSnapProv >= g_snapSec)
@@ -2695,7 +2874,10 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
      {
       if(trans.type == TRADE_TRANSACTION_POSITION ||
          trans.type == TRADE_TRANSACTION_DEAL_ADD ||
-         trans.type == TRADE_TRANSACTION_DEAL_UPDATE)
+         trans.type == TRADE_TRANSACTION_DEAL_UPDATE ||
+         trans.type == TRADE_TRANSACTION_ORDER_ADD ||      // PRD 15: pending order
+         trans.type == TRADE_TRANSACTION_ORDER_UPDATE ||
+         trans.type == TRADE_TRANSACTION_ORDER_DELETE)
          g_dirty = true;
      }
    if(g_isClient)
