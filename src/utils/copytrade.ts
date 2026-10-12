@@ -607,9 +607,16 @@ export const fetchMyClientLinks = async (): Promise<{ links: MyLink[]; missing: 
 export const fetchMyEaTokens = async (): Promise<EaTokenRow[]> => {
   if (!supabase) return [];
   try {
+    // Filter eksplisit `client_id = me` - JANGAN bergantung pada RLS saja. Untuk
+    // akun admin, RLS sendiri tidak cukup: policy admin_all membuat SEMUA baris
+    // token user lain ikut terambil dan tampil di dasbor ini.
+    const { data: auth } = await supabase.auth.getUser();
+    const me = auth?.user?.id;
+    if (!me) return [];
     const { data, error } = await supabase
       .from('ea_tokens')
       .select('id,label,role,active,last_seen,terminal_build,account_login,account_server,is_demo,leverage,created_at')
+      .eq('client_id', me)
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data || []).map((r: any) => ({
@@ -634,12 +641,18 @@ export const fetchMyEaTokens = async (): Promise<EaTokenRow[]> => {
 export const fetchMyDeliveries = async (limit = 60): Promise<DeliveryRow[]> => {
   if (!supabase) return [];
   try {
+    // Sama seperti token: filter eksplisit, karena admin_all (dulu) membuat log
+    // eksekusi semua client ikut terbaca.
+    const { data: auth } = await supabase.auth.getUser();
+    const me = auth?.user?.id;
+    if (!me) return [];
     const { data, error } = await supabase
       .from('copy_deliveries')
       .select(
         'id,status,lots,risk_amount,risk_pct,fill_price,slippage_points,skip_reason,fail_reason,ea_balance,ea_equity,executed_at,created_at,' +
           'copy_events(kind,payload)'
       )
+      .eq('client_id', me)
       .order('created_at', { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -675,9 +688,14 @@ export const fetchClientPositions = async (): Promise<
 > => {
   if (!supabase) return [];
   try {
+    // Filter eksplisit (lihat catatan di fetchMyEaTokens): jangan andalkan RLS saja.
+    const { data: auth } = await supabase.auth.getUser();
+    const me = auth?.user?.id;
+    if (!me) return [];
     const { data, error } = await supabase
       .from('client_positions')
       .select('id,state,symbol,lots,sl,tp,opened_at')
+      .eq('client_id', me)
       .order('opened_at', { ascending: false })
       .limit(40);
     if (error) throw error;

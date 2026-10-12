@@ -705,9 +705,16 @@ create policy "copy_deliveries_ea_update" on public.copy_deliveries
   using (public.ea_uid() is not null and public.ea_uid() = client_id)
   with check (public.ea_uid() is not null and public.ea_uid() = client_id);
 
+-- TANPA admin_all di sini (sengaja). Isi tabel ini adalah data PRIBADI per client:
+-- log eksekusi tiap client (lot, harga, alasan skip/gagal).
+-- Admin tidak butuh ini untuk menindak laporan, dan kalau ada, dasbor CopyTrade
+-- milik admin menampilkan data user lain bercampur dengan datanya sendiri
+-- (persis keluhan "token client user A muncul di akun user B"). Admin tetap bisa
+-- melihat sisi provider (signal_providers, copy_links, provider_positions,
+-- copy_events, provider_reports) yang memang dibutuhkan untuk moderasi.
+-- Baris `drop` tetap dijalankan supaya instalasi yang sudah terlanjur memakai
+-- versi lama ikut dibersihkan (file ini idempotent).
 drop policy if exists "admin_all" on public.copy_deliveries;
-create policy "admin_all" on public.copy_deliveries
-  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- 5f) client_positions
 drop policy if exists "client_positions_own" on public.client_positions;
@@ -722,9 +729,16 @@ create policy "client_positions_ea_all" on public.client_positions
   using (public.ea_uid() is not null and public.ea_uid() = client_id)
   with check (public.ea_uid() is not null and public.ea_uid() = client_id);
 
+-- TANPA admin_all di sini (sengaja). Isi tabel ini adalah data PRIBADI per client:
+-- posisi milik tiap client.
+-- Admin tidak butuh ini untuk menindak laporan, dan kalau ada, dasbor CopyTrade
+-- milik admin menampilkan data user lain bercampur dengan datanya sendiri
+-- (persis keluhan "token client user A muncul di akun user B"). Admin tetap bisa
+-- melihat sisi provider (signal_providers, copy_links, provider_positions,
+-- copy_events, provider_reports) yang memang dibutuhkan untuk moderasi.
+-- Baris `drop` tetap dijalankan supaya instalasi yang sudah terlanjur memakai
+-- versi lama ikut dibersihkan (file ini idempotent).
 drop policy if exists "admin_all" on public.client_positions;
-create policy "admin_all" on public.client_positions
-  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- 5g) ea_tokens (user hanya melihat/mengelola token miliknya sendiri)
 drop policy if exists "ea_tokens_own" on public.ea_tokens;
@@ -733,9 +747,16 @@ create policy "ea_tokens_own" on public.ea_tokens
   using (client_id = auth.uid())
   with check (client_id = auth.uid());
 
+-- TANPA admin_all di sini (sengaja). Isi tabel ini adalah data PRIBADI per client:
+-- identitas terminal: label, login akun broker, server, leverage.
+-- Admin tidak butuh ini untuk menindak laporan, dan kalau ada, dasbor CopyTrade
+-- milik admin menampilkan data user lain bercampur dengan datanya sendiri
+-- (persis keluhan "token client user A muncul di akun user B"). Admin tetap bisa
+-- melihat sisi provider (signal_providers, copy_links, provider_positions,
+-- copy_events, provider_reports) yang memang dibutuhkan untuk moderasi.
+-- Baris `drop` tetap dijalankan supaya instalasi yang sudah terlanjur memakai
+-- versi lama ikut dibersihkan (file ini idempotent).
 drop policy if exists "admin_all" on public.ea_tokens;
-create policy "admin_all" on public.ea_tokens
-  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- 5h) ea_feed
 drop policy if exists "ea_feed_own" on public.ea_feed;
@@ -749,9 +770,16 @@ create policy "ea_feed_ea_read" on public.ea_feed
   for select to anon, authenticated
   using (public.ea_uid() is not null and public.ea_uid() = client_id);
 
+-- TANPA admin_all di sini (sengaja). Isi tabel ini adalah data PRIBADI per client:
+-- umpan status terminal tiap client.
+-- Admin tidak butuh ini untuk menindak laporan, dan kalau ada, dasbor CopyTrade
+-- milik admin menampilkan data user lain bercampur dengan datanya sendiri
+-- (persis keluhan "token client user A muncul di akun user B"). Admin tetap bisa
+-- melihat sisi provider (signal_providers, copy_links, provider_positions,
+-- copy_events, provider_reports) yang memang dibutuhkan untuk moderasi.
+-- Baris `drop` tetap dijalankan supaya instalasi yang sudah terlanjur memakai
+-- versi lama ikut dibersihkan (file ini idempotent).
 drop policy if exists "admin_all" on public.ea_feed;
-create policy "admin_all" on public.ea_feed
-  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- 5i) guard_events
 drop policy if exists "guard_events_own" on public.guard_events;
@@ -767,9 +795,16 @@ create policy "guard_events_ea_insert" on public.guard_events
   for insert to anon, authenticated
   with check (public.ea_uid() is not null and public.ea_uid() = client_id);
 
+-- TANPA admin_all di sini (sengaja). Isi tabel ini adalah data PRIBADI per client:
+-- catatan guard milik tiap client.
+-- Admin tidak butuh ini untuk menindak laporan, dan kalau ada, dasbor CopyTrade
+-- milik admin menampilkan data user lain bercampur dengan datanya sendiri
+-- (persis keluhan "token client user A muncul di akun user B"). Admin tetap bisa
+-- melihat sisi provider (signal_providers, copy_links, provider_positions,
+-- copy_events, provider_reports) yang memang dibutuhkan untuk moderasi.
+-- Baris `drop` tetap dijalankan supaya instalasi yang sudah terlanjur memakai
+-- versi lama ikut dibersihkan (file ini idempotent).
 drop policy if exists "admin_all" on public.guard_events;
-create policy "admin_all" on public.guard_events
-  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- 5j) provider_reports
 drop policy if exists "provider_reports_insert_own" on public.provider_reports;
