@@ -1731,6 +1731,20 @@ double ComputeLots(const LinkSettings &s, const string sym, const int side,
 //====================================================================
 // Clamp SL/TP ke jarak minimum broker (SYMBOL_TRADE_STOPS_LEVEL).
 // Dipakai saat retcode 10016 INVALID_STOPS (PRD 6.5.6): clamp lalu retry 1x.
+// Jarak minimum SL/TP yang benar-benar diterima broker: stops level, freeze level,
+// atau SPREAD saat ini - mana yang terbesar. SL yang lebih dekat dari spread akan
+// ditolak INVALID_STOPS (10016) karena harganya jatuh di sisi yang salah.
+double MinStopDistance(const string sym)
+  {
+   double point = SymbolInfoDouble(sym, SYMBOL_POINT);
+   if(point <= 0) return(0);
+   double stopsLv  = (double)SymbolInfoInteger(sym, SYMBOL_TRADE_STOPS_LEVEL);
+   double freezeLv = (double)SymbolInfoInteger(sym, SYMBOL_TRADE_FREEZE_LEVEL);
+   double spread   = CurrentSpreadPoints(sym);
+   double need     = MathMax(MathMax(stopsLv, freezeLv), spread) + 2.0;  // +2 poin margin
+   return(need * point);
+  }
+
 bool ClampStops(const string sym, const int side, double &sl, double &tp)
   {
    double point = SymbolInfoDouble(sym, SYMBOL_POINT);
@@ -1846,6 +1860,38 @@ void HandleOpen(const Delivery &d, const LinkSettings &s)
       sl = NormalizeDouble(d.side > 0 ? px - s.slFallbackPoints * point : px + s.slFallbackPoints * point, digits);
    if(s.copyTp && d.tp > 0) tp = NormalizeDouble(LevelForClient(d.entry, d.tp, px, SlTpMode == SLTP_ABSOLUTE), digits);
 
+   // --- SL/TP vs jarak minimum broker (penyebab entry "hilang" tanpa jejak) ---
+   // Provider TANPA SL: yang dipasang adalah fallback milik client, jadi kalau
+   // jaraknya lebih dekat daripada yang diterima broker -> LEBARKAN. Tidak ada jarak
+   // pilihan provider yang dilanggar, dan melewatkan entry jelas lebih buruk.
+   // Provider DENGAN SL yang terlalu dekat untuk broker client -> entry dilewati
+   // dengan alasan eksplisit: memperlebar berarti mengubah risiko pilihan client.
+   bool slWidened = false;
+   double minDist = MinStopDistance(sym);
+   if(sl > 0 && minDist > 0)
+     {
+      double dist = MathAbs(px - sl);
+      if(dist < minDist)
+        {
+         if(d.sl <= 0)
+           {
+            sl = NormalizeDouble(d.side > 0 ? px - minDist : px + minDist, digits);
+            slWidened = true;
+            Print("ITJ: fallback SL ", sym, " dilebarkan ke jarak minimum broker (",
+                  DoubleToString(minDist / point, 0), " poin = ", DoubleToString(minDist, digits), ")");
+           }
+         else
+           {
+            AckDelivery(d.id, "skipped",
+               StringFormat("SL provider %.5f hanya %.0f poin dari harga masuk, minimum broker ini %.0f poin "
+                            "(termasuk spread) - risiko tidak diubah, entry dilewati",
+                            d.sl, dist / point, minDist / point),
+               0, 0, 0, 0, 0, 0);
+            return;
+           }
+        }
+     }
+
    long mag = ClientMagicFor(d.providerId);
    string cmt = PositionComment(d.providerPositionId);
    if(StringLen(cmt) > 31) cmt = StringSubstr(cmt, 0, 31);
@@ -1919,8 +1965,9 @@ void HandleOpen(const Delivery &d, const LinkSettings &s)
    if(posTicket > 0) ticket = posTicket;
 
    g_failStreak = 0;
-   AckDelivery(d.id, "executed", "", ticket, lots, fill,
-               SlippagePoints(sym, px, fill), riskAmount, s.riskPct);
+   AckDelivery(d.id, "executed",
+               (slWidened ? "SL fallback dilebarkan ke jarak minimum broker (provider tanpa SL)" : ""),
+               ticket, lots, fill, SlippagePoints(sym, px, fill), riskAmount, s.riskPct);
    Print("ITJ: OPEN ", sym, " ", (d.side > 0 ? "BUY" : "SELL"), " ", DoubleToString(lots, 2),
          " lot @ ", DoubleToString(fill, digits), " ticket=", ticket);
   }
