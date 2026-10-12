@@ -83,11 +83,18 @@ create table if not exists public.copy_events (
   id uuid primary key default gen_random_uuid(),
   provider_id uuid not null references auth.users(id) on delete cascade,
   provider_position_id uuid references public.provider_positions(id) on delete set null,
-  kind text not null check (kind in ('OPEN','MODIFY_SL','MODIFY_TP','PARTIAL_CLOSE','CLOSE','CLOSE_ALL')),
+  kind text not null check (kind in ('OPEN','MODIFY_SL','MODIFY_TP','PARTIAL_CLOSE','CLOSE','CLOSE_ALL',
+                                     'PLACE_ORDER','MODIFY_ORDER','CANCEL_ORDER')),
   seq bigint not null default 1,                    -- monoton per provider (§6.5.3)
   payload jsonb not null default '{}'::jsonb,       -- { sl, tp } LENGKAP, bukan delta (§6.5.2)
   created_at timestamptz not null default now()
 );
+
+-- Nilai kind untuk PRD 15 (pending order). Idempotent supaya instalasi lama ikut naik.
+alter table public.copy_events drop constraint if exists copy_events_kind_check;
+alter table public.copy_events add constraint copy_events_kind_check check (kind in
+  ('OPEN','MODIFY_SL','MODIFY_TP','PARTIAL_CLOSE','CLOSE','CLOSE_ALL',
+   'PLACE_ORDER','MODIFY_ORDER','CANCEL_ORDER'));
 
 -- 1e) 1 baris per client per event (hasil fan-out)
 create table if not exists public.copy_deliveries (
@@ -129,6 +136,55 @@ create table if not exists public.client_positions (
   closed_at timestamptz,
   updated_at timestamptz not null default now()
 );
+
+-- 1f2) provider_orders: pending order (limit/stop) milik provider (PRD 15)
+create table if not exists public.provider_orders (
+  id uuid primary key default gen_random_uuid(),
+  provider_id uuid not null references auth.users(id) on delete cascade,
+  order_ticket bigint not null,
+  symbol text not null default '?',
+  order_type text not null check (order_type in
+    ('buy_limit','sell_limit','buy_stop','sell_stop','buy_stop_limit','sell_stop_limit')),
+  price numeric,
+  sl numeric,
+  tp numeric,
+  volume numeric not null default 0,
+  market_ref numeric,          -- harga pasar provider SAAT order ditempatkan -> dasar jarak relatif (PRD 15.1)
+  expiration timestamptz,
+  magic bigint,
+  status text not null default 'working' check (status in ('working','filled','cancelled','expired')),
+  revision bigint not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (provider_id, order_ticket)
+);
+create index if not exists provider_orders_prov_idx on public.provider_orders (provider_id, status);
+
+-- 1f3) client_orders: hasil mirror di terminal client (diisi dari ACK EA, PRD 15.4).
+--       Hanya menyimpan fakta milik CLIENT (harga & lot yang benar-benar ia pasang);
+--       harga/SL/TP provider tetap ada di provider_orders lewat provider_order_id.
+create table if not exists public.client_orders (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null references auth.users(id) on delete cascade,
+  provider_id uuid references auth.users(id) on delete cascade,
+  provider_order_id uuid references public.provider_orders(id) on delete set null,
+  provider_order_ticket bigint,
+  client_ticket bigint,
+  symbol text,
+  order_type text,
+  price numeric,               -- harga order di terminal CLIENT (hasil terjemahan jarak)
+  lots numeric,
+  state text not null default 'working' check (state in ('working','filled','cancelled','rejected')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+-- Kolom penghubung event -> order. Diletakkan SETELAH provider_orders dibuat:
+-- foreign key butuh tabel tujuannya sudah ada.
+alter table public.copy_events add column if not exists provider_order_id uuid
+  references public.provider_orders(id) on delete set null;
+
+create index if not exists client_orders_client_idx on public.client_orders (client_id, state);
+create index if not exists client_orders_porder_idx on public.client_orders (provider_order_id);
 
 -- 1g) Token EA per terminal (HANYA HASH yang disimpan, token mentah tidak pernah masuk DB)
 create table if not exists public.ea_tokens (
@@ -397,16 +453,19 @@ as $$
     "sizing": {"method": "risk_pct", "riskPct": 1.0, "basis": "balance",
                "maxLotCap": 5.0, "allowMinLotFallback": false},
     "stops":  {"slFallbackPct": 0.15, "slFallbackPoints": 0, "copyTp": true, "maxHoldMinutes": 0},
-    "mirror": {"modifyThrottleSeconds": 3, "minModifyPoints": 0, "riskBreachAction": "warn"},
+    "mirror": {"modifyThrottleSeconds": 3, "minModifyPoints": 0, "riskBreachAction": "warn",
+               "mirrorPendingOrders": true},
     "guards": {"maxSpreadPct": 0.08, "maxSpreadPoints": 0,
                "maxEntryDeviationPct": 0.20, "maxEntryDeviationPoints": 0,
                "maxSlippagePoints": 0, "maxPositions": 5, "maxPositionsPerSymbol": 1,
                "allowSymbols": [], "blockSymbols": [],
+               "maxPendingOrders": 5, "maxPendingOrdersPerSymbol": 2,
                "sessionFilter": {"enabled": false, "start": "07:00", "end": "22:00"},
                "followOnReconnect": false, "failStreakPause": true},
     "limits": {"maxTotalRiskPct": 10, "dailyLossLimitPct": 5, "dailyProfitTargetPct": null,
                "maxDrawdownPct": 15, "maxTradesPerDay": 20},
-    "order":  {"type": "market", "deviationPct": 0.05, "deviationPoints": 0, "fillPolicy": "IOC"},
+    "order":  {"type": "market", "deviationPct": 0.05, "deviationPoints": 0, "fillPolicy": "IOC",
+               "copyExpiry": true},
     "journal": {"autoSync": false, "accountId": null},
     "notify": {"telegram": true, "bell": true}
   }'::jsonb;
@@ -425,6 +484,9 @@ $$;
 -- pilihan yang sudah dibuat setelah pembaruan ini.
 update public.copy_links
    set settings = public.jsonb_deep_merge(settings, '{
+         "mirror": {"mirrorPendingOrders": true},
+         "guards": {"maxPendingOrders": 5, "maxPendingOrdersPerSymbol": 2},
+         "order":  {"copyExpiry": true},
          "guards": {"maxSpreadPct": 0.08, "maxSpreadPoints": 0,
                     "maxEntryDeviationPct": 0.20, "maxEntryDeviationPoints": 0},
          "stops":  {"slFallbackPct": 0.15, "slFallbackPoints": 0},
@@ -573,7 +635,9 @@ begin
          l.client_id,
          new.provider_id,
          'pending',
-         case when new.kind in ('CLOSE','CLOSE_ALL') then null
+         -- Order pending tidak pernah expire: order yang masih 'working' di provider
+         -- tetap sah, dan catch-up-nya dijaga oleh provider_orders.status (PRD 15.3 #25).
+         case when new.kind in ('CLOSE','CLOSE_ALL','PLACE_ORDER','MODIFY_ORDER','CANCEL_ORDER') then null
               else now() + interval '120 seconds' end
   from public.copy_links l
   where l.provider_id = new.provider_id
@@ -605,6 +669,8 @@ alter table public.provider_positions enable row level security;
 alter table public.copy_events       enable row level security;
 alter table public.copy_deliveries   enable row level security;
 alter table public.client_positions  enable row level security;
+alter table public.provider_orders  enable row level security;
+alter table public.client_orders    enable row level security;
 alter table public.ea_tokens         enable row level security;
 alter table public.ea_feed           enable row level security;
 alter table public.guard_events      enable row level security;
@@ -778,6 +844,55 @@ create policy "ea_tokens_own" on public.ea_tokens
 -- Baris `drop` tetap dijalankan supaya instalasi yang sudah terlanjur memakai
 -- versi lama ikut dibersihkan (file ini idempotent).
 drop policy if exists "admin_all" on public.ea_tokens;
+
+-- 5g2) provider_orders & client_orders.
+--       Tanpa admin_all (data per user, konsisten dengan keputusan sebelumnya):
+--       provider mengelola ordernya, client hanya MELIHAT order provider yang dia
+--       ikuti (dibutuhkan untuk cek status + catch-up PRD 15.3 #25), dan EA masuk
+--       lewat token.
+drop policy if exists "provider_orders_own" on public.provider_orders;
+create policy "provider_orders_own" on public.provider_orders
+  for all to authenticated
+  using (provider_id = auth.uid())
+  with check (provider_id = auth.uid());
+
+drop policy if exists "provider_orders_ea" on public.provider_orders;
+create policy "provider_orders_ea" on public.provider_orders
+  for all to anon, authenticated
+  using (public.ea_uid() is not null and public.ea_uid() = provider_id)
+  with check (public.ea_uid() is not null and public.ea_uid() = provider_id);
+
+drop policy if exists "provider_orders_follower_read" on public.provider_orders;
+create policy "provider_orders_follower_read" on public.provider_orders
+  for select to authenticated
+  using (exists (
+    select 1 from public.copy_links l
+    where l.provider_id = public.provider_orders.provider_id
+      and l.client_id = auth.uid()
+      and l.status in ('active', 'paused')
+  ));
+
+drop policy if exists "provider_orders_ea_follower_read" on public.provider_orders;
+create policy "provider_orders_ea_follower_read" on public.provider_orders
+  for select to anon, authenticated
+  using (public.ea_uid() is not null and exists (
+    select 1 from public.copy_links l
+    where l.provider_id = public.provider_orders.provider_id
+      and l.client_id = public.ea_uid()
+      and l.status in ('active', 'paused')
+  ));
+
+drop policy if exists "client_orders_own" on public.client_orders;
+create policy "client_orders_own" on public.client_orders
+  for all to authenticated
+  using (client_id = auth.uid())
+  with check (client_id = auth.uid());
+
+drop policy if exists "client_orders_ea" on public.client_orders;
+create policy "client_orders_ea" on public.client_orders
+  for all to anon, authenticated
+  using (public.ea_uid() is not null and public.ea_uid() = client_id)
+  with check (public.ea_uid() is not null and public.ea_uid() = client_id);
 
 -- 5h) ea_feed
 drop policy if exists "ea_feed_own" on public.ea_feed;
@@ -2192,11 +2307,23 @@ begin
     new.provider_id := public.ea_uid();
   end if;
 
-  if new.provider_position_id is null and new.provider_ticket is not null then
+  -- Pencarian dipisah per jenis event: ticket order dan ticket posisi berasal dari
+  -- ruang nomor yang berbeda, jadi menebak tabelnya bisa memasangkan yang salah.
+  if new.provider_position_id is null and new.provider_ticket is not null
+     and new.kind in ('OPEN','MODIFY_SL','MODIFY_TP','PARTIAL_CLOSE','CLOSE') then
     select p.id into new.provider_position_id
     from public.provider_positions p
     where p.provider_id = new.provider_id
       and p.provider_ticket = new.provider_ticket
+    limit 1;
+  end if;
+
+  if new.provider_order_id is null and new.provider_ticket is not null
+     and new.kind in ('PLACE_ORDER','MODIFY_ORDER','CANCEL_ORDER') then
+    select o.id into new.provider_order_id
+    from public.provider_orders o
+    where o.provider_id = new.provider_id
+      and o.order_ticket = new.provider_ticket
     limit 1;
   end if;
 
@@ -2208,7 +2335,7 @@ declare
   t text;
 begin
   -- tabel dengan provider_id saja
-  foreach t in array array['provider_positions', 'guard_events'] loop
+  foreach t in array array['provider_positions', 'guard_events', 'provider_orders'] loop
     execute format('drop trigger if exists %I_ea_stamp on public.%I', t, t);
     execute format('create trigger %I_ea_stamp before insert on public.%I '
                    'for each row execute function public.copytrade_ea_stamp()', t, t);
@@ -2234,6 +2361,55 @@ declare
   v_tp numeric := public.copytrade_price(new.payload ->> 'tp');
   v_vol numeric := public.copytrade_num(new.payload ->> 'volume');
 begin
+  if new.kind in ('PLACE_ORDER', 'MODIFY_ORDER', 'CANCEL_ORDER') then
+    -- State pending order provider diturunkan dari event, sama seperti provider_positions
+    -- diturunkan dari OPEN/MODIFY/CLOSE (PRD 15.4).
+    if new.provider_ticket is null then
+      return new;
+    end if;
+
+    if new.kind = 'PLACE_ORDER' then
+      insert into public.provider_orders as po (
+        provider_id, order_ticket, symbol, order_type, price, sl, tp, volume,
+        market_ref, expiration, magic, status
+      ) values (
+        new.provider_id, new.provider_ticket,
+        coalesce(new.payload ->> 'symbol', '?'),
+        coalesce(new.payload ->> 'order_type', 'buy_limit'),
+        public.copytrade_price(new.payload ->> 'price'), v_sl, v_tp, coalesce(v_vol, 0),
+        public.copytrade_price(new.payload ->> 'market_ref'),
+        public.copytrade_ts(new.payload ->> 'expiration'),
+        public.copytrade_num(new.payload ->> 'magic'),
+        'working'
+      )
+      on conflict (provider_id, order_ticket) do update
+        set symbol = excluded.symbol, order_type = excluded.order_type, price = excluded.price,
+            sl = excluded.sl, tp = excluded.tp, volume = excluded.volume,
+            market_ref = excluded.market_ref, expiration = excluded.expiration,
+            magic = excluded.magic,
+            -- 'filled' tidak pernah diturunkan kembali ke 'working'
+            status = case when po.status = 'filled' then 'filled' else 'working' end,
+            revision = po.revision + 1, updated_at = now();
+
+    elsif new.kind = 'MODIFY_ORDER' then
+      update public.provider_orders
+         set price = coalesce(public.copytrade_price(new.payload ->> 'price'), price),
+             sl = coalesce(v_sl, sl), tp = coalesce(v_tp, tp),
+             volume = coalesce(v_vol, volume),
+             expiration = public.copytrade_ts(new.payload ->> 'expiration'),
+             revision = revision + 1, updated_at = now()
+       where provider_id = new.provider_id and order_ticket = new.provider_ticket;
+
+    else  -- CANCEL_ORDER
+      update public.provider_orders
+         set status = case when status = 'filled' then 'filled' else 'cancelled' end,
+             revision = revision + 1, updated_at = now()
+       where provider_id = new.provider_id and order_ticket = new.provider_ticket;
+    end if;
+
+    return new;
+  end if;
+
   if new.kind = 'OPEN' then
     if new.provider_ticket is null then
       return new;
@@ -2410,6 +2586,10 @@ declare
   v_sl numeric;
   v_tp numeric;
   v_entry numeric;
+  v_order_id uuid;
+  v_order_ticket bigint;
+  v_osym text;
+  v_otype text;
 begin
   if new.status <> 'executed' or coalesce(old.status, '') = 'executed' then
     return new;
@@ -2442,6 +2622,41 @@ begin
        and state = 'open'
        and (provider_position_id = v_pp
             or (v_kind = 'CLOSE_ALL' and provider_id = new.provider_id));
+
+  elsif v_kind in ('PLACE_ORDER', 'MODIFY_ORDER', 'CANCEL_ORDER') then
+    -- client_orders diisi dari ACK EA: yang dicatat adalah fakta milik CLIENT
+    -- (harga & lot yang benar-benar ia pasang), sedangkan harga/SL/TP provider
+    -- tetap bisa dibaca lewat provider_order_id (PRD 15.4).
+    select po.id, e.provider_ticket,
+           coalesce(po.symbol, e.payload ->> 'symbol'),
+           coalesce(po.order_type, e.payload ->> 'order_type')
+      into v_order_id, v_order_ticket, v_osym, v_otype
+    from public.copy_events e
+    left join public.provider_orders po on po.id = e.provider_order_id
+    where e.id = new.event_id;
+
+    if v_kind = 'PLACE_ORDER' then
+      insert into public.client_orders (
+        client_id, provider_id, provider_order_id, provider_order_ticket,
+        client_ticket, symbol, order_type, price, lots, state
+      ) values (
+        new.client_id, new.provider_id, v_order_id, v_order_ticket,
+        new.client_ticket, v_osym, v_otype, new.fill_price, new.lots, 'working'
+      );
+    elsif v_kind = 'MODIFY_ORDER' then
+      update public.client_orders
+         set price = coalesce(new.fill_price, price),
+             lots  = coalesce(new.lots, lots),
+             updated_at = now()
+       where client_id = new.client_id
+         and (provider_order_id = v_order_id or provider_order_ticket = v_order_ticket);
+    else  -- CANCEL_ORDER
+      update public.client_orders
+         set state = 'cancelled', updated_at = now()
+       where client_id = new.client_id
+         and state = 'working'
+         and (provider_order_id = v_order_id or provider_order_ticket = v_order_ticket);
+    end if;
 
   elsif v_kind = 'PARTIAL_CLOSE' then
     update public.client_positions

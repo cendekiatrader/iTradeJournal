@@ -352,7 +352,13 @@ export interface CopySettings {
   // harga, jadi 30 poin berarti 0,30 USD di broker 2-desimal tapi 0,03 USD di
   // broker 3-desimal. Elemen *Points tetap ada sebagai alternatif manual (0 = off).
   stops: { slFallbackPct: number; slFallbackPoints: number; copyTp: boolean; maxHoldMinutes: number };
-  mirror: { modifyThrottleSeconds: number; minModifyPoints: number; riskBreachAction: 'warn' | 'trim' | 'ignore' };
+  mirror: {
+    modifyThrottleSeconds: number;
+    minModifyPoints: number;
+    riskBreachAction: 'warn' | 'trim' | 'ignore';
+    // PRD 15.3 #15: ikut memirror pending order (limit/stop) provider.
+    mirrorPendingOrders: boolean;
+  };
   guards: {
     maxSpreadPct: number;
     maxSpreadPoints: number;
@@ -361,6 +367,8 @@ export interface CopySettings {
     maxSlippagePoints: number;
     maxPositions: number;
     maxPositionsPerSymbol: number;
+    maxPendingOrders: number;
+    maxPendingOrdersPerSymbol: number;
     allowSymbols: string[];
     blockSymbols: string[];
     sessionFilter: { enabled: boolean; start: string; end: string };
@@ -374,7 +382,13 @@ export interface CopySettings {
     maxDrawdownPct: number;
     maxTradesPerDay: number;
   };
-  order: { type: 'market'; deviationPct: number; deviationPoints: number; fillPolicy: 'IOC' | 'FOK' | 'RETURN' };
+  order: {
+    type: 'market';
+    deviationPct: number;
+    deviationPoints: number;
+    fillPolicy: 'IOC' | 'FOK' | 'RETURN';
+    copyExpiry: boolean;
+  };
   journal: { autoSync: boolean; accountId: string | null };
   notify: { telegram: boolean; bell: boolean };
 }
@@ -383,7 +397,7 @@ export const DEFAULT_COPY_SETTINGS: CopySettings = {
   mode: 'auto',
   sizing: { method: 'risk_pct', riskPct: 1, basis: 'balance', maxLotCap: 5, allowMinLotFallback: false },
   stops: { slFallbackPct: 0.15, slFallbackPoints: 0, copyTp: true, maxHoldMinutes: 0 },
-  mirror: { modifyThrottleSeconds: 3, minModifyPoints: 0, riskBreachAction: 'warn' },
+  mirror: { modifyThrottleSeconds: 3, minModifyPoints: 0, riskBreachAction: 'warn', mirrorPendingOrders: true },
   guards: {
     maxSpreadPct: 0.08,
     maxSpreadPoints: 0,
@@ -392,6 +406,8 @@ export const DEFAULT_COPY_SETTINGS: CopySettings = {
     maxSlippagePoints: 20,
     maxPositions: 5,
     maxPositionsPerSymbol: 1,
+    maxPendingOrders: 5,
+    maxPendingOrdersPerSymbol: 2,
     allowSymbols: [],
     blockSymbols: [],
     sessionFilter: { enabled: false, start: '07:00', end: '22:00' },
@@ -399,7 +415,7 @@ export const DEFAULT_COPY_SETTINGS: CopySettings = {
     failStreakPause: true
   },
   limits: { maxTotalRiskPct: 10, dailyLossLimitPct: 5, dailyProfitTargetPct: null, maxDrawdownPct: 15, maxTradesPerDay: 20 },
-  order: { type: 'market', deviationPct: 0.05, deviationPoints: 0, fillPolicy: 'IOC' },
+  order: { type: 'market', deviationPct: 0.05, deviationPoints: 0, fillPolicy: 'IOC', copyExpiry: true },
   journal: { autoSync: false, accountId: null },
   notify: { telegram: true, bell: true }
 };
